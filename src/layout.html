@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{title}}</title>
+<meta name="description" content="{{description}}">
+<link rel="canonical" href="https://vipleconsultores.com{{url}}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Viple Consultores">
+<meta property="og:title" content="{{title}}">
+<meta property="og:description" content="{{description}}">
+<meta property="og:url" content="https://vipleconsultores.com{{url}}">
+<meta property="og:image" content="https://vipleconsultores.com{{og_image}}">
+<link rel="icon" href="/assets/img/logo-cuadrado.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Fira+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/site.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap">
+    {{brand}}
+    <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav"><span></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="Principal">
+      <ul class="menu">
+        <li><a data-nav="inicio" href="/">Inicio</a></li>
+        <li class="has-sub">
+          <a data-nav="servicios" href="/servicios/">Servicios</a>
+          <ul class="submenu">
+            <li><a href="/servicios/estructura-empresarial/">Estructura y crecimiento empresarial</a></li>
+            <li><a href="/servicios/contratos/">Contratos</a></li>
+            <li><a href="/servicios/proteccion-de-datos/">Protección de datos personales</a></li>
+            <li><a href="/servicios/reclamos-y-denuncias/">Reclamos y denuncias de clientes</a></li>
+            <li><a href="/servicios/herramientas-legales/">Herramientas legales</a></li>
+          </ul>
+        </li>
+        <li><a data-nav="quien-soy" href="/quien-soy/">Quién soy</a></li>
+        <li><a data-nav="notas" href="/notas/">Notas</a></li>
+        <li><a data-nav="novedades" href="/novedades/">Novedades</a></li>
+        <li><a data-nav="contacto" class="btn" href="/contacto/">Conversemos</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+{{content}}
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="cols">
+      <div>
+        <img class="foot-logo" src="/assets/img/logo-cuadrado.png" alt="Viple Consultores · Legal & Compliance">
+        <p>Asesoría legal práctica para empresas: corporativo, contratos, protección de datos y cumplimiento.</p>
+      </div>
+      <div>
+        <h4>Sitio</h4>
+        <ul>
+          <li><a href="/servicios/">Servicios</a></li>
+          <li><a href="/quien-soy/">Quién soy</a></li>
+          <li><a href="/notas/">Notas</a></li>
+          <li><a href="/novedades/">Novedades</a></li>
+          <li><a href="/contacto/">Contacto</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <ul>
+          <li><a href="mailto:gabriel@vipleconsultores.com">gabriel@vipleconsultores.com</a></li>
+          <li><a href="tel:+51907498580">+51 907 498 580</a></li>
+          <li><a href="https://www.linkedin.com/company/viple-consultores/" target="_blank" rel="noopener">LinkedIn</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="bottom">
+      <span>© <span id="y"></span> Viple Consultores · Legal &amp; Compliance</span>
+      <span>Lima, Perú</span>
+    </div>
+  </div>
+</footer>
+
+<script src="/assets/js/site.js"></script>
+</body>
+</html>

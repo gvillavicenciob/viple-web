@@ -1,0 +1,148 @@
+# Configuración del panel de administración (Decap CMS)
+# Se abre en https://vipleconsultores.com/admin/
+
+backend:
+  name: github
+  repo: gvillavicenciob/viple-web
+  branch: main
+  commit_messages:
+    create: "Crear {{collection}}: {{slug}}"
+    update: "Editar {{collection}}: {{slug}}"
+    delete: "Borrar {{collection}}: {{slug}}"
+    uploadMedia: "Subir imagen: {{path}}"
+    deleteMedia: "Borrar imagen: {{path}}"
+
+locale: es
+site_url: https://vipleconsultores.com
+display_url: https://vipleconsultores.com
+logo_url: /assets/img/logo-cuadrado.png
+
+# Dónde se guardan las imágenes que subas desde el panel
+media_folder: assets/uploads
+public_folder: /assets/uploads
+
+collections:
+  # ---------------- NOTAS ----------------
+  - name: notas
+    label: Notas
+    label_singular: Nota
+    description: Artículos y posts. Se muestran en la pestaña «Notas».
+    folder: content/notas
+    create: true
+    delete: true
+    extension: json
+    format: json
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "notas/{{slug}}"
+    summary: "{{title}} · {{date}}"
+    sortable_fields: [date, title]
+    view_filters:
+      - label: Borradores
+        field: draft
+        pattern: true
+    fields:
+      - { label: Título, name: title, widget: string }
+      - label: Fecha
+        name: date
+        widget: datetime
+        date_format: DD/MM/YYYY
+        time_format: false
+        format: YYYY-MM-DD
+        picker_utc: true
+      - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
+      - label: Resumen
+        name: summary
+        widget: text
+        hint: Una o dos líneas. Aparece en la tarjeta del listado y al compartir en redes.
+      - label: Imagen principal
+        name: image
+        widget: image
+        required: false
+        hint: Opcional. Recomendado horizontal (por ejemplo 1600 × 900 px).
+      - label: Descripción de la imagen
+        name: image_alt
+        widget: string
+        required: false
+        hint: Texto alternativo para accesibilidad (qué muestra la imagen).
+      - label: Etiquetas
+        name: tags
+        widget: list
+        required: false
+        hint: Separadas por comas. Ej. contratos, sociedades
+      - { label: Cuerpo del texto, name: body, widget: markdown }
+      - label: Borrador (no publicar todavía)
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+
+  # ---------------- NOVEDADES ----------------
+  - name: novedades
+    label: Novedades
+    label_singular: Novedad
+    description: Nuevas normas, cambios regulatorios y asuntos de interés. Se muestran en la pestaña «Novedades».
+    folder: content/novedades
+    create: true
+    delete: true
+    extension: json
+    format: json
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "novedades/{{slug}}"
+    summary: "{{title}} · {{category}} · {{date}}"
+    sortable_fields: [date, title, category]
+    view_filters:
+      - label: Borradores
+        field: draft
+        pattern: true
+    view_groups:
+      - label: Categoría
+        field: category
+    fields:
+      - { label: Título, name: title, widget: string }
+      - label: Fecha
+        name: date
+        widget: datetime
+        date_format: DD/MM/YYYY
+        time_format: false
+        format: YYYY-MM-DD
+        picker_utc: true
+      - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
+      - label: Categoría
+        name: category
+        widget: select
+        default: Nueva norma
+        options:
+          - Nueva norma
+          - Modificación normativa
+          - Proyecto de ley
+          - Resolución o criterio de autoridad
+          - Asunto de interés
+      - label: Resumen
+        name: summary
+        widget: text
+        hint: Una o dos líneas. Aparece en la tarjeta del listado y al compartir en redes.
+      - label: Nombre de la fuente
+        name: source_name
+        widget: string
+        required: false
+        hint: Opcional. Ej. Diario Oficial El Peruano
+      - label: Enlace a la norma o fuente
+        name: source_url
+        widget: string
+        required: false
+        hint: Opcional. Dirección web completa (https://…)
+      - label: Imagen principal
+        name: image
+        widget: image
+        required: false
+        hint: Opcional. Recomendado horizontal (por ejemplo 1600 × 900 px).
+      - label: Descripción de la imagen
+        name: image_alt
+        widget: string
+        required: false
+      - { label: Cuerpo del texto, name: body, widget: markdown }
+      - label: Borrador (no publicar todavía)
+        name: draft
+        widget: boolean
+        default: false
+        required: false

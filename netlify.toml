@@ -1,0 +1,10 @@
+# Netlify: cómo construir y publicar el sitio
+[build]
+  command = "pip install -r requirements.txt && python3 build.py"
+  publish = "_site"
+
+# El panel de administración no debe aparecer en buscadores
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
