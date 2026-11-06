@@ -1,2 +1,8 @@
 _site/
 __pycache__/
+
+# Local Netlify folder
+.netlify
+
+# Archivos de ayuda que agrega Netlify CLI (no son parte del sitio)
+.agents/
