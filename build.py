@@ -3,17 +3,20 @@ Construye el sitio de Viple Consultores en la carpeta _site/.
 
 - Envuelve cada página de src/pages/ con la plantilla común src/layout.html
   (encabezado, menú y pie de página).
-- Genera las páginas de Notas y Novedades a partir de los artículos guardados
-  por el panel de administración (/admin) en content/notas y content/novedades.
+- Genera la sección «Ideas y análisis» (content/notas) y la sección
+  «Novedades» (content/novedades) a partir de los artículos guardados
+  desde el panel de administración (/admin).
 
 Netlify ejecuta este archivo automáticamente en cada publicación.
 Para probarlo en tu computadora:  python build.py
 """
 import html
 import json
+import math
 import re
 import shutil
 from pathlib import Path
+from urllib.parse import quote
 
 import markdown
 
@@ -26,23 +29,25 @@ DEFAULT_AUTHOR = "Gabriel Villavicencio Bedoya"
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
          "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
 
-COLLECTIONS = {
-    "notas": {
-        "nav": "notas",
-        "eyebrow": "Notas",
-        "h1": "Notas y artículos",
-        "intro": "Análisis y reflexiones prácticas sobre temas legales para empresas.",
-        "item_label": "Nota",
-        "empty": "Todavía no hay notas publicadas. Vuelve pronto.",
-    },
-    "novedades": {
-        "nav": "novedades",
-        "eyebrow": "Novedades",
-        "h1": "Novedades normativas y asuntos de interés",
-        "intro": "Nuevas normas, cambios regulatorios y temas de actualidad relevantes para tu empresa.",
-        "item_label": "Novedad",
-        "empty": "Todavía no hay novedades publicadas. Vuelve pronto.",
-    },
+# Sección editorial «Ideas y análisis» (se guarda en content/notas)
+IDEAS = {
+    "name": "notas",
+    "label": "Ideas y análisis",
+    "h1": "Ideas para repensar cómo trabajamos en lo legal",
+    "intro": ("Reflexiones sobre Legal Ops, inteligencia artificial, gestión del conocimiento "
+              "y nuevas formas de organizar el trabajo legal en empresas y firmas de abogados"),
+    "empty": "Muy pronto publicaremos los primeros artículos.",
+}
+
+# Sección «Novedades» (sin cambios de diseño por ahora)
+NOVEDADES = {
+    "name": "novedades",
+    "nav": "novedades",
+    "eyebrow": "Novedades",
+    "h1": "Novedades normativas y asuntos de interés",
+    "intro": "Nuevas normas, cambios regulatorios y temas de actualidad relevantes para tu empresa.",
+    "item_label": "Novedad",
+    "empty": "Todavía no hay novedades publicadas. Vuelve pronto.",
 }
 
 LAYOUT = (SRC / "layout.html").read_text(encoding="utf-8")
@@ -61,6 +66,11 @@ def fecha_larga(iso):
         return ""
 
 
+def minutos_lectura(texto):
+    palabras = len(re.findall(r"\w+", texto or ""))
+    return max(1, math.ceil(palabras / 200))
+
+
 def brand(logo):
     if logo == "ninguno":
         return '<a class="brand none" href="/" tabindex="-1" aria-hidden="true"></a>'
@@ -69,13 +79,16 @@ def brand(logo):
             'width="500" height="500"></a>')
 
 
-def render(url, content, title, description, nav="", logo="cuadrado", og_image="/assets/img/logo-cuadrado.png"):
+def render(url, content, title, description, nav="", logo="cuadrado",
+           og_image="/assets/img/logo-cuadrado.png", og_type="website", head_extra=""):
     page = LAYOUT
     for key, val in {
         "{{title}}": esc(title),
         "{{description}}": esc(description),
         "{{url}}": url,
         "{{og_image}}": og_image,
+        "{{og_type}}": og_type,
+        "{{head_extra}}": head_extra,
         "{{brand}}": brand(logo),
         "{{content}}": content,
     }.items():
@@ -99,7 +112,7 @@ def parse_page(path):
     return meta, body
 
 
-# ---------- Artículos (Notas / Novedades) ----------
+# ---------- Carga de artículos ----------
 
 def load_items(name):
     items = []
@@ -118,10 +131,13 @@ def load_items(name):
         data["date"] = str(data.get("date") or "")[:10]
         data["collection"] = name
         data["url"] = f"/{name}/{f.stem}/"
+        data["minutes"] = minutos_lectura(data.get("body"))
         items.append(data)
     items.sort(key=lambda d: (d["date"], d["slug"]), reverse=True)
     return items
 
+
+# ---------- Tarjeta genérica (Novedades y bloque del inicio) ----------
 
 def card(item):
     thumb = (f'<img src="{esc(item["image"])}" alt="{esc(item.get("image_alt") or "")}" loading="lazy">'
@@ -144,16 +160,171 @@ def empty_box(msg):
             f'<p>{esc(msg)}</p></div>')
 
 
-def build_collection(name, items):
-    cfg = COLLECTIONS[name]
-    filters = ""
-    if name == "novedades":
-        cats = sorted({i.get("category") for i in items if i.get("category")})
-        if len(cats) > 1:
-            filters = ('<div class="filters" role="group" aria-label="Filtrar por categoría">'
-                       '<button data-cat="todas" aria-pressed="true">Todas</button>'
-                       + "".join(f'<button data-cat="{esc(c)}" aria-pressed="false">{esc(c)}</button>' for c in cats)
-                       + "</div>")
+def filter_buttons(items):
+    cats = sorted({i.get("category") for i in items if i.get("category")})
+    if len(cats) < 2:
+        return ""
+    return ('<div class="filters" role="group" aria-label="Filtrar por categoría">'
+            '<button data-cat="todas" aria-pressed="true">Todas</button>'
+            + "".join(f'<button data-cat="{esc(c)}" aria-pressed="false">{esc(c)}</button>' for c in cats)
+            + "</div>")
+
+
+# ---------- Sección «Ideas y análisis» ----------
+
+def ed_meta(item):
+    return (f'<time datetime="{item["date"]}">{fecha_larga(item["date"])}</time>'
+            f'<span aria-hidden="true">·</span><span>{item["minutes"]} min de lectura</span>')
+
+
+def ed_card(item):
+    cat = item.get("category") or ""
+    return f'''<a class="ed-card" data-filter-item data-cat="{esc(cat)}" href="{item["url"]}">
+      <span class="ed-cat">{esc(cat)}</span>
+      <h3>{esc(item.get("title"))}</h3>
+      <p>{esc(item.get("summary"))}</p>
+      <span class="ed-meta">{ed_meta(item)}</span>
+    </a>'''
+
+
+def ed_featured(item):
+    cat = item.get("category") or ""
+    img = (f'<div class="ed-feat-img"><img src="{esc(item["image"])}" alt="{esc(item.get("image_alt") or "")}"></div>'
+           if item.get("image") else "")
+    return f'''<a class="ed-featured{' has-img' if img else ''}" data-filter-item data-cat="{esc(cat)}" href="{item["url"]}">
+      <div class="ed-feat-txt">
+        <span class="ed-label">Artículo destacado</span>
+        <span class="ed-cat">{esc(cat)}</span>
+        <h2>{esc(item.get("title"))}</h2>
+        <p>{esc(item.get("summary"))}</p>
+        <span class="ed-meta">{ed_meta(item)}</span>
+        <span class="ed-more">Leer artículo →</span>
+      </div>
+      {img}
+    </a>'''
+
+
+def build_ideas(items):
+    name = IDEAS["name"]
+    if items:
+        featured = next((i for i in items if i.get("featured")), items[0])
+        rest = [i for i in items if i is not featured]
+        cards = ('<div class="ed-grid">' + "".join(ed_card(i) for i in rest) + "</div>") if rest else ""
+        listing = f'''{filter_buttons(items)}
+    {ed_featured(featured)}
+    {cards}'''
+    else:
+        listing = empty_box(IDEAS["empty"])
+    content = f'''
+<div class="page-head ed-head">
+  <div class="wrap">
+    <div class="eyebrow">{IDEAS["label"]}</div>
+    <h1>{IDEAS["h1"]}</h1>
+    <p>{IDEAS["intro"]}.</p>
+  </div>
+</div>
+<section class="ed">
+  <div class="wrap">
+    {listing}
+  </div>
+</section>'''
+    render(f"/{name}/", content, f'{IDEAS["label"]} | Viple Consultores', IDEAS["intro"] + ".", nav="notas")
+
+    for item in items:
+        render_article(item, items)
+
+
+def share_links(item):
+    url = SITE_URL + item["url"]
+    u, t = quote(url, safe=""), quote(item.get("title") or "", safe="")
+    links = [
+        ("LinkedIn", f"https://www.linkedin.com/sharing/share-offsite/?url={u}"),
+        ("X", f"https://twitter.com/intent/tweet?url={u}&text={t}"),
+        ("WhatsApp", f"https://wa.me/?text={t}%20{u}"),
+        ("Correo", f"mailto:?subject={t}&body={u}"),
+    ]
+    out = "".join(f'<a href="{esc(h)}" target="_blank" rel="noopener">{n}</a>' for n, h in links)
+    out += f'<button type="button" data-copy="{esc(url)}">Copiar enlace</button>'
+    return f'<div class="ed-share"><span>Compartir</span>{out}</div>'
+
+
+def related(item, items, n=3):
+    others = [i for i in items if i is not item]
+    same = [i for i in others if i.get("category") and i.get("category") == item.get("category")]
+    rest = [i for i in others if i not in same]
+    return (same + rest)[:n]
+
+
+def render_article(item, items):
+    name = IDEAS["name"]
+    body_html = markdown.markdown(item.get("body") or "", extensions=["extra", "sane_lists"])
+    author = item.get("author") or DEFAULT_AUTHOR
+    cat = item.get("category") or ""
+    cover = (f'<figure class="ed-cover"><img src="{esc(item["image"])}" alt="{esc(item.get("image_alt") or "")}"></figure>'
+             if item.get("image") else "")
+    sources = [s for s in (item.get("sources") or []) if isinstance(s, dict) and (s.get("url") or s.get("title"))]
+    sources_html = ""
+    if sources:
+        lis = "".join(
+            f'<li><a href="{esc(s["url"])}" target="_blank" rel="noopener">{esc(s.get("title") or s["url"])}</a></li>'
+            if s.get("url") else f'<li>{esc(s.get("title"))}</li>' for s in sources)
+        sources_html = f'<aside class="ed-sources"><h2>Fuentes</h2><ul>{lis}</ul></aside>'
+    rel = related(item, items)
+    rel_html = (f'''<section class="ed-related">
+  <div class="wrap">
+    <h2>Otros artículos</h2>
+    <div class="ed-grid">{"".join(ed_card(i) for i in rel)}</div>
+  </div>
+</section>''' if rel else "")
+    photo = ('<img src="/assets/img/gabriel.jpg" alt="">' if "villavicencio" in author.lower() else "")
+    content = f'''
+<div class="page-head ed-head ed-article-head">
+  <div class="wrap ed-narrow">
+    <a class="ed-back-top" href="/{name}/">← {IDEAS["label"]}</a>
+    <span class="ed-cat">{esc(cat)}</span>
+    <h1>{esc(item.get("title"))}</h1>
+    <p class="ed-byline">Por {esc(author)} <span aria-hidden="true">·</span> <time datetime="{item["date"]}">{fecha_larga(item["date"])}</time> <span aria-hidden="true">·</span> {item["minutes"]} min de lectura</p>
+  </div>
+</div>
+<section class="ed">
+  <article class="wrap ed-narrow">
+    {cover}
+    <div class="prose ed-prose">{body_html}</div>
+    {sources_html}
+    {share_links(item)}
+    <div class="author-line">{photo}<div><strong>{esc(author)}</strong>Viple Consultores · Legal &amp; Compliance</div></div>
+    <a class="back" href="/{name}/">← Volver a {IDEAS["label"]}</a>
+  </article>
+</section>
+{rel_html}'''
+    image = item.get("image") or "/assets/img/logo-cuadrado.png"
+    ld = {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": item.get("title"),
+        "description": item.get("summary"),
+        "datePublished": item["date"],
+        "author": {"@type": "Person", "name": author},
+        "publisher": {"@type": "Organization", "name": "Viple Consultores",
+                      "logo": {"@type": "ImageObject", "url": SITE_URL + "/assets/img/logo-cuadrado.png"}},
+        "image": SITE_URL + image,
+        "articleSection": cat,
+        "mainEntityOfPage": SITE_URL + item["url"],
+    }
+    head_extra = (f'<meta property="article:published_time" content="{item["date"]}">\n'
+                  f'<meta property="article:section" content="{esc(cat)}">\n'
+                  f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>')
+    render(item["url"], content, f'{item.get("title")} | Viple Consultores',
+           item.get("summary") or IDEAS["intro"], nav="notas", og_image=image,
+           og_type="article", head_extra=head_extra)
+
+
+# ---------- Sección «Novedades» ----------
+
+def build_novedades(items):
+    cfg = NOVEDADES
+    name = cfg["name"]
+    filters = filter_buttons(items)
     listing = ('<div class="posts">' + "".join(card(i) for i in items) + "</div>") if items else empty_box(cfg["empty"])
     content = f'''
 <div class="page-head">
@@ -183,10 +354,6 @@ def build_collection(name, items):
             link = (f'<a href="{esc(item["source_url"])}" target="_blank" rel="noopener">{label}</a>'
                     if item.get("source_url") else label)
             source = f'<div class="source-box">Fuente: {link}</div>'
-        tags = item.get("tags") or []
-        tags_html = ('<div class="meta" style="margin-top:28px">'
-                     + "".join(f'<span class="pill" style="background:var(--sage)">{esc(t)}</span>' for t in tags)
-                     + "</div>") if tags else ""
         photo = ('<img src="/assets/img/gabriel.jpg" alt="">'
                  if "villavicencio" in author.lower() else "")
         content = f'''
@@ -202,7 +369,6 @@ def build_collection(name, items):
     {cover}
     <div class="prose">{body_html}</div>
     {source}
-    {tags_html}
     <div class="author-line">{photo}<div><strong>{esc(author)}</strong>Viple Consultores · Legal &amp; Compliance</div></div>
     <a class="back" href="/{name}/">← Ver todas las {cfg["eyebrow"].lower()}</a>
   </article>
@@ -212,6 +378,8 @@ def build_collection(name, items):
                og_image=item.get("image") or "/assets/img/logo-cuadrado.png")
 
 
+# ---------- Bloque «lo último» del inicio ----------
+
 def latest_block(all_items):
     if not all_items:
         return ""
@@ -219,9 +387,9 @@ def latest_block(all_items):
     return f'''<section style="background:var(--sage-light)">
   <div class="wrap">
     <div class="section-head reveal">
-      <h2>Notas y novedades</h2>
-      <p>Lo último publicado: análisis prácticos, nuevas normas y asuntos de interés para tu empresa.
-      <br><a href="/notas/" style="color:var(--navy)">Ver notas</a> · <a href="/novedades/" style="color:var(--navy)">Ver novedades</a></p>
+      <h2>Ideas, análisis y novedades</h2>
+      <p>Lo último publicado: reflexiones prácticas, nuevas normas y asuntos de interés para tu empresa.
+      <br><a href="/notas/" style="color:var(--navy)">Ver ideas y análisis</a> · <a href="/novedades/" style="color:var(--navy)">Ver novedades</a></p>
     </div>
     <div class="posts">{cards}</div>
   </div>
@@ -237,9 +405,9 @@ def main():
     shutil.copytree(ROOT / "assets", OUT / "assets", dirs_exist_ok=True)
     shutil.copytree(ROOT / "admin", OUT / "admin", dirs_exist_ok=True)
 
-    collections = {name: load_items(name) for name in COLLECTIONS}
-    everything = sorted(collections["notas"] + collections["novedades"],
-                        key=lambda d: d["date"], reverse=True)
+    ideas = load_items("notas")
+    novedades = load_items("novedades")
+    everything = sorted(ideas + novedades, key=lambda d: d["date"], reverse=True)
 
     for path in sorted((SRC / "pages").rglob("*.html")):
         rel = path.relative_to(SRC / "pages").as_posix()
@@ -257,8 +425,8 @@ def main():
                nav=meta.get("nav", ""), logo=meta.get("logo", "cuadrado"),
                og_image=meta.get("og_image", "/assets/img/logo-cuadrado.png"))
 
-    for name, items in collections.items():
-        build_collection(name, items)
+    build_ideas(ideas)
+    build_novedades(novedades)
 
     urls = "".join(f"<url><loc>{SITE_URL}{u}</loc></url>" for u in SITEMAP)
     (OUT / "sitemap.xml").write_text(
@@ -267,7 +435,7 @@ def main():
     (OUT / "robots.txt").write_text(f"User-agent: *\nDisallow: /admin/\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
     print(f"Sitio generado en _site/ · {len(SITEMAP)} páginas · "
-          f"{len(collections['notas'])} notas · {len(collections['novedades'])} novedades")
+          f"{len(ideas)} ideas y análisis · {len(novedades)} novedades")
 
 
 if __name__ == "__main__":

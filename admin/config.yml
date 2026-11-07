@@ -22,11 +22,12 @@ media_folder: assets/uploads
 public_folder: /assets/uploads
 
 collections:
-  # ---------------- NOTAS ----------------
+  # ---------------- IDEAS Y ANÁLISIS ----------------
+  # (los archivos se guardan en content/notas y se publican en /notas/)
   - name: notas
-    label: Notas
-    label_singular: Nota
-    description: Artículos y posts. Se muestran en la pestaña «Notas».
+    label: Ideas y análisis
+    label_singular: Artículo
+    description: Artículos y reflexiones. Se muestran en la pestaña «Ideas y análisis».
     folder: content/notas
     create: true
     delete: true
@@ -34,12 +35,18 @@ collections:
     format: json
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     preview_path: "notas/{{slug}}"
-    summary: "{{title}} · {{date}}"
-    sortable_fields: [date, title]
+    summary: "{{title}} · {{category}} · {{date}}"
+    sortable_fields: [date, title, category]
     view_filters:
       - label: Borradores
         field: draft
         pattern: true
+      - label: Destacado
+        field: featured
+        pattern: true
+    view_groups:
+      - label: Categoría
+        field: category
     fields:
       - { label: Título, name: title, widget: string }
       - label: Fecha
@@ -50,26 +57,47 @@ collections:
         format: YYYY-MM-DD
         picker_utc: true
       - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
+      - label: Categoría
+        name: category
+        widget: select
+        default: Legal Ops
+        options:
+          - Legal Ops
+          - Inteligencia artificial
+          - Legal Design
+          - Mejora de procesos
+          - Gestión del conocimiento
+          - Trabajo legal y empresa
       - label: Resumen
         name: summary
         widget: text
         hint: Una o dos líneas. Aparece en la tarjeta del listado y al compartir en redes.
+      - label: Artículo destacado
+        name: featured
+        widget: boolean
+        default: false
+        required: false
+        hint: Se muestra en grande al inicio del listado. Si marcas varios, se destaca el más reciente; si no marcas ninguno, se destaca el último publicado.
       - label: Imagen principal
         name: image
         widget: image
         required: false
-        hint: Opcional. Recomendado horizontal (por ejemplo 1600 × 900 px).
+        hint: Opcional. Recomendado horizontal (por ejemplo 1600 × 900 px). Evita imágenes de stock genéricas.
       - label: Descripción de la imagen
         name: image_alt
         widget: string
         required: false
         hint: Texto alternativo para accesibilidad (qué muestra la imagen).
-      - label: Etiquetas
-        name: tags
+      - { label: Cuerpo del texto, name: body, widget: markdown }
+      - label: Fuentes
+        name: sources
         widget: list
         required: false
-        hint: Separadas por comas. Ej. contratos, sociedades
-      - { label: Cuerpo del texto, name: body, widget: markdown }
+        summary: "{{fields.title}}"
+        hint: Opcional. Enlaces a normas, estudios o artículos citados.
+        fields:
+          - { label: Nombre de la fuente, name: title, widget: string }
+          - { label: Enlace (https://…), name: url, widget: string, required: false }
       - label: Borrador (no publicar todavía)
         name: draft
         widget: boolean

@@ -25,15 +25,25 @@
     els.forEach(function (el) { el.classList.add('in'); });
   }
 
-  // Filtro por categoría (página de Novedades)
+  // Filtro por categoría (Ideas y análisis, Novedades)
   var filters = document.querySelectorAll('.filters button');
   filters.forEach(function (b) {
     b.addEventListener('click', function () {
       var cat = b.getAttribute('data-cat');
       filters.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
-      document.querySelectorAll('.post-card[data-cat]').forEach(function (c) {
-        c.hidden =!(cat === 'todas' || c.getAttribute('data-cat') === cat);
+      document.querySelectorAll('.post-card[data-cat], [data-filter-item]').forEach(function (c) {
+        c.hidden = !(cat === 'todas' || c.getAttribute('data-cat') === cat);
       });
+    });
+  });
+
+  // Botón «Copiar enlace» de los artículos
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var url = b.getAttribute('data-copy');
+      var done = function () { b.textContent = 'Enlace copiado'; setTimeout(function () { b.textContent = 'Copiar enlace'; }, 2000); };
+      if (navigator.clipboard) { navigator.clipboard.writeText(url).then(done, function () { window.prompt('Copia este enlace:', url); }); }
+      else { window.prompt('Copia este enlace:', url); }
     });
   });
 })();

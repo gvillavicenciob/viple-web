@@ -8,7 +8,7 @@
 | `src/layout.html` | Encabezado, menú y pie de página comunes a todas las páginas. |
 | `assets/` | Estilos, logos, foto e imágenes subidas desde el panel. |
 | `admin/` | El panel de administración (`/admin`). |
-| `content/notas`, `content/novedades` | Los artículos que crees desde el panel (se llenan solos). |
+| `content/notas`, `content/novedades` | Los artículos de «Ideas y análisis» y «Novedades» que crees desde el panel (se llenan solos). |
 | `build.py`, `netlify.toml`, `requirements.txt` | Instrucciones para que Netlify arme el sitio. No hace falta tocarlos. |
 | `_site/` | El sitio ya armado, generado automáticamente. **No subirlo a GitHub.** |
 
@@ -58,7 +58,7 @@ pero el panel no puede guardar nada.
 ### 6. Úsalo
 1. Entra a https://vipleconsultores.com/admin
 2. **Iniciar sesión con GitHub**.
-3. Elige **Notas** o **Novedades** → **Nueva**. Llena los campos y pulsa **Publicar**.
+3. Elige **Ideas y análisis** o **Novedades** → **Nueva**. Llena los campos y pulsa **Publicar**.
 4. En 1–2 minutos el artículo aparece en el sitio.
    Para editar o borrar, abre el artículo en el panel y usa **Publicar** o **Borrar entrada**.
 
