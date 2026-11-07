@@ -3,7 +3,8 @@ Construye el sitio de Viple Consultores en la carpeta _site/.
 
 - Envuelve cada página de src/pages/ con la plantilla común src/layout.html
   (encabezado, menú y pie de página).
-- Genera la sección «Ideas y análisis» (content/notas) y la sección
+- Genera las secciones «Ideas y análisis» (content/notas), «Te ayudamos con
+  tus dudas» (content/dudas) y
   «Novedades» (content/novedades) a partir de los artículos guardados
   desde el panel de administración (/admin).
 
@@ -37,6 +38,23 @@ IDEAS = {
     "intro": ("Reflexiones sobre Legal Ops, inteligencia artificial, gestión del conocimiento "
               "y nuevas formas de organizar el trabajo legal en empresas y firmas de abogados"),
     "empty": "Muy pronto publicaremos los primeros artículos.",
+    "nav": "notas",
+    "featured_label": "Artículo destacado",
+    "more": "Leer artículo →",
+    "related": "Otros artículos",
+}
+
+# Sección «Te ayudamos con tus dudas» (se guarda en content/dudas, mismo formato editorial)
+DUDAS = {
+    "name": "dudas",
+    "label": "Te ayudamos con tus dudas",
+    "h1": "Respuestas claras a las dudas legales de tu negocio",
+    "intro": "Explicamos en lenguaje sencillo temas legales frecuentes en la operación diaria de las empresas",
+    "empty": "Muy pronto publicaremos las primeras respuestas.",
+    "nav": "dudas",
+    "featured_label": "Destacado",
+    "more": "Leer respuesta →",
+    "related": "Otras dudas",
 }
 
 # Sección «Novedades» (sin cambios de diseño por ahora)
@@ -187,40 +205,40 @@ def ed_card(item):
     </a>'''
 
 
-def ed_featured(item):
+def ed_featured(item, cfg):
     cat = item.get("category") or ""
     img = (f'<div class="ed-feat-img"><img src="{esc(item["image"])}" alt="{esc(item.get("image_alt") or "")}"></div>'
            if item.get("image") else "")
     return f'''<a class="ed-featured{' has-img' if img else ''}" data-filter-item data-cat="{esc(cat)}" href="{item["url"]}">
       <div class="ed-feat-txt">
-        <span class="ed-label">Artículo destacado</span>
+        <span class="ed-label">{cfg["featured_label"]}</span>
         <span class="ed-cat">{esc(cat)}</span>
         <h2>{esc(item.get("title"))}</h2>
         <p>{esc(item.get("summary"))}</p>
         <span class="ed-meta">{ed_meta(item)}</span>
-        <span class="ed-more">Leer artículo →</span>
+        <span class="ed-more">{cfg["more"]}</span>
       </div>
       {img}
     </a>'''
 
 
-def build_ideas(items):
-    name = IDEAS["name"]
+def build_editorial(cfg, items):
+    name = cfg["name"]
     if items:
         featured = next((i for i in items if i.get("featured")), items[0])
         rest = [i for i in items if i is not featured]
         cards = ('<div class="ed-grid">' + "".join(ed_card(i) for i in rest) + "</div>") if rest else ""
         listing = f'''{filter_buttons(items)}
-    {ed_featured(featured)}
+    {ed_featured(featured, cfg)}
     {cards}'''
     else:
-        listing = empty_box(IDEAS["empty"])
+        listing = empty_box(cfg["empty"])
     content = f'''
 <div class="page-head ed-head">
   <div class="wrap">
-    <div class="eyebrow">{IDEAS["label"]}</div>
-    <h1>{IDEAS["h1"]}</h1>
-    <p>{IDEAS["intro"]}.</p>
+    <div class="eyebrow">{cfg["label"]}</div>
+    <h1>{cfg["h1"]}</h1>
+    <p>{cfg["intro"]}.</p>
   </div>
 </div>
 <section class="ed">
@@ -228,10 +246,10 @@ def build_ideas(items):
     {listing}
   </div>
 </section>'''
-    render(f"/{name}/", content, f'{IDEAS["label"]} | Viple Consultores', IDEAS["intro"] + ".", nav="notas")
+    render(f"/{name}/", content, f'{cfg["label"]} | Viple Consultores', cfg["intro"] + ".", nav=cfg["nav"])
 
     for item in items:
-        render_article(item, items)
+        render_article(cfg, item, items)
 
 
 def share_links(item):
@@ -255,8 +273,8 @@ def related(item, items, n=3):
     return (same + rest)[:n]
 
 
-def render_article(item, items):
-    name = IDEAS["name"]
+def render_article(cfg, item, items):
+    name = cfg["name"]
     body_html = markdown.markdown(item.get("body") or "", extensions=["extra", "sane_lists"])
     author = item.get("author") or DEFAULT_AUTHOR
     cat = item.get("category") or ""
@@ -272,7 +290,7 @@ def render_article(item, items):
     rel = related(item, items)
     rel_html = (f'''<section class="ed-related">
   <div class="wrap">
-    <h2>Otros artículos</h2>
+    <h2>{cfg["related"]}</h2>
     <div class="ed-grid">{"".join(ed_card(i) for i in rel)}</div>
   </div>
 </section>''' if rel else "")
@@ -280,7 +298,7 @@ def render_article(item, items):
     content = f'''
 <div class="page-head ed-head ed-article-head">
   <div class="wrap ed-narrow">
-    <a class="ed-back-top" href="/{name}/">← {IDEAS["label"]}</a>
+    <a class="ed-back-top" href="/{name}/">← {cfg["label"]}</a>
     <span class="ed-cat">{esc(cat)}</span>
     <h1>{esc(item.get("title"))}</h1>
     <p class="ed-byline">Por {esc(author)} <span aria-hidden="true">·</span> <time datetime="{item["date"]}">{fecha_larga(item["date"])}</time> <span aria-hidden="true">·</span> {item["minutes"]} min de lectura</p>
@@ -293,7 +311,7 @@ def render_article(item, items):
     {sources_html}
     {share_links(item)}
     <div class="author-line">{photo}<div><strong>{esc(author)}</strong>Viple Consultores · Legal &amp; Compliance</div></div>
-    <a class="back" href="/{name}/">← Volver a {IDEAS["label"]}</a>
+    <a class="back" href="/{name}/">← Volver a {cfg["label"]}</a>
   </article>
 </section>
 {rel_html}'''
@@ -315,7 +333,7 @@ def render_article(item, items):
                   f'<meta property="article:section" content="{esc(cat)}">\n'
                   f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>')
     render(item["url"], content, f'{item.get("title")} | Viple Consultores',
-           item.get("summary") or IDEAS["intro"], nav="notas", og_image=image,
+           item.get("summary") or cfg["intro"], nav=cfg["nav"], og_image=image,
            og_type="article", head_extra=head_extra)
 
 
@@ -407,6 +425,7 @@ def main():
 
     ideas = load_items("notas")
     novedades = load_items("novedades")
+    dudas = load_items("dudas")
     everything = sorted(ideas + novedades, key=lambda d: d["date"], reverse=True)
 
     for path in sorted((SRC / "pages").rglob("*.html")):
@@ -425,7 +444,8 @@ def main():
                nav=meta.get("nav", ""), logo=meta.get("logo", "cuadrado"),
                og_image=meta.get("og_image", "/assets/img/logo-cuadrado.png"))
 
-    build_ideas(ideas)
+    build_editorial(IDEAS, ideas)
+    build_editorial(DUDAS, dudas)
     build_novedades(novedades)
 
     urls = "".join(f"<url><loc>{SITE_URL}{u}</loc></url>" for u in SITEMAP)
@@ -435,7 +455,7 @@ def main():
     (OUT / "robots.txt").write_text(f"User-agent: *\nDisallow: /admin/\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
     print(f"Sitio generado en _site/ · {len(SITEMAP)} páginas · "
-          f"{len(ideas)} ideas y análisis · {len(novedades)} novedades")
+          f"{len(ideas)} ideas y análisis · {len(dudas)} dudas · {len(novedades)} novedades")
 
 
 if __name__ == "__main__":

@@ -104,6 +104,88 @@ collections:
         default: false
         required: false
 
+  # ---------------- TE AYUDAMOS CON TUS DUDAS ----------------
+  # (los archivos se guardan en content/dudas y se publican en /dudas/)
+  - name: dudas
+    label: Te ayudamos con tus dudas
+    label_singular: Respuesta
+    description: Respuestas a dudas legales frecuentes. Se muestran en la pestaña «Te ayudamos con tus dudas».
+    folder: content/dudas
+    create: true
+    delete: true
+    extension: json
+    format: json
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "dudas/{{slug}}"
+    summary: "{{title}} · {{category}} · {{date}}"
+    sortable_fields: [date, title, category]
+    view_filters:
+      - label: Borradores
+        field: draft
+        pattern: true
+      - label: Destacado
+        field: featured
+        pattern: true
+    view_groups:
+      - label: Categoría
+        field: category
+    fields:
+      - { label: Título (la duda o pregunta), name: title, widget: string }
+      - label: Fecha
+        name: date
+        widget: datetime
+        date_format: DD/MM/YYYY
+        time_format: false
+        format: YYYY-MM-DD
+        picker_utc: true
+      - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
+      - label: Categoría
+        name: category
+        widget: select
+        default: Estructura y crecimiento empresarial
+        options:
+          - Estructura y crecimiento empresarial
+          - Contratos
+          - Protección de datos personales
+          - Prácticas comerciales y reclamos
+          - Herramientas legales
+          - Otros temas
+      - label: Resumen
+        name: summary
+        widget: text
+        hint: Una o dos líneas. Aparece en la tarjeta del listado y al compartir en redes.
+      - label: Destacado
+        name: featured
+        widget: boolean
+        default: false
+        required: false
+        hint: Se muestra en grande al inicio del listado. Si marcas varios, se destaca el más reciente; si no marcas ninguno, se destaca el último publicado.
+      - label: Imagen principal
+        name: image
+        widget: image
+        required: false
+        hint: Opcional. Recomendado horizontal (por ejemplo 1600 × 900 px). Evita imágenes de stock genéricas.
+      - label: Descripción de la imagen
+        name: image_alt
+        widget: string
+        required: false
+        hint: Texto alternativo para accesibilidad (qué muestra la imagen).
+      - { label: Respuesta, name: body, widget: markdown }
+      - label: Fuentes
+        name: sources
+        widget: list
+        required: false
+        summary: "{{fields.title}}"
+        hint: Opcional. Enlaces a normas, estudios o artículos citados.
+        fields:
+          - { label: Nombre de la fuente, name: title, widget: string }
+          - { label: Enlace (https://…), name: url, widget: string, required: false }
+      - label: Borrador (no publicar todavía)
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+
   # ---------------- NOVEDADES ----------------
   - name: novedades
     label: Novedades
