@@ -88,3 +88,11 @@ Ya no tienes que arrastrar carpetas a Netlify: todo cambio en GitHub se publica 
 **Destacar una pregunta en la portada**: marca **Destacar en la portada** en la nota y publícala. La portada muestra hasta 3 destacadas; si no hay ninguna, muestra las 3 más recientes.
 
 **Cambiar el nombre o la descripción de un servicio**: entra a **Servicios (nombres y descripciones)**. El cambio se aplica a la vez en el menú, la portada, /servicios/ y la página del servicio.
+
+## «Presentaciones especiales» desde el panel
+
+1. Entra a `/admin` y abre **Presentaciones especiales** → **Nueva Presentación**.
+2. Escribe el **Título** y un **Resumen** de dos o tres líneas.
+3. En **Archivo de la presentación** sube el PDF (se abre directamente en el navegador). Si subes un PowerPoint, el visitante lo descarga. Si la presentación está publicada en otro sitio (Google Slides, Canva…), pega su dirección en **O enlace a la presentación**.
+4. Opcional: en **Imagen o portada** sube una captura de la primera diapositiva. Si la dejas vacía, se muestra un ícono de presentación.
+5. Pulsa **Publicar**. En uno o dos minutos aparece en `/presentaciones/`, con las más recientes primero.

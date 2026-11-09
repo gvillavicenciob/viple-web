@@ -314,6 +314,62 @@ collections:
         default: false
         required: false
 
+  # ---------------- PRESENTACIONES ESPECIALES ----------------
+  # (los archivos se guardan en content/presentaciones y se muestran en /presentaciones/)
+  - name: presentaciones
+    label: Presentaciones especiales
+    label_singular: Presentación
+    description: Presentaciones que ya preparaste sobre distintos temas. Cada una aparece en /presentaciones/ con su imagen, título y un resumen breve. Sube de preferencia la versión en PDF, porque se abre directamente en el navegador.
+    folder: content/presentaciones
+    create: true
+    delete: true
+    extension: json
+    format: json
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    media_folder: /assets/uploads/presentaciones
+    public_folder: /assets/uploads/presentaciones
+    summary: "{{title}} · {{date}}"
+    sortable_fields: [date, title]
+    view_filters:
+      - label: Borradores
+        field: draft
+        pattern: true
+    fields:
+      - { label: Título, name: title, widget: string }
+      - label: Resumen
+        name: summary
+        widget: text
+        hint: Dos o tres líneas que expliquen de qué trata la presentación.
+      - label: Archivo de la presentación
+        name: file
+        widget: file
+        required: false
+        hint: De preferencia en PDF (se abre en el navegador). Un PowerPoint se descarga en lugar de abrirse. Procura que pese menos de 20 MB.
+      - label: O enlace a la presentación
+        name: link
+        widget: string
+        required: false
+        hint: Opcional. Úsalo si la presentación está publicada en otro sitio (Google Slides, Canva, SlideShare…). Si subes un archivo, se usa el archivo.
+      - label: Imagen o portada
+        name: image
+        widget: image
+        required: false
+        hint: Opcional. Por ejemplo, una captura de la primera diapositiva. Si la dejas vacía, se muestra un ícono de presentación.
+      - label: Fecha
+        name: date
+        widget: datetime
+        date_format: DD/MM/YYYY
+        time_format: false
+        format: YYYY-MM-DD
+        picker_utc: true
+        required: false
+        hint: Las más recientes aparecen primero. Si la dejas vacía, se usa la fecha en que creaste la entrada.
+      - label: Borrador (no publicar todavía)
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+
   # ---------------- SERVICIOS ----------------
   # Nombres y descripciones breves que se muestran en el menú, la portada y /servicios/.
   - name: servicios

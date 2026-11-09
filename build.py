@@ -87,8 +87,8 @@ def minutos_lectura(texto):
 
 def brand(logo=None):
     return ('<a class="brand" href="/" aria-label="Viple Consultores – Inicio">'
-            '<img src="/assets/img/logo-header.png" alt="Viple Consultores · Legal &amp; Compliance" '
-            'width="446" height="281"></a>')
+            '<img src="/assets/img/logo-cuadrado.png" alt="Viple Consultores · Legal &amp; Compliance" '
+            'width="500" height="500"></a>')
 
 
 # ---------- Servicios (fuente única: content/servicios.json) ----------
@@ -592,6 +592,58 @@ def build_novedades(items):
                og_image=item.get("image") or "/assets/img/logo-cuadrado.png")
 
 
+# ---------- Sección «Presentaciones especiales» (content/presentaciones) ----------
+
+PRESENTACIONES = {
+    "h1": "Presentaciones especiales",
+    "intro": "Presentaciones que hemos preparado sobre temas legales de interés para personas y empresas.",
+    "empty": "Muy pronto publicaremos nuestras primeras presentaciones.",
+}
+
+ICONO_PRES = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" '
+              'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+              '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4M8 20h8"/>'
+              '<path d="M7 12l3-3 2 2 4-4"/></svg>')
+
+
+def pres_card(it):
+    destino = it.get("file") or it.get("link") or ""
+    img = (f'<img src="{esc(it["image"])}" alt="" loading="lazy">' if it.get("image") else ICONO_PRES)
+    ext = destino.rsplit(".", 1)[-1].lower() if it.get("file") and "." in destino else ""
+    accion = {"pdf": "Ver presentación (PDF)", "ppt": "Descargar presentación", "pptx": "Descargar presentación"}.get(ext, "Ver presentación")
+    tag, attrs, more = "div", "", ""
+    if destino:
+        tag = "a"
+        attrs = f' href="{esc(destino)}" target="_blank" rel="noopener"'
+        more = f'<span class="pres-more">{accion} <span aria-hidden="true">→</span></span>'
+    return f'''<li><{tag} class="pres-card"{attrs}>
+      <div class="pres-img">{img}</div>
+      <div class="pres-txt">
+        <h3>{esc(it.get("title"))}</h3>
+        <p>{esc(it.get("summary"))}</p>
+        {more}
+      </div>
+    </{tag}></li>'''
+
+
+def build_presentaciones(items):
+    cfg = PRESENTACIONES
+    listing = ('<ul class="pres-list">' + "".join(pres_card(i) for i in items) + "</ul>") if items else empty_box(cfg["empty"])
+    content = f'''
+<div class="page-head">
+  <div class="wrap">
+    <h1>{cfg["h1"]}</h1>
+    <p>{cfg["intro"]}</p>
+  </div>
+</div>
+<section class="pres">
+  <div class="wrap">
+    {listing}
+  </div>
+</section>'''
+    render("/presentaciones/", content, f'{cfg["h1"]} | Viple Consultores', cfg["intro"], nav="presentaciones")
+
+
 # ---------- Bloque «lo último» del inicio ----------
 
 def latest_block(all_items):
@@ -647,6 +699,7 @@ def main():
     build_editorial(IDEAS, ideas)
     build_dudas(dudas, temas)
     build_novedades(novedades)
+    build_presentaciones(load_items("presentaciones"))
 
     urls = "".join(f"<url><loc>{SITE_URL}{u}</loc></url>" for u in SITEMAP)
     (OUT / "sitemap.xml").write_text(
