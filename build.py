@@ -88,7 +88,7 @@ def minutos_lectura(texto):
 def brand(logo=None):
     return ('<a class="brand" href="/" aria-label="Viple Consultores – Inicio">'
             '<img src="/assets/img/logo-header.png" alt="Viple Consultores · Legal &amp; Compliance" '
-            'width="385" height="236"></a>')
+            'width="446" height="281"></a>')
 
 
 # ---------- Servicios (fuente única: content/servicios.json) ----------
