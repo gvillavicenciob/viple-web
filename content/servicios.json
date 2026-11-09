@@ -2,7 +2,8 @@
   "servicios": [
     {
       "slug": "estructura-empresarial",
-      "name": "Asesoría legal práctica para la estructura y el crecimiento de tu negocio",
+      "name": "Asesoría legal en estructura empresarial, acuerdos entre socios e inversión",
+      "menu": "Socios, estructura e inversión",
       "summary": "Ordenamos la estructura de tu empresa, la relación entre socios y los procesos de inversión para que crezca sobre una base legal sólida."
     },
     {

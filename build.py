@@ -12,6 +12,7 @@ Netlify ejecuta este archivo automáticamente en cada publicación.
 Para probarlo en tu computadora:  python build.py
 """
 import html
+import hashlib
 import json
 import math
 import re
@@ -35,8 +36,9 @@ IDEAS = {
     "name": "notas",
     "label": "Cómo mejorar el trabajo legal",
     "h1": "Cómo mejorar el trabajo legal en tu negocio",
-    "intro": ("Reflexiones sobre Legal Ops, inteligencia artificial, gestión del conocimiento "
-              "y nuevas formas de organizar el trabajo legal en empresas y firmas de abogados"),
+    "intro": ("Consejos prácticos para que tu equipo sepa qué contratos puede cerrar con condiciones ya aprobadas, "
+              "cuándo conviene involucrar a un abogado en un proyecto y cómo aprovechar lo que ya negoció con un "
+              "cliente para llegar mejor preparado al siguiente acuerdo"),
     "empty": "Muy pronto publicaremos los primeros artículos.",
     "nav": "notas",
     "featured_label": "Artículo destacado",
@@ -65,6 +67,10 @@ NOVEDADES = {
 }
 
 LAYOUT = (SRC / "layout.html").read_text(encoding="utf-8")
+# Versión de CSS/JS en la URL: cada cambio obliga al navegador a descargar la hoja nueva (evita ver estilos viejos)
+for _f in ("css/site.css", "js/site.js"):
+    _v = hashlib.md5((ROOT / "assets" / _f).read_bytes()).hexdigest()[:8]
+    LAYOUT = LAYOUT.replace(f"/assets/{_f}", f"/assets/{_f}?v={_v}")
 SITEMAP = []
 
 
@@ -97,7 +103,7 @@ SERVICIOS = json.loads((ROOT / "content" / "servicios.json").read_text(encoding=
 
 
 def svc_menu():
-    return "\n".join(f'              <li><a href="/servicios/{s["slug"]}/">{esc(s["name"])}</a></li>'
+    return "\n".join(f'              <li><a href="/servicios/{s["slug"]}/">{esc(s.get("menu") or s["name"])}</a></li>'
                      for s in SERVICIOS)
 
 
@@ -524,7 +530,7 @@ def dudas_home(items):
     return f'''<section class="home-dudas">
   <div class="wrap">
     <div class="section-head reveal">
-      <h2>Te ayudamos con tus dudas</h2>
+      <h2>¿Tienes preguntas?</h2>
       <p>{DUDAS["intro"]}</p>
     </div>
     {cuerpo}

@@ -98,6 +98,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--link);outline-offse
 /* Paneles de servicios (inicio y /servicios/) */
 .svc-panels{display:flex;flex-direction:column;border-top:1px solid #dde4e4}
 .svc-panel{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:22px;align-items:center;padding:20px 12px;border-bottom:1px solid #dde4e4;text-decoration:none;color:inherit;transition:background .2s}
+/* Encabezado de servicios en el inicio: título en dos líneas equilibradas, párrafo centrado verticalmente */
+.section-head.svc-head{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);align-items:center;margin-bottom:56px}
+.svc-head h2{max-width:9em;text-wrap:balance}
+.svc-sub{font-family:var(--serif);font-weight:500;font-size:1.45rem;line-height:1.3;color:var(--navy);margin-bottom:18px}
 .svc-panel:hover{background:var(--sage-light)}
 .svc-panel .num{font-family:var(--serif);font-size:1.35rem;color:var(--sage-dark)}
 .svc-panel h3{font-family:var(--serif);font-weight:500;font-size:1.24rem;line-height:1.3;color:var(--navy);margin-bottom:4px}
@@ -412,3 +416,4 @@ a.pres-card:hover{border-color:var(--ed-blue-2);box-shadow:0 10px 26px rgba(20,3
 a.pres-card:hover .pres-more{text-decoration:underline;text-underline-offset:3px}
 @media (max-width:900px){.pres-list{grid-template-columns:1fr}}
 @media (max-width:520px){.pres-card{grid-template-columns:1fr}.pres-img{aspect-ratio:16/9}}
+@media (max-width:900px){.section-head.svc-head{grid-template-columns:1fr;gap:20px;margin-bottom:40px}}

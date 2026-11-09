@@ -390,5 +390,6 @@ collections:
             hint: Cambia nombres o descripciones. No agregues ni quites servicios desde aquí (cada uno tiene su propia página).
             fields:
               - { label: Dirección de la página (no cambiar), name: slug, widget: hidden }
-              - { label: Nombre, name: name, widget: string }
+              - { label: Nombre, name: name, widget: string, hint: "Título completo: se usa en la página del servicio, la portada y /servicios/." }
+              - { label: Nombre corto para el menú, name: menu, widget: string, required: false, hint: "Opcional. Si lo dejas vacío, el menú desplegable usa el nombre completo." }
               - { label: Descripción breve, name: summary, widget: text }
