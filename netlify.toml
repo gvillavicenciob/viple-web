@@ -8,3 +8,11 @@
   for = "/admin/*"
   [headers.values]
     X-Robots-Tag = "noindex"
+
+# La dirección técnica de Netlify redirige al dominio oficial (evita contenido duplicado en buscadores).
+# Solo afecta a esa dirección exacta; las vistas previas (rama--...netlify.app) siguen funcionando.
+[[redirects]]
+  from = "https://resplendent-sfogliatella-e4a742.netlify.app/*"
+  to = "https://vipleconsultores.com/:splat"
+  status = 301
+  force = true

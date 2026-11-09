@@ -3,8 +3,8 @@ Construye el sitio de Viple Consultores en la carpeta _site/.
 
 - Envuelve cada página de src/pages/ con la plantilla común src/layout.html
   (encabezado, menú y pie de página).
-- Genera las secciones «Ideas y análisis» (content/notas), «Te ayudamos con
-  tus dudas» (content/dudas) y
+- Genera las secciones «Cómo mejorar el trabajo legal» (content/notas), «Te ayudamos
+  con tus dudas» (content/dudas, temas en content/temas-dudas) y
   «Novedades» (content/novedades) a partir de los artículos guardados
   desde el panel de administración (/admin).
 
@@ -33,8 +33,8 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
 # Sección editorial «Ideas y análisis» (se guarda en content/notas)
 IDEAS = {
     "name": "notas",
-    "label": "Ideas y análisis",
-    "h1": "Ideas para repensar cómo trabajamos en lo legal",
+    "label": "Cómo mejorar el trabajo legal",
+    "h1": "Cómo mejorar el trabajo legal en tu negocio",
     "intro": ("Reflexiones sobre Legal Ops, inteligencia artificial, gestión del conocimiento "
               "y nuevas formas de organizar el trabajo legal en empresas y firmas de abogados"),
     "empty": "Muy pronto publicaremos los primeros artículos.",
@@ -44,18 +44,14 @@ IDEAS = {
     "related": "Otros artículos",
 }
 
-# Sección «Te ayudamos con tus dudas» (se guarda en content/dudas, mismo formato editorial)
+# Sección «Te ayudamos con tus dudas» (notas en content/dudas, temas en content/temas-dudas)
 DUDAS = {
     "name": "dudas",
     "label": "Te ayudamos con tus dudas",
-    "h1": "Respuestas claras a las dudas legales de tu negocio",
-    "intro": "Explicamos en lenguaje sencillo temas legales frecuentes en la operación diaria de las empresas",
+    "intro": "Encuentra respuestas a preguntas legales sobre situaciones de tu vida diaria o de tu negocio.",
     "empty": "Muy pronto publicaremos las primeras respuestas.",
-    "nav": "dudas",
-    "featured_label": "Destacado",
-    "more": "Leer respuesta →",
-    "related": "Otras dudas",
 }
+PUBLICOS = {"personas": "Para personas", "negocios": "Para negocios", "ambos": "Para personas y negocios"}
 
 # Sección «Novedades» (sin cambios de diseño por ahora)
 NOVEDADES = {
@@ -89,12 +85,36 @@ def minutos_lectura(texto):
     return max(1, math.ceil(palabras / 200))
 
 
-def brand(logo):
-    if logo == "ninguno":
-        return '<a class="brand none" href="/" tabindex="-1" aria-hidden="true"></a>'
+def brand(logo=None):
     return ('<a class="brand" href="/" aria-label="Viple Consultores – Inicio">'
-            '<img src="/assets/img/logo-cuadrado.png" alt="Viple Consultores · Legal &amp; Compliance" '
-            'width="500" height="500"></a>')
+            '<img src="/assets/img/logo-header.png" alt="Viple Consultores · Legal &amp; Compliance" '
+            'width="385" height="236"></a>')
+
+
+# ---------- Servicios (fuente única: content/servicios.json) ----------
+
+SERVICIOS = json.loads((ROOT / "content" / "servicios.json").read_text(encoding="utf-8"))["servicios"]
+
+
+def svc_menu():
+    return "\n".join(f'              <li><a href="/servicios/{s["slug"]}/">{esc(s["name"])}</a></li>'
+                     for s in SERVICIOS)
+
+
+def svc_panels():
+    rows = "".join(f'''<a class="svc-panel" href="/servicios/{s["slug"]}/">
+        <span class="num">{i:02d}</span>
+        <div class="svc-txt"><h3>{esc(s["name"])}</h3><span>{esc(s["summary"])}</span></div>
+        <span class="more">Ver servicio →</span>
+      </a>''' for i, s in enumerate(SERVICIOS, 1))
+    return f'<div class="svc-panels">{rows}</div>'
+
+
+def fill_services(text):
+    text = text.replace("{{svc_panels}}", svc_panels())
+    for s in SERVICIOS:
+        text = text.replace("{{svc:" + s["slug"] + "}}", esc(s["name"]))
+    return text
 
 
 def render(url, content, title, description, nav="", logo="cuadrado",
@@ -108,6 +128,7 @@ def render(url, content, title, description, nav="", logo="cuadrado",
         "{{og_type}}": og_type,
         "{{head_extra}}": head_extra,
         "{{brand}}": brand(logo),
+        "{{svc_menu}}": svc_menu(),
         "{{content}}": content,
     }.items():
         page = page.replace(key, val)
@@ -147,6 +168,9 @@ def load_items(name):
             continue
         data["slug"] = f.stem
         data["date"] = str(data.get("date") or "")[:10]
+        if not data["date"]:
+            m = re.match(r"(\d{4}-\d{2}-\d{2})", f.stem)
+            data["date"] = m.group(1) if m else ""
         data["collection"] = name
         data["url"] = f"/{name}/{f.stem}/"
         data["minutes"] = minutos_lectura(data.get("body"))
@@ -337,6 +361,178 @@ def render_article(cfg, item, items):
            og_type="article", head_extra=head_extra)
 
 
+# ---------- Sección «Te ayudamos con tus dudas» ----------
+
+def load_temas():
+    temas = {}
+    folder = ROOT / "content" / "temas-dudas"
+    for f in (sorted(folder.glob("*.json")) if folder.exists() else []):
+        try:
+            t = json.loads(f.read_text(encoding="utf-8"))
+        except Exception as e:
+            print(f"  ! No se pudo leer el tema {f.name}: {e}")
+            continue
+        tid = str(t.get("id") or f.stem).strip()
+        try:
+            orden = int(t.get("order", 99))
+        except (TypeError, ValueError):
+            orden = 99
+        temas[tid] = {"id": tid, "name": t.get("name") or tid, "order": orden}
+    return temas
+
+
+def texto_plano(md, n=170):
+    txt = re.sub(r"<[^>]+>", " ", markdown.markdown(md or ""))
+    txt = re.sub(r"\s+", " ", html.unescape(txt)).strip()
+    return txt if len(txt) <= n else txt[:n].rsplit(" ", 1)[0] + "…"
+
+
+def prep_dudas(items, temas):
+    revisar = []
+    for it in items:
+        aud = str(it.get("audience") or "").strip().lower()
+        it["aud"] = aud if aud in PUBLICOS else ""
+        it["tema"] = temas.get(str(it.get("topic") or "").strip())
+        it["resumen"] = it.get("summary") or texto_plano(it.get("body"))
+        if not it["aud"] or not it["tema"]:
+            revisar.append(it["slug"])
+    if revisar:
+        print("  ! Dudas sin público o tema válido (solo visibles en «Ver todo»): " + ", ".join(revisar))
+    return items
+
+
+def duda_card(it):
+    tema = it["tema"]["name"] if it["tema"] else ""
+    tid = it["tema"]["id"] if it["tema"] else ""
+    aud = PUBLICOS.get(it["aud"], "")
+    meta = (f'<span class="dd-topic">{esc(tema)}</span>' if tema else "") + \
+           (f'<span class="dd-aud">{aud}</span>' if aud else "")
+    return f'''<li class="dd-item" data-aud="{it["aud"]}" data-topic="{esc(tid)}">
+      <a href="{it["url"]}">
+        <span class="dd-meta">{meta}</span>
+        <h3>{esc(it.get("title"))}</h3>
+        <p>{esc(it["resumen"])}</p>
+        <span class="dd-more">Leer respuesta →</span>
+      </a>
+    </li>'''
+
+
+def build_dudas(items, temas):
+    name = DUDAS["name"]
+    if items:
+        usados = {it["tema"]["id"] for it in items if it["tema"]}
+        lista = sorted((t for t in temas.values() if t["id"] in usados), key=lambda t: (t["order"], t["name"]))
+        topic_btns = ('<button type="button" data-topic="" aria-pressed="true">Todos los temas</button>' +
+                      "".join(f'<button type="button" data-topic="{esc(t["id"])}" aria-pressed="false">{esc(t["name"])}</button>'
+                              for t in lista))
+        listing = f'''<div class="dd-filters" data-dd-filters>
+      <p class="dd-q" id="dd-q-aud">¿Qué información buscas?</p>
+      <div class="seg" role="group" aria-labelledby="dd-q-aud">
+        <button type="button" data-aud="todo" aria-pressed="true">Ver todo</button>
+        <button type="button" data-aud="personas" aria-pressed="false">Para mí</button>
+        <button type="button" data-aud="negocios" aria-pressed="false">Para mi negocio</button>
+      </div>
+      <h2 class="dd-h" id="dd-q-topic">Explora por tema</h2>
+      <div class="chips" role="group" aria-labelledby="dd-q-topic">{topic_btns}</div>
+    </div>
+    <p class="dd-count" aria-live="polite" data-dd-count></p>
+    <ul class="dd-list" data-dd-list>{"".join(duda_card(it) for it in items)}</ul>
+    <p class="dd-none" data-dd-none hidden>Todavía no hay preguntas para esta combinación. Prueba con otro tema o con «Ver todo».</p>'''
+    else:
+        listing = empty_box(DUDAS["empty"])
+    content = f'''
+<div class="page-head ed-head">
+  <div class="wrap">
+    <h1>{DUDAS["label"]}</h1>
+    <p>{DUDAS["intro"]}</p>
+  </div>
+</div>
+<section class="ed dd">
+  <div class="wrap">
+    {listing}
+  </div>
+</section>'''
+    render(f"/{name}/", content, f'{DUDAS["label"]} | Viple Consultores', DUDAS["intro"], nav="dudas")
+    for it in items:
+        render_duda(it, items)
+
+
+def render_duda(it, items):
+    name = DUDAS["name"]
+    body_html = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
+    author = it.get("author") or DEFAULT_AUTHOR
+    tema = it["tema"]["name"] if it["tema"] else ""
+    aud = PUBLICOS.get(it["aud"], "")
+    adjunto = ""
+    if it.get("attachment"):
+        adjunto = (f'<p class="dd-file"><a href="{esc(it["attachment"])}" target="_blank" rel="noopener">'
+                   f'Descargar archivo de apoyo</a></p>')
+    sources = [x for x in (it.get("sources") or []) if isinstance(x, dict) and (x.get("url") or x.get("title"))]
+    sources_html = ""
+    if sources:
+        lis = "".join(
+            f'<li><a href="{esc(x["url"])}" target="_blank" rel="noopener">{esc(x.get("title") or x["url"])}</a></li>'
+            if x.get("url") else f'<li>{esc(x.get("title"))}</li>' for x in sources)
+        sources_html = f'<aside class="ed-sources"><h2>Fuentes</h2><ul>{lis}</ul></aside>'
+    otros = [i for i in items if i is not it]
+    mismo = [i for i in otros if i["tema"] and it["tema"] and i["tema"]["id"] == it["tema"]["id"]]
+    rel = (mismo + [i for i in otros if i not in mismo])[:3]
+    rel_html = (f'''<section class="ed-related">
+  <div class="wrap">
+    <h2>Otras preguntas</h2>
+    <ul class="dd-list">{"".join(duda_card(i) for i in rel)}</ul>
+  </div>
+</section>''' if rel else "")
+    tags = (f'<span class="ed-cat">{esc(tema)}</span>' if tema else "") + \
+           (f'<span class="dd-aud on-dark">{aud}</span>' if aud else "")
+    content = f'''
+<div class="page-head ed-head ed-article-head">
+  <div class="wrap ed-narrow">
+    <a class="ed-back-top" href="/{name}/">← {DUDAS["label"]}</a>
+    <div class="dd-tags">{tags}</div>
+    <h1>{esc(it.get("title"))}</h1>
+    <p class="ed-byline">Por {esc(author)} <span aria-hidden="true">·</span> <time datetime="{it["date"]}">{fecha_larga(it["date"])}</time> <span aria-hidden="true">·</span> {it["minutes"]} min de lectura</p>
+  </div>
+</div>
+<section class="ed">
+  <article class="wrap ed-narrow">
+    <div class="prose ed-prose">{body_html}</div>
+    {adjunto}
+    {sources_html}
+    {share_links(it)}
+    <a class="back" href="/{name}/">← Volver a {DUDAS["label"]}</a>
+  </article>
+</section>
+{rel_html}'''
+    ld = {"@context": "https://schema.org", "@type": "Article", "headline": it.get("title"),
+          "description": it["resumen"], "datePublished": it["date"],
+          "author": {"@type": "Person", "name": author},
+          "publisher": {"@type": "Organization", "name": "Viple Consultores", "url": SITE_URL},
+          "mainEntityOfPage": SITE_URL + it["url"]}
+    render(it["url"], content, f'{it.get("title")} | Viple Consultores', it["resumen"], nav="dudas",
+           og_type="article",
+           head_extra=f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>')
+
+
+def dudas_home(items):
+    destacadas = [i for i in items if i.get("featured_home")]
+    elegidas = (destacadas or items)[:3]
+    if elegidas:
+        cuerpo = f'<ul class="dd-list dd-home">{"".join(duda_card(i) for i in elegidas)}</ul>'
+    else:
+        cuerpo = f'<p class="dd-soon">{esc(DUDAS["empty"])}</p>'
+    return f'''<section class="home-dudas">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <h2>Te ayudamos con tus dudas</h2>
+      <p>{DUDAS["intro"]}</p>
+    </div>
+    {cuerpo}
+    <p class="dd-all"><a href="/dudas/">Ver todas las preguntas →</a></p>
+  </div>
+</section>'''
+
+
 # ---------- Sección «Novedades» ----------
 
 def build_novedades(items):
@@ -405,9 +601,9 @@ def latest_block(all_items):
     return f'''<section style="background:var(--sage-light)">
   <div class="wrap">
     <div class="section-head reveal">
-      <h2>Ideas, análisis y novedades</h2>
-      <p>Lo último publicado: reflexiones prácticas, nuevas normas y asuntos de interés para tu empresa.
-      <br><a href="/notas/" style="color:var(--navy)">Ver ideas y análisis</a> · <a href="/novedades/" style="color:var(--navy)">Ver novedades</a></p>
+      <h2>Lo último publicado</h2>
+      <p>Artículos sobre cómo mejorar el trabajo legal, nuevas normas y asuntos de interés para tu empresa.
+      <br><a href="/notas/" style="color:var(--navy)">Ver «Cómo mejorar el trabajo legal»</a> · <a href="/novedades/" style="color:var(--navy)">Ver novedades</a></p>
     </div>
     <div class="posts">{cards}</div>
   </div>
@@ -425,7 +621,8 @@ def main():
 
     ideas = load_items("notas")
     novedades = load_items("novedades")
-    dudas = load_items("dudas")
+    temas = load_temas()
+    dudas = prep_dudas(load_items("dudas"), temas)
     everything = sorted(ideas + novedades, key=lambda d: d["date"], reverse=True)
 
     for path in sorted((SRC / "pages").rglob("*.html")):
@@ -440,12 +637,15 @@ def main():
             url = "/404.html"
         meta, body = parse_page(path)
         body = body.replace("{{latest}}", latest_block(everything))
+        body = body.replace("{{dudas_home}}", dudas_home(dudas))
+        body = fill_services(body)
+        meta["title"] = fill_services(meta.get("title", "Viple Consultores")).replace("&amp;", "&")
         render(url, body, meta.get("title", "Viple Consultores"), meta.get("description", ""),
                nav=meta.get("nav", ""), logo=meta.get("logo", "cuadrado"),
                og_image=meta.get("og_image", "/assets/img/logo-cuadrado.png"))
 
     build_editorial(IDEAS, ideas)
-    build_editorial(DUDAS, dudas)
+    build_dudas(dudas, temas)
     build_novedades(novedades)
 
     urls = "".join(f"<url><loc>{SITE_URL}{u}</loc></url>" for u in SITEMAP)
@@ -455,7 +655,7 @@ def main():
     (OUT / "robots.txt").write_text(f"User-agent: *\nDisallow: /admin/\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
     print(f"Sitio generado en _site/ · {len(SITEMAP)} páginas · "
-          f"{len(ideas)} ideas y análisis · {len(dudas)} dudas · {len(novedades)} novedades")
+          f"{len(ideas)} artículos · {len(dudas)} dudas · {len(novedades)} novedades")
 
 
 if __name__ == "__main__":

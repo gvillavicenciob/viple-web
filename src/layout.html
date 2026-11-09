@@ -8,6 +8,7 @@
 <link rel="canonical" href="https://vipleconsultores.com{{url}}">
 <meta property="og:type" content="{{og_type}}">
 <meta property="og:site_name" content="Viple Consultores">
+<meta property="og:locale" content="es_PE">
 <meta property="og:title" content="{{title}}">
 <meta property="og:description" content="{{description}}">
 <meta property="og:url" content="https://vipleconsultores.com{{url}}">
@@ -22,29 +23,34 @@
 <body>
 
 <header class="site-header">
-  <div class="wrap">
-    {{brand}}
-    <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav"><span></span></button>
-    <nav class="site-nav" id="site-nav" aria-label="Principal">
-      <ul class="menu">
-        <li><a data-nav="inicio" href="/">Inicio</a></li>
-        <li class="has-sub">
-          <a data-nav="servicios" href="/servicios/">Cómo te podemos ayudar</a>
-          <ul class="submenu">
-            <li><a href="/servicios/estructura-empresarial/">Estructura y crecimiento empresarial</a></li>
-            <li><a href="/servicios/contratos/">Contratos que funcionan en la práctica</a></li>
-            <li><a href="/servicios/proteccion-de-datos/">Protección de datos personales</a></li>
-            <li><a href="/servicios/reclamos-y-denuncias/">Prácticas comerciales y reclamos</a></li>
-            <li><a href="/servicios/herramientas-legales/">Diseño de herramientas legales</a></li>
-          </ul>
-        </li>
-        <li><a data-nav="notas" href="/notas/">Ideas y análisis</a></li>
-        <li><a data-nav="dudas" href="/dudas/">Te ayudamos con tus dudas</a></li>
-        <li><a data-nav="novedades" href="/novedades/">Novedades</a></li>
-        <li><a data-nav="quien-soy" href="/quien-soy/">Quién soy</a></li>
-        <li><a data-nav="contacto" class="btn" href="/contacto/">Conversemos</a></li>
-      </ul>
-    </nav>
+  <div class="hdr-top">
+    <div class="wrap">
+      {{brand}}
+      <p class="tagline">Queremos ser parte de tu equipo</p>
+      <button class="menu-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav"><span></span></button>
+    </div>
+  </div>
+  <div class="hdr-nav">
+    <div class="wrap">
+      <nav class="site-nav" id="site-nav" aria-label="Principal">
+        <ul class="menu">
+          <li><a data-nav="inicio" href="/">Inicio</a></li>
+          <li class="has-sub">
+            <a data-nav="servicios" href="/servicios/">Cómo te podemos ayudar</a>
+            <button class="sub-toggle" type="button" aria-expanded="false" aria-controls="submenu-servicios" aria-label="Mostrar servicios"></button>
+            <ul class="submenu" id="submenu-servicios">
+              <li><a href="/servicios/">Ver todos los servicios</a></li>
+{{svc_menu}}
+            </ul>
+          </li>
+          <li><a data-nav="dudas" href="/dudas/">Te ayudamos con tus dudas</a></li>
+          <li><a data-nav="notas" href="/notas/">Cómo mejorar el trabajo legal</a></li>
+          <li><a data-nav="novedades" href="/novedades/">Novedades</a></li>
+          <li><a data-nav="quien-soy" href="/quien-soy/">Quién soy</a></li>
+          <li><a data-nav="contacto" class="btn outline" href="/contacto/">Conversemos</a></li>
+        </ul>
+      </nav>
+    </div>
   </div>
 </header>
 
@@ -63,8 +69,8 @@
         <h4>Sitio</h4>
         <ul>
           <li><a href="/servicios/">Cómo te podemos ayudar</a></li>
-          <li><a href="/notas/">Ideas y análisis</a></li>
           <li><a href="/dudas/">Te ayudamos con tus dudas</a></li>
+          <li><a href="/notas/">Cómo mejorar el trabajo legal</a></li>
           <li><a href="/novedades/">Novedades</a></li>
           <li><a href="/quien-soy/">Quién soy</a></li>
           <li><a href="/contacto/">Contacto</a></li>

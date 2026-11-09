@@ -1,30 +1,40 @@
-<!--{"title": "Viple Consultores | Legal & Compliance", "description": "Asesoría legal alineada con la operación real de tu negocio: estructura empresarial, contratos, protección de datos personales, prácticas comerciales y herramientas legales.", "nav": "inicio", "logo": "ninguno"}-->
+<!--{"title": "Viple Consultores | Asesoría legal para empresas · Legal & Compliance", "description": "Viple Consultores: asesoría legal práctica para empresas en estructura y crecimiento del negocio, contratos, protección de datos personales, prácticas comerciales y reclamos, y herramientas legales.", "nav": "inicio"}-->
 
-<section class="hero">
-  <div class="wrap">
-    <img class="hero-logo" src="/assets/img/logo-horizontal-hero.png" alt="Viple Consultores · Legal & Compliance" width="665" height="336">
-    <h1 class="hero-title">
-      <span>Asesoría legal alineada con la operación real de tu negocio.</span>
-      <span>Parte de tu equipo.</span>
-    </h1>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://vipleconsultores.com/#organization","name":"Viple Consultores","alternateName":"Viple Consultores · Legal & Compliance","url":"https://vipleconsultores.com/","logo":"https://vipleconsultores.com/assets/img/logo-cuadrado.png","email":"gabriel@vipleconsultores.com","telephone":"+51 907 498 580","address":{"@type":"PostalAddress","addressLocality":"Lima","addressCountry":"PE"},"sameAs":["https://www.linkedin.com/company/viple-consultores/"]},{"@type":"WebSite","@id":"https://vipleconsultores.com/#website","name":"Viple Consultores","url":"https://vipleconsultores.com/","inLanguage":"es","publisher":{"@id":"https://vipleconsultores.com/#organization"}}]}</script>
+
+<section class="home-intro">
+  <div class="wrap intro-grid">
+    <div class="intro-text">
+      <h1>¿Cómo te podemos ayudar?</h1>
+      <p>En Viple partimos de lo que necesitas hacer y de cómo funciona tu negocio para darte asesoría legal que puedas aplicar en el día a día.</p>
+    </div>
+    <div class="intro-art">
+      <img src="/assets/img/portada-ilustracion.jpg" alt="Ilustración: dos personas revisan juntas un documento en una mesa de trabajo" width="1440" height="754" fetchpriority="high">
+    </div>
+    <div class="intro-cards">
+      <a class="choice" href="/servicios/">
+        <span class="choice-title">Busco asesoría para algo que necesito hacer</span>
+        <span class="choice-link">Explorar cómo te podemos ayudar <span aria-hidden="true">→</span></span>
+      </a>
+      <a class="choice" href="/dudas/">
+        <span class="choice-title">Primero quiero informarme para saber cómo proceder</span>
+        <span class="choice-link">Ver preguntas para personas y negocios <span aria-hidden="true">→</span></span>
+      </a>
+    </div>
   </div>
 </section>
 
-<section>
+<section class="home-svc">
   <div class="wrap">
     <div class="section-head reveal">
       <h2>Cómo te podemos ayudar</h2>
       <p>Acompañamiento legal pensado para proteger la empresa sin frenar su actividad comercial: claro, ágil y útil en el día a día.</p>
     </div>
-    <div class="grid reveal">
-      <a class="card" href="/servicios/estructura-empresarial/"><span class="num">01</span><h3>Asesoría legal práctica para la estructura y crecimiento de tu empresa</h3><span class="more">Ver más →</span></a>
-      <a class="card" href="/servicios/contratos/"><span class="num">02</span><h3>Elaboración de contratos claros y útiles para proteger la operación de tu negocio</h3><span class="more">Ver más →</span></a>
-      <a class="card" href="/servicios/proteccion-de-datos/"><span class="num">03</span><h3>Protección de datos personales + Oficial de Datos Personales as a Service</h3><span class="more">Ver más →</span></a>
-      <a class="card" href="/servicios/reclamos-y-denuncias/"><span class="num">04</span><h3>Prácticas comerciales y reclamos</h3><span class="more">Ver más →</span></a>
-      <a class="card" href="/servicios/herramientas-legales/"><span class="num">05</span><h3>Diseño de herramientas legales para estandarizar, ordenar y acelerar la gestión legal</h3><span class="more">Ver más →</span></a>
-    </div>
+    {{svc_panels}}
   </div>
 </section>
+
+{{dudas_home}}
 
 {{latest}}
 

@@ -13,6 +13,9 @@ backend:
     deleteMedia: "Borrar imagen: {{path}}"
 
 locale: es
+
+# Permite probar el panel en tu computadora (npx decap-server). No afecta al sitio publicado.
+local_backend: true
 site_url: https://vipleconsultores.com
 display_url: https://vipleconsultores.com
 logo_url: /assets/img/logo-cuadrado.png
@@ -22,12 +25,12 @@ media_folder: assets/uploads
 public_folder: /assets/uploads
 
 collections:
-  # ---------------- IDEAS Y ANÁLISIS ----------------
+  # ---------------- CÓMO MEJORAR EL TRABAJO LEGAL ----------------
   # (los archivos se guardan en content/notas y se publican en /notas/)
   - name: notas
-    label: Ideas y análisis
+    label: Cómo mejorar el trabajo legal
     label_singular: Artículo
-    description: Artículos y reflexiones. Se muestran en la pestaña «Ideas y análisis».
+    description: Artículos sobre cómo organizar y mejorar el trabajo legal en una empresa. Se muestran en la pestaña «Cómo mejorar el trabajo legal».
     folder: content/notas
     create: true
     delete: true
@@ -56,6 +59,8 @@ collections:
         time_format: false
         format: YYYY-MM-DD
         picker_utc: true
+        required: false
+        hint: Si la dejas vacía, se usa la fecha en que creaste la entrada.
       - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
       - label: Categoría
         name: category
@@ -104,12 +109,43 @@ collections:
         default: false
         required: false
 
-  # ---------------- TE AYUDAMOS CON TUS DUDAS ----------------
-  # (los archivos se guardan en content/dudas y se publican en /dudas/)
+  # ---------------- TEMAS DE DUDAS ----------------
+  # (content/temas-dudas). Cada nota de dudas se asocia a un tema por su identificador.
+  - name: temas_dudas
+    label: Temas de dudas
+    label_singular: Tema
+    description: Temas de «Te ayudamos con tus dudas». En la web solo aparecen los temas que tienen al menos una nota publicada. Puedes cambiar el nombre visible y el orden cuando quieras; el identificador no se cambia.
+    folder: content/temas-dudas
+    create: true
+    delete: true
+    extension: json
+    format: json
+    identifier_field: name
+    slug: "{{id}}"
+    summary: "{{order}} · {{name}}"
+    sortable_fields: [order, name]
+    fields:
+      - label: Nombre visible
+        name: name
+        widget: string
+      - label: Identificador (no cambiar después de crear el tema)
+        name: id
+        widget: string
+        pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Solo minúsculas sin tildes, números y guiones. Ej.: compras-y-reclamos"]
+        hint: Se usa para enlazar las notas con este tema. Si después cambias el nombre visible, las notas siguen asociadas.
+      - label: Orden
+        name: order
+        widget: number
+        value_type: int
+        default: 10
+        hint: Los temas se muestran de menor a mayor.
+
+  # ---------------- NOTAS DE DUDAS ----------------
+  # (content/dudas, se publican en /dudas/<archivo>/; el enlace no cambia aunque edites el título)
   - name: dudas
-    label: Te ayudamos con tus dudas
-    label_singular: Respuesta
-    description: Respuestas a dudas legales frecuentes. Se muestran en la pestaña «Te ayudamos con tus dudas».
+    label: Notas de dudas
+    label_singular: Nota
+    description: Preguntas y respuestas de «Te ayudamos con tus dudas». Puedes escribir la respuesta o pegarla desde Word.
     folder: content/dudas
     create: true
     delete: true
@@ -117,20 +153,69 @@ collections:
     format: json
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     preview_path: "dudas/{{slug}}"
-    summary: "{{title}} · {{category}} · {{date}}"
-    sortable_fields: [date, title, category]
+    summary: "{{title}} · {{audience}} · {{topic}}"
+    sortable_fields: [date, title]
     view_filters:
       - label: Borradores
         field: draft
         pattern: true
-      - label: Destacado
-        field: featured
+      - label: Destacadas en la portada
+        field: featured_home
         pattern: true
+      - label: Para personas
+        field: audience
+        pattern: personas
+      - label: Para negocios
+        field: audience
+        pattern: negocios
+      - label: Para ambos
+        field: audience
+        pattern: ambos
     view_groups:
-      - label: Categoría
-        field: category
+      - label: Tema
+        field: topic
+      - label: Público
+        field: audience
     fields:
-      - { label: Título (la duda o pregunta), name: title, widget: string }
+      - label: Título o pregunta
+        name: title
+        widget: string
+      - label: ¿A quién le sirve esta nota?
+        name: audience
+        widget: select
+        options:
+          - { label: Personas, value: personas }
+          - { label: Negocios, value: negocios }
+          - { label: Ambos, value: ambos }
+      - label: Tema
+        name: topic
+        widget: relation
+        collection: temas_dudas
+        value_field: id
+        search_fields: [name]
+        display_fields: [name]
+        options_length: 100
+        hint: Si el tema que necesitas no existe, créalo en «Temas de dudas» y vuelve aquí.
+      - label: Respuesta
+        name: body
+        widget: markdown
+        hint: Puedes escribir aquí o copiar y pegar desde Word; luego revisa títulos, listas y negritas con la barra de formato.
+      - label: Resumen
+        name: summary
+        widget: text
+        required: false
+        hint: Una o dos líneas para la tarjeta del listado. Si lo dejas vacío, se usa el inicio de la respuesta.
+      - label: Archivo de apoyo
+        name: attachment
+        widget: file
+        required: false
+        hint: Por ejemplo, el Word o PDF original o un modelo descargable. Aparece como enlace al final de la respuesta.
+      - label: Destacar en la portada
+        name: featured_home
+        widget: boolean
+        default: false
+        required: false
+        hint: La portada muestra hasta 3 notas destacadas (las más recientes). Si no destacas ninguna, muestra las 3 últimas publicadas.
       - label: Fecha
         name: date
         widget: datetime
@@ -138,45 +223,15 @@ collections:
         time_format: false
         format: YYYY-MM-DD
         picker_utc: true
+        required: false
+        hint: Si la dejas vacía, se usa la fecha en que creaste la entrada.
       - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
-      - label: Categoría
-        name: category
-        widget: select
-        default: Estructura y crecimiento empresarial
-        options:
-          - Estructura y crecimiento empresarial
-          - Contratos
-          - Protección de datos personales
-          - Prácticas comerciales y reclamos
-          - Herramientas legales
-          - Otros temas
-      - label: Resumen
-        name: summary
-        widget: text
-        hint: Una o dos líneas. Aparece en la tarjeta del listado y al compartir en redes.
-      - label: Destacado
-        name: featured
-        widget: boolean
-        default: false
-        required: false
-        hint: Se muestra en grande al inicio del listado. Si marcas varios, se destaca el más reciente; si no marcas ninguno, se destaca el último publicado.
-      - label: Imagen principal
-        name: image
-        widget: image
-        required: false
-        hint: Opcional. Recomendado horizontal (por ejemplo 1600 × 900 px). Evita imágenes de stock genéricas.
-      - label: Descripción de la imagen
-        name: image_alt
-        widget: string
-        required: false
-        hint: Texto alternativo para accesibilidad (qué muestra la imagen).
-      - { label: Respuesta, name: body, widget: markdown }
       - label: Fuentes
         name: sources
         widget: list
         required: false
         summary: "{{fields.title}}"
-        hint: Opcional. Enlaces a normas, estudios o artículos citados.
+        hint: Opcional. Normas, resoluciones o artículos citados.
         fields:
           - { label: Nombre de la fuente, name: title, widget: string }
           - { label: Enlace (https://…), name: url, widget: string, required: false }
@@ -216,6 +271,8 @@ collections:
         time_format: false
         format: YYYY-MM-DD
         picker_utc: true
+        required: false
+        hint: Si la dejas vacía, se usa la fecha en que creaste la entrada.
       - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
       - label: Categoría
         name: category
@@ -256,3 +313,26 @@ collections:
         widget: boolean
         default: false
         required: false
+
+  # ---------------- SERVICIOS ----------------
+  # Nombres y descripciones breves que se muestran en el menú, la portada y /servicios/.
+  - name: servicios
+    label: Servicios (nombres y descripciones)
+    delete: false
+    editor:
+      preview: false
+    files:
+      - label: Listado de servicios
+        name: listado
+        file: content/servicios.json
+        fields:
+          - label: Servicios
+            name: servicios
+            widget: list
+            allow_add: false
+            summary: "{{fields.name}}"
+            hint: Cambia nombres o descripciones. No agregues ni quites servicios desde aquí (cada uno tiene su propia página).
+            fields:
+              - { label: Dirección de la página (no cambiar), name: slug, widget: hidden }
+              - { label: Nombre, name: name, widget: string }
+              - { label: Descripción breve, name: summary, widget: text }
