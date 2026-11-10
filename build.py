@@ -34,8 +34,8 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
 # Sección editorial «Ideas y análisis» (se guarda en content/notas)
 IDEAS = {
     "name": "notas",
-    "label": "Cómo mejorar el trabajo legal",
-    "h1": "Cómo mejorar el trabajo legal en tu negocio",
+    "label": "¿Tu equipo odia a Legal?",
+    "h1": "Cómo organizar el trabajo legal para que no se convierta en un cuello de botella",
     "intro": ("Consejos prácticos para que tu equipo sepa qué contratos puede cerrar con condiciones ya aprobadas, "
               "cuándo conviene involucrar a un abogado en un proyecto y cómo aprovechar lo que ya negoció con un "
               "cliente para llegar mejor preparado al siguiente acuerdo"),
@@ -273,6 +273,8 @@ def render(url, content, title, description, nav="", logo="cuadrado",
         page = page.replace(key, val)
     if nav:
         page = page.replace(f'data-nav="{nav}"', f'data-nav="{nav}" aria-current="page"')
+    if url == "/":
+        page = page.replace("<body>", '<body class="is-home">', 1)
     dest = OUT / url.strip("/") / "index.html" if url != "/" else OUT / "index.html"
     if url.endswith(".html"):
         dest = OUT / url.strip("/")
@@ -399,7 +401,6 @@ def build_editorial(cfg, items):
     content = f'''
 <div class="page-head ed-head">
   <div class="wrap">
-    <div class="eyebrow">{cfg["label"]}</div>
     <h1>{cfg["h1"]}</h1>
     <p>{cfg["intro"]}.</p>
   </div>
@@ -837,7 +838,7 @@ def latest_block(all_items):
     <div class="section-head reveal">
       <h2>Lo último publicado</h2>
       <p>Artículos sobre cómo mejorar el trabajo legal, nuevas normas y asuntos de interés para tu empresa.
-      <br><a href="/notas/" style="color:var(--navy)">Ver «Cómo mejorar el trabajo legal»</a> · <a href="/novedades/" style="color:var(--navy)">Ver novedades</a></p>
+      <br><a href="/notas/" style="color:var(--navy)">Ver «¿Tu equipo odia a Legal?»</a> · <a href="/novedades/" style="color:var(--navy)">Ver novedades</a></p>
     </div>
     <div class="posts">{cards}</div>
   </div>

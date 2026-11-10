@@ -596,3 +596,33 @@ h1,h2{font-weight:700;letter-spacing:-.01em;color:var(--navy-ui)}
 }
 @media (prefers-reduced-motion:reduce){.faq-track{scroll-behavior:auto}}
 .faq-carousel{min-width:0}
+
+/* ----- Ajustes 10 nov (2): menú azul en la portada, pie y tarjetas de «Cómo trabajamos contigo» ----- */
+.is-home .hdr-top{border-bottom:0;margin-bottom:10px}
+.is-home .hdr-nav{background:var(--head-blue)}
+.is-home .hdr-nav .menu a{color:var(--white)}
+.is-home .hdr-nav .menu a:hover{color:#c9d6ea}
+.is-home .hdr-nav .menu a[aria-current="page"]{box-shadow:inset 0 -2px 0 var(--white)}
+.is-home .hdr-nav .btn.outline{background:transparent;border-color:var(--white);color:var(--white)}
+.is-home .hdr-nav .btn.outline:hover{background:var(--white);color:var(--head-blue)}
+.is-home .hdr-nav .submenu a{color:var(--navy-ui)}
+.is-home .hdr-nav .submenu a:hover{color:var(--navy-ui)}
+.is-home .site-header a:focus-visible,.is-home .site-header button:focus-visible{outline-color:var(--white)}
+.is-home .site-header .submenu a:focus-visible{outline-color:var(--link)}
+.is-home{--header-h:160px}
+.foot-txt{text-align:justify;text-justify:inter-word;hyphens:auto;-webkit-hyphens:auto}
+.how-item{background:#f6e9ef;border:1px solid #ead3de;border-radius:12px;padding:24px 28px}
+.how-grid{gap:20px}
+@media (max-width:1199px){
+  .is-home .hdr-top{margin-bottom:0}
+  .is-home{--header-h:81px}
+  .is-home .hdr-nav{background:transparent}
+  .is-home .hdr-nav .menu a{color:var(--navy-ui)}
+  .is-home .hdr-nav .menu a[aria-current="page"]{box-shadow:none}
+  .is-home .hdr-nav .menu .btn.outline{background:var(--navy-ui);border-color:var(--navy-ui);color:var(--white)}
+  .is-home .site-header .site-nav a:focus-visible{outline-color:var(--link)}
+}
+@media (max-width:900px){.how-grid{gap:14px}.how-item{padding:20px 22px}}
+.is-home .hdr-nav .sub-toggle{color:var(--white)}
+.is-home .hdr-top{margin-bottom:14px}
+@media (max-width:1199px){.is-home .hdr-top{margin-bottom:0}}
