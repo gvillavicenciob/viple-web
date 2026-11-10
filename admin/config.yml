@@ -11,6 +11,13 @@ backend:
     delete: "Borrar {{collection}}: {{slug}}"
     uploadMedia: "Subir imagen: {{path}}"
     deleteMedia: "Borrar imagen: {{path}}"
+  # Al publicar desde el flujo editorial, cada cambio entra a main como un solo commit
+  squash_merges: true
+
+# Flujo editorial: lo que guardas en el panel NO se publica. Cada entrada crea una rama y un
+# pull request en GitHub, Netlify genera una vista previa gratuita y solo al pulsar «Publicar»
+# el cambio pasa a main (un despliegue a producción).
+publish_mode: editorial_workflow
 
 locale: es
 
@@ -319,7 +326,7 @@ collections:
   - name: presentaciones
     label: Presentaciones especiales
     label_singular: Presentación
-    description: Presentaciones que ya preparaste sobre distintos temas. Cada una aparece en /presentaciones/ con su imagen, título y un resumen breve. Sube de preferencia la versión en PDF, porque se abre directamente en el navegador.
+    description: Presentaciones que ya preparaste, mostradas como diapositivas en imagen dentro de la web (no se ofrece ningún archivo para descargar). Exporta las diapositivas desde PowerPoint como imágenes JPG y súbelas en orden.
     folder: content/presentaciones
     create: true
     delete: true
@@ -340,21 +347,31 @@ collections:
         name: summary
         widget: text
         hint: Dos o tres líneas que expliquen de qué trata la presentación.
-      - label: Archivo de la presentación
-        name: file
-        widget: file
+      - label: Diapositivas
+        name: slides
+        widget: list
         required: false
-        hint: De preferencia en PDF (se abre en el navegador). Un PowerPoint se descarga en lugar de abrirse. Procura que pese menos de 20 MB.
-      - label: O enlace a la presentación
+        collapsed: true
+        add_to_top: false
+        label_singular: diapositiva
+        hint: Sube una imagen por diapositiva, en el orden en que deben verse (JPG, de preferencia de 1600 px de ancho y menos de 300 KB cada una). Puedes reordenarlas arrastrándolas.
+        field: { label: Imagen de la diapositiva, name: image, widget: image, choose_url: false }
+      - label: Texto que acompaña la presentación
+        name: body
+        widget: markdown
+        required: false
+        hint: Opcional, pero recomendado. Google no puede leer el texto dentro de las imágenes; un resumen o los puntos principales aquí ayudan a que te encuentren.
+      - label: O enlace a la presentación en otro sitio
         name: link
         widget: string
         required: false
-        hint: Opcional. Úsalo si la presentación está publicada en otro sitio (Google Slides, Canva, SlideShare…). Si subes un archivo, se usa el archivo.
-      - label: Imagen o portada
+        hint: Opcional. Solo si la presentación está publicada fuera de la web (por ejemplo, Canva). Si subiste diapositivas, se usan las diapositivas.
+      - label: Imagen de portada
         name: image
         widget: image
         required: false
-        hint: Opcional. Por ejemplo, una captura de la primera diapositiva. Si la dejas vacía, se muestra un ícono de presentación.
+        choose_url: false
+        hint: Opcional. Aparece en el listado. Si la dejas vacía, se usa la primera diapositiva.
       - label: Fecha
         name: date
         widget: datetime

@@ -91,8 +91,31 @@ Ya no tienes que arrastrar carpetas a Netlify: todo cambio en GitHub se publica 
 
 ## «Presentaciones especiales» desde el panel
 
-1. Entra a `/admin` y abre **Presentaciones especiales** → **Nueva Presentación**.
-2. Escribe el **Título** y un **Resumen** de dos o tres líneas.
-3. En **Archivo de la presentación** sube el PDF (se abre directamente en el navegador). Si subes un PowerPoint, el visitante lo descarga. Si la presentación está publicada en otro sitio (Google Slides, Canva…), pega su dirección en **O enlace a la presentación**.
-4. Opcional: en **Imagen o portada** sube una captura de la primera diapositiva. Si la dejas vacía, se muestra un ícono de presentación.
-5. Pulsa **Publicar**. En uno o dos minutos aparece en `/presentaciones/`, con las más recientes primero.
+Las presentaciones se muestran como diapositivas en imagen dentro de la web, con botones para avanzar y retroceder. No se ofrece ningún archivo para descargar.
+
+1. En PowerPoint: **Archivo → Exportar → Cambiar el tipo de archivo → JPEG**, guarda y elige **Todas las diapositivas**. Se crea una carpeta con una imagen por diapositiva.
+2. En `/admin` abre **Presentaciones especiales → Nueva Presentación**.
+3. Escribe el **Título** y el **Resumen**. En **Diapositivas** pulsa **Add diapositiva** y sube cada imagen en orden.
+4. Opcional: escribe el **Texto que acompaña la presentación** (ayuda a que Google la encuentre) y una **Imagen de portada**.
+5. Pulsa **Guardar**. Queda como borrador: no se publica (ver la sección siguiente).
+
+## Flujo editorial: revisar antes de publicar (sin gastar créditos)
+
+El panel está en modo editorial. **Guardar** no publica nada: crea una rama y un pull request en GitHub, y Netlify genera una vista previa gratuita (deploy preview). Solo **Publicar → Publicar ahora** lleva el cambio a la web y hace un despliegue a producción (15 créditos del plan Free).
+
+1. Guarda la entrada. Arriba aparece **Estado: Borrador**.
+2. Espera 1–3 minutos y pulsa **Ver vista previa** (o revisa *Deploys* en Netlify). La dirección es `https://deploy-preview-<número>--resplendent-sfogliatella-e4a742.netlify.app`.
+3. Si algo no te gusta, corrige y vuelve a **Guardar**: la vista previa se actualiza sin costo.
+4. Cuando esté bien, cambia el estado a **Listo** y pulsa **Publicar → Publicar ahora**.
+5. Para publicar varias entradas con un solo despliegue: en Netlify pon *Build settings → Build status → Stopped builds*, publica todo desde el panel, vuelve a activar las compilaciones y pulsa *Deploys → Trigger deploy → Deploy site*.
+
+## Ver la web en tu computadora (sin Netlify)
+
+En PowerShell, desde esta carpeta:
+
+```
+python build.py
+python -m http.server 8000 --directory _site
+```
+
+Abre http://localhost:8000/. Después de cada cambio vuelve a correr `python build.py` y recarga el navegador.

@@ -612,16 +612,21 @@ ICONO_PRES = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
               '<path d="M7 12l3-3 2 2 4-4"/></svg>')
 
 
+def pres_slides(it):
+    return [s for s in (it.get("slides") or []) if isinstance(s, str) and s.strip()]
+
+
 def pres_card(it):
-    destino = it.get("file") or it.get("link") or ""
-    img = (f'<img src="{esc(it["image"])}" alt="" loading="lazy">' if it.get("image") else ICONO_PRES)
-    ext = destino.rsplit(".", 1)[-1].lower() if it.get("file") and "." in destino else ""
-    accion = {"pdf": "Ver presentación (PDF)", "ppt": "Descargar presentación", "pptx": "Descargar presentación"}.get(ext, "Ver presentación")
+    slides = pres_slides(it)
+    portada = it.get("image") or (slides[0] if slides else "")
+    img = f'<img src="{esc(portada)}" alt="" loading="lazy">' if portada else ICONO_PRES
     tag, attrs, more = "div", "", ""
-    if destino:
-        tag = "a"
-        attrs = f' href="{esc(destino)}" target="_blank" rel="noopener"'
-        more = f'<span class="pres-more">{accion} <span aria-hidden="true">→</span></span>'
+    if slides:
+        tag, attrs = "a", f' href="{it["url"]}"'
+    elif it.get("link"):
+        tag, attrs = "a", f' href="{esc(it["link"])}" target="_blank" rel="noopener"'
+    if tag == "a":
+        more = '<span class="pres-more">Ver presentación <span aria-hidden="true">→</span></span>'
     return f'''<li><{tag} class="pres-card"{attrs}>
       <div class="pres-img">{img}</div>
       <div class="pres-txt">
@@ -630,6 +635,41 @@ def pres_card(it):
         {more}
       </div>
     </{tag}></li>'''
+
+
+def render_presentacion(it):
+    slides = pres_slides(it)
+    n = len(slides)
+    figs = ""
+    for i, s in enumerate(slides, 1):
+        lazy = "" if i == 1 else ' loading="lazy"'
+        figs += (f'<figure class="slide"><img src="{esc(s)}" alt="Diapositiva {i} de {n}: {esc(it.get("title"))}"'
+                 f'{lazy} draggable="false"></figure>')
+    nav = ('<div class="slides-nav"><button type="button" data-prev aria-label="Diapositiva anterior">←</button>'
+           f'<span data-count aria-live="polite">1 / {n}</span>'
+           '<button type="button" data-next aria-label="Diapositiva siguiente">→</button></div>') if n > 1 else ""
+    body = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
+    texto = f'<div class="prose pres-body">{body}</div>' if body.strip() else ""
+    content = f'''
+<div class="page-head">
+  <div class="wrap">
+    <div class="crumbs"><a href="/presentaciones/">{PRESENTACIONES["h1"]}</a></div>
+    <h1>{esc(it.get("title"))}</h1>
+    <p>{esc(it.get("summary"))}</p>
+  </div>
+</div>
+<section class="pres-view">
+  <div class="wrap">
+    <div class="slides" data-slides>
+      <div class="slides-track" tabindex="0" role="region" aria-label="Diapositivas de la presentación">{figs}</div>
+      {nav}
+    </div>
+    {texto}
+    <a class="back" href="/presentaciones/">← Ver todas las presentaciones</a>
+  </div>
+</section>'''
+    render(it["url"], content, f'{it.get("title")} | Viple Consultores', it.get("summary") or PRESENTACIONES["intro"],
+           nav="presentaciones", og_image=it.get("image") or slides[0])
 
 
 def build_presentaciones(items):
@@ -648,6 +688,9 @@ def build_presentaciones(items):
   </div>
 </section>'''
     render("/presentaciones/", content, f'{cfg["h1"]} | Viple Consultores', cfg["intro"], nav="presentaciones")
+    for it in items:
+        if pres_slides(it):
+            render_presentacion(it)
 
 
 # ---------- Bloque «lo último» del inicio ----------

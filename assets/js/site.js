@@ -95,6 +95,33 @@
     apply();
   }
 
+  // Visor de diapositivas (Presentaciones especiales)
+  document.querySelectorAll('[data-slides]').forEach(function (box) {
+    var track = box.querySelector('.slides-track');
+    var prev = box.querySelector('[data-prev]');
+    var next = box.querySelector('[data-next]');
+    var count = box.querySelector('[data-count]');
+    var total = track.children.length;
+    var current = function () { return track.clientWidth ? Math.round(track.scrollLeft / track.clientWidth) : 0; };
+    var go = function (i) { track.scrollLeft = Math.max(0, Math.min(total - 1, i)) * track.clientWidth; update(); };
+    var update = function () {
+      var i = current();
+      if (count) count.textContent = (i + 1) + ' / ' + total;
+      if (prev) prev.disabled = i <= 0;
+      if (next) next.disabled = i >= total - 1;
+    };
+    if (prev) prev.addEventListener('click', function () { go(current() - 1); });
+    if (next) next.addEventListener('click', function () { go(current() + 1); });
+    track.addEventListener('scroll', function () { window.requestAnimationFrame(update); });
+    track.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(current() + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(current() - 1); }
+    });
+    // Sin menú contextual sobre las diapositivas (no impide una captura de pantalla, pero evita «Guardar imagen»)
+    box.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    update();
+  });
+
   // Botón «Copiar enlace» de los artículos
   document.querySelectorAll('[data-copy]').forEach(function (b) {
     b.addEventListener('click', function () {
