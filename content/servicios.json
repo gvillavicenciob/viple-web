@@ -2,29 +2,59 @@
   "servicios": [
     {
       "slug": "estructura-empresarial",
-      "name": "Asesoría legal en estructura empresarial, acuerdos entre socios e inversión",
-      "menu": "Socios, estructura e inversión",
-      "summary": "Ordenamos la estructura de tu empresa, la relación entre socios y los procesos de inversión para que crezca sobre una base legal sólida."
+      "name": "Estructuramos tu negocio",
+      "menu": "Estructuramos tu negocio",
+      "summary": "Ordenamos la estructura de tu empresa, la relación entre socios y los procesos de inversión para que crezca sobre una base legal sólida.",
+      "preguntas": [
+        { "pregunta": "¿Qué conviene acordar antes de incorporar un nuevo socio?" },
+        { "pregunta": "¿Cuándo conviene revisar los poderes de la empresa?" }
+      ]
     },
     {
       "slug": "contratos",
       "name": "Contratos que funcionan en la práctica",
-      "summary": "Elaboramos, revisamos y negociamos contratos claros y fáciles de ejecutar, que protegen a la empresa sin frenar su actividad comercial."
+      "summary": "Elaboramos, revisamos y negociamos contratos claros y fáciles de ejecutar, que protegen a la empresa sin frenar su actividad comercial.",
+      "preguntas": [
+        { "pregunta": "¿Qué reviso antes de firmar un contrato que me enviaron?" },
+        { "pregunta": "¿Qué conviene acordar cuando cambia el alcance de un servicio?" }
+      ]
     },
     {
       "slug": "proteccion-de-datos",
       "name": "Protección de datos personales",
-      "summary": "Incorporamos el cumplimiento de protección de datos en la operación diaria y actuamos como tu Oficial de Datos Personales externo."
+      "summary": "Incorporamos el cumplimiento de protección de datos en la operación diaria y actuamos como tu Oficial de Datos Personales externo.",
+      "preguntas": [
+        { "pregunta": "¿Qué debo revisar antes de compartir datos con un proveedor?" },
+        { "pregunta": "¿Cómo puede mi equipo atender una solicitud sobre datos personales?" },
+        { "pregunta": "¿Puedo enviar promociones por WhatsApp a mis clientes?" }
+      ]
     },
     {
       "slug": "reclamos-y-denuncias",
       "name": "Prácticas comerciales y reclamos",
-      "summary": "Revisamos tus prácticas comerciales para prevenir contingencias y te acompañamos en la atención y defensa frente a reclamos y denuncias."
+      "summary": "Revisamos tus prácticas comerciales para prevenir contingencias y te acompañamos en la atención y defensa frente a reclamos y denuncias.",
+      "preguntas": [
+        { "pregunta": "¿Qué conviene revisar antes de lanzar una promoción?" },
+        { "pregunta": "¿Cómo organizar una respuesta a un reclamo de un cliente?" }
+      ]
     },
     {
       "slug": "herramientas-legales",
       "name": "Diseño de herramientas legales",
-      "summary": "Desarrollamos contratos modelo, playbooks y guías que estandarizan criterios, ordenan procesos y facilitan el trabajo interno."
+      "summary": "Desarrollamos contratos modelo, playbooks y guías que estandarizan criterios, ordenan procesos y facilitan el trabajo interno.",
+      "preguntas": [
+        { "pregunta": "¿Cuándo conviene convertir una tarea recurrente en una guía?" },
+        { "pregunta": "¿Qué necesita un contrato modelo para que el equipo pueda usarlo?" }
+      ]
+    },
+    {
+      "slug": "protegemos-tu-inversion",
+      "name": "Protegemos tu inversión",
+      "summary": "Asesoría legal para personas que invierten en fondos privados o empresas inmobiliarias, antes de comprometer su dinero y durante la inversión.",
+      "preguntas": [
+        { "pregunta": "¿Qué documentos conviene revisar antes de invertir en un fondo privado?" },
+        { "pregunta": "¿Qué debo revisar si una inmobiliaria propone ampliar el plazo de pago?" }
+      ]
     }
   ]
 }

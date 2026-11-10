@@ -9,7 +9,7 @@
 | `assets/` | Estilos, logos, foto e imágenes subidas desde el panel. |
 | `admin/` | El panel de administración (`/admin`). |
 | `content/notas`, `content/dudas`, `content/temas-dudas`, `content/novedades` | Lo que crees desde el panel en «¿Tu equipo odia a Legal?», «¿Tienes preguntas?», «¿Tienes preguntas? · Temas» y «Novedades» (se llenan solos). |
-| `content/servicios.json` | Nombres y descripciones breves de los cinco servicios (menú, portada y /servicios/). |
+| `content/servicios.json` | Nombres, descripciones breves y preguntas frecuentes de los seis servicios (menú, portada, carrusel «¿Tienes preguntas?» y /servicios/). |
 | `build.py`, `netlify.toml`, `requirements.txt` | Instrucciones para que Netlify arme el sitio. No hace falta tocarlos. |
 | `_site/` | El sitio ya armado, generado automáticamente. **No subirlo a GitHub.** |
 

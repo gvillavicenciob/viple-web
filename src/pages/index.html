@@ -1,24 +1,26 @@
-<!--{"title": "Viple Consultores | Asesoría legal para empresas · Legal & Compliance", "description": "Viple Consultores: asesoría legal práctica para empresas en estructura y crecimiento del negocio, contratos, protección de datos personales, prácticas comerciales y reclamos, y herramientas legales.", "nav": "inicio"}-->
+<!--{"title": "Viple Consultores | Asesoría legal para empresas · Legal & Compliance", "description": "Viple Consultores: asesoría legal alineada con la operación real de tu negocio. Estructura empresarial, contratos, protección de datos personales, prácticas comerciales y reclamos, herramientas legales y protección de tu inversión.", "nav": "inicio"}-->
 
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://vipleconsultores.com/#organization","name":"Viple Consultores","alternateName":"Viple Consultores · Legal & Compliance","url":"https://vipleconsultores.com/","logo":"https://vipleconsultores.com/assets/img/logo-cuadrado.png","email":"gabriel@vipleconsultores.com","telephone":"+51 907 498 580","address":{"@type":"PostalAddress","addressLocality":"Lima","addressCountry":"PE"},"sameAs":["https://www.linkedin.com/company/viple-consultores/"]},{"@type":"WebSite","@id":"https://vipleconsultores.com/#website","name":"Viple Consultores","url":"https://vipleconsultores.com/","inLanguage":"es","publisher":{"@id":"https://vipleconsultores.com/#organization"}}]}</script>
 
-<section class="home-intro">
-  <div class="wrap intro-grid">
-    <div class="intro-text">
-      <h1>¿Cómo te podemos ayudar?</h1>
-      <p>En Viple partimos de lo que necesitas hacer y de cómo funciona tu negocio para darte asesoría legal que puedas aplicar en el día a día.</p>
+<section class="home-hero">
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+      <h1>Asesoría legal alineada con la operación real de tu negocio</h1>
+      <p class="hero-sub">Parte de tu equipo</p>
     </div>
-    <div class="intro-art">
+    <div class="hero-art">
       <img src="/assets/img/portada-ilustracion.jpg" alt="Ilustración: dos personas revisan juntas un documento en una mesa de trabajo" width="1440" height="754" fetchpriority="high">
     </div>
-    <div class="intro-cards">
-      <a class="choice" href="/servicios/">
-        <span class="choice-title">Sé qué quiero hacer y busco un abogado que entienda mi negocio</span>
-        <span class="choice-link">Explorar cómo te podemos ayudar <span aria-hidden="true">→</span></span>
+    <div class="hero-cards">
+      <a class="hero-card hc-light" href="/servicios/">
+        <span class="hc-ico">{{icon:grid}}</span>
+        <span class="hc-title">Quiero explorar los servicios</span>
+        <span class="hc-chev">{{icon:chevron}}</span>
       </a>
-      <a class="choice" href="/dudas/">
-        <span class="choice-title">Quiero saber qué hacer en mi situación</span>
-        <span class="choice-link">Respuestas a preguntas frecuentes que te pueden ayudar a tomar una decisión <span aria-hidden="true">→</span></span>
+      <a class="hero-card hc-dark" href="/dudas/">
+        <span class="hc-ico">{{icon:book}}</span>
+        <span class="hc-title">Quiero saber qué hacer en mi situación</span>
+        <span class="hc-chev">{{icon:chevron}}</span>
       </a>
     </div>
   </div>
@@ -26,15 +28,15 @@
 
 <section class="home-svc">
   <div class="wrap">
-    <div class="section-head svc-head reveal">
+    <div class="svc-intro">
       <h2>Lo que podemos hacer por ti</h2>
-      <p>Acompañamiento legal pensado para proteger el negocio sin frenar su actividad comercial: claro, ágil y útil en el día a día.</p>
+      <p>Acompañamiento legal pensado para proteger tu negocio sin frenar su actividad comercial.</p>
     </div>
-    <h3 class="svc-sub">Nuestros servicios</h3>
+    <p class="pill-label">Nuestros servicios</p>
     {{svc_panels}}
   </div>
 </section>
 
-{{dudas_home}}
+{{preguntas_carrusel}}
 
 {{latest}}

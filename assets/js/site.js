@@ -122,6 +122,38 @@
     update();
   });
 
+  // Carrusel «¿Tienes preguntas?» de la portada (una diapositiva por servicio)
+  document.querySelectorAll('[data-carousel]').forEach(function (box) {
+    var track = box.querySelector('.faq-track');
+    var prev = box.querySelector('[data-prev]');
+    var next = box.querySelector('[data-next]');
+    var dots = box.querySelectorAll('[data-dot]');
+    var total = track.children.length;
+    var pos = 0, timer;
+    var current = function () { return pos; };
+    var go = function (i) { pos = Math.max(0, Math.min(total - 1, i)); track.scrollLeft = pos * track.clientWidth; update(); };
+    // Al deslizar con el dedo o el trackpad, la posición se toma cuando termina el desplazamiento
+    track.addEventListener('scroll', function () {
+      clearTimeout(timer);
+      timer = setTimeout(function () { if (track.clientWidth) { pos = Math.round(track.scrollLeft / track.clientWidth); update(); } }, 150);
+    });
+    var update = function () {
+      var i = pos;
+      if (prev) prev.disabled = i <= 0;
+      if (next) next.disabled = i >= total - 1;
+      dots.forEach(function (d, n) { d.setAttribute('aria-current', n === i ? 'true' : 'false'); });
+    };
+    if (prev) prev.addEventListener('click', function () { go(current() - 1); });
+    if (next) next.addEventListener('click', function () { go(current() + 1); });
+    dots.forEach(function (d) { d.addEventListener('click', function () { go(+d.getAttribute('data-dot')); }); });
+    track.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(current() + 1); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(current() - 1); }
+    });
+    window.addEventListener('resize', function () { go(pos); });
+    update();
+  });
+
   // Botón «Copiar enlace» de los artículos
   document.querySelectorAll('[data-copy]').forEach(function (b) {
     b.addEventListener('click', function () {

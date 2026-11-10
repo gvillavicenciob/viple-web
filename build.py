@@ -93,8 +93,59 @@ def minutos_lectura(texto):
 
 def brand(logo=None):
     return ('<a class="brand" href="/" aria-label="Viple Consultores – Inicio">'
-            '<img src="/assets/img/logo-cuadrado.png" alt="Viple Consultores · Legal &amp; Compliance" '
-            'width="500" height="500"></a>')
+            '<img src="/assets/img/logo-viple-horizontal.png" alt="Viple Consultores · Legal &amp; Compliance" '
+            'width="349" height="212"></a>')
+
+
+# ---------- Íconos (trazo simple, heredan el color del texto) ----------
+# En las páginas se usan como {{icon:nombre}}
+
+ICONS = {
+    "building": '<path d="M4 21V5.5l8-3 8 3V21"/><path d="M2 21h20"/><path d="M8.5 9h1.5M14 9h1.5M8.5 13h1.5M14 13h1.5"/><path d="M10 21v-4h4v4"/>',
+    "doc-pen": '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h5.5"/><path d="M14 3l5 5h-5z"/><path d="M8 11h6M8 15h3.5"/><path d="M19 13l2 2-6.5 6.5H12.5v-2z"/>',
+    "doc-search": '<path d="M13 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h5"/><path d="M13 3l5 5h-5z"/><path d="M8 11h5M8 15h2.5"/><circle cx="16.5" cy="16.5" r="3"/><path d="M18.7 18.7 21 21"/>',
+    "doc-check": '<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/>',
+    "shield-lock": '<path d="M12 2.5l8 3v5.8c0 4.9-3.4 8.8-8 10.7-4.6-1.9-8-5.8-8-10.7V5.5z"/><rect x="9" y="11" width="6" height="5" rx="1"/><path d="M10.2 11V9.6a1.8 1.8 0 0 1 3.6 0V11"/>',
+    "shield-check": '<path d="M12 2.5l8 3v5.8c0 4.9-3.4 8.8-8 10.7-4.6-1.9-8-5.8-8-10.7V5.5z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+    "megaphone": '<path d="M3 10v4a1 1 0 0 0 1 1h3l9 5V4L7 9H4a1 1 0 0 0-1 1z"/><path d="M7 15l1.5 5H11l-1.5-5"/><path d="M19 9.5a3 3 0 0 1 0 5"/>',
+    "tools": '<rect x="3" y="8" width="18" height="12" rx="1.5"/><path d="M9 8V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V8"/><path d="M3 13h18"/><path d="M10 12v3h4v-3"/>',
+    "trend": '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/><path d="M15 8h5v5"/>',
+    "grid": '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
+    "book": '<path d="M12 6.5C10 5 7 4.5 3 5v14c4-.5 7 0 9 1.5 2-1.5 5-2 9-1.5V5c-4-.5-7 0-9 1.5z"/><path d="M12 6.5v14"/>',
+    "users": '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17.5 14c2.4.2 4 2 4 4.5"/>',
+    "refresh": '<path d="M20 11a8 8 0 0 0-14.5-4.5L3 9"/><path d="M3 4v5h5"/><path d="M4 13a8 8 0 0 0 14.5 4.5L21 15"/><path d="M21 20v-5h-5"/>',
+    "layers": '<path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5"/><path d="M3 16.5 12 21l9-4.5"/>',
+    "database": '<ellipse cx="12" cy="5.5" rx="7.5" ry="2.5"/><path d="M4.5 5.5v13c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5v-13"/><path d="M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/>',
+    "clipboard": '<rect x="5" y="4" width="14" height="17" rx="1.5"/><path d="M9 3h6v3H9z"/><path d="M8.5 10.5h7M8.5 14h7M8.5 17.5h4"/>',
+    "bell": '<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20.5a2 2 0 0 0 4 0"/>',
+    "user-shield": '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6 1.3 0 2.5.3 3.5.9"/><path d="M18 13l3.5 1.3v2.5c0 2.2-1.5 3.9-3.5 4.7-2-.8-3.5-2.5-3.5-4.7v-2.5z"/>',
+    "tag": '<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+    "headset": '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4" height="6" rx="1.5"/><rect x="17" y="13" width="4" height="6" rx="1.5"/><path d="M19 19v.5a2.5 2.5 0 0 1-2.5 2.5H13"/>',
+    "scale": '<path d="M12 3v18M7 21h10M5 7h14"/><path d="M5 7l-3 7a3 3 0 0 0 6 0z"/><path d="M19 7l-3 7a3 3 0 0 0 6 0z"/>',
+    "checklist": '<path d="M10 6h11M10 12h11M10 18h11"/><path d="M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/>',
+    "approve": '<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/>',
+    "bulb": '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2v.1h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
+    "alert": '<path d="M12 3.5 21.5 20h-19z"/><path d="M12 10v4.5"/><path d="M12 17.5h.01"/>',
+    "chevron": '<path d="M9 5l7 7-7 7"/>',
+    "arrow-left": '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+    "arrow-right": '<path d="M5 12h14M13 6l6 6-6 6"/>',
+}
+
+# Ícono de cada servicio (por su dirección); si falta, se usa el de documento
+SVC_ICONS = {
+    "estructura-empresarial": "building",
+    "contratos": "doc-pen",
+    "proteccion-de-datos": "shield-lock",
+    "reclamos-y-denuncias": "megaphone",
+    "herramientas-legales": "tools",
+    "protegemos-tu-inversion": "trend",
+}
+
+
+def icon(name, cls="ico-svg"):
+    return (f'<svg class="{cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+            f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'
+            f'{ICONS.get(name, ICONS["doc-check"])}</svg>')
 
 
 # ---------- Servicios (fuente única: content/servicios.json) ----------
@@ -107,19 +158,101 @@ def svc_menu():
                      for s in SERVICIOS)
 
 
-def svc_panels():
-    rows = "".join(f'''<a class="svc-panel" href="/servicios/{s["slug"]}/">
-        <span class="num">{i:02d}</span>
-        <div class="svc-txt"><h3>{esc(s["name"])}</h3><span>{esc(s["summary"])}</span></div>
-        <span class="more">Ver servicio →</span>
-      </a>''' for i, s in enumerate(SERVICIOS, 1))
-    return f'<div class="svc-panels">{rows}</div>'
+def svc_panels(summary=False):
+    cards = ""
+    for s in SERVICIOS:
+        resumen = f'<span class="svc-sum">{esc(s["summary"])}</span>' if summary else ""
+        cards += f"""<a class="svc-card" href="/servicios/{s["slug"]}/">
+        <span class="svc-ico">{icon(SVC_ICONS.get(s["slug"], "doc-check"))}</span>
+        <span class="svc-txt"><span class="svc-name">{esc(s["name"])}</span>{resumen}</span>
+        <span class="svc-chev">{icon("chevron")}</span>
+      </a>"""
+    return f'<div class="svc-cards{" with-sum" if summary else ""}">{cards}</div>'
+
+
+# Enlaces de las preguntas: a la respuesta elegida en el panel (si existe) o a «¿Tienes preguntas?»
+DUDAS_SLUGS = set()
+
+
+def pregunta_url(p):
+    slug = str(p.get("respuesta") or "").strip()
+    return f"/dudas/{slug}/" if slug in DUDAS_SLUGS else "/dudas/"
+
+
+def preguntas_de(s):
+    return [p for p in (s.get("preguntas") or []) if isinstance(p, dict) and str(p.get("pregunta") or "").strip()]
+
+
+def pregunta_items(s):
+    return "".join(f'<li><a href="{pregunta_url(p)}"><span>{esc(p["pregunta"])}</span>{icon("arrow-right", "q-arrow")}</a></li>'
+                   for p in preguntas_de(s))
+
+
+def svc_preguntas(slug):
+    s = next((x for x in SERVICIOS if x["slug"] == slug), None)
+    if not s or not preguntas_de(s):
+        return ""
+    return f"""<div class="rel-q">
+      <h2>Preguntas relacionadas</h2>
+      <ul>{pregunta_items(s)}</ul>
+    </div>"""
+
+
+def svc_nav(slug):
+    i = next((n for n, x in enumerate(SERVICIOS) if x["slug"] == slug), None)
+    if i is None:
+        return ""
+    links = ""
+    if i > 0:
+        a = SERVICIOS[i - 1]
+        links += f'<a class="prev" href="/servicios/{a["slug"]}/"><small>← Anterior</small>{esc(a["name"])}</a>'
+    if i < len(SERVICIOS) - 1:
+        b = SERVICIOS[i + 1]
+        links += f'<a class="next" href="/servicios/{b["slug"]}/"><small>Siguiente →</small>{esc(b["name"])}</a>'
+    return f'<div class="wrap"><nav class="svc-nav" aria-label="Otros servicios">{links}</nav></div>'
+
+
+def preguntas_carrusel():
+    con = [s for s in SERVICIOS if preguntas_de(s)]
+    if not con:
+        return ""
+    n = len(con)
+    slides = ""
+    for i, s in enumerate(con, 1):
+        slides += f"""<div class="faq-slide" role="group" aria-roledescription="diapositiva" aria-label="{i} de {n}: {esc(s["name"])}">
+          <a class="faq-svc" href="/servicios/{s["slug"]}/">{icon(SVC_ICONS.get(s["slug"], "doc-check"))}<span>{esc(s["name"])}</span></a>
+          <ul class="faq-q">{pregunta_items(s)}</ul>
+        </div>"""
+    dots = "".join(f'<button type="button" data-dot="{i}" aria-label="Ver preguntas de {esc(s["name"])}"></button>'
+                   for i, s in enumerate(con))
+    return f"""<section class="home-faq">
+  <div class="wrap faq-grid">
+    <div class="faq-head">
+      <h2>¿Tienes preguntas?</h2>
+      <p>Preguntas frecuentes sobre cada uno de nuestros servicios.</p>
+      <a class="faq-all" href="/dudas/">Ver todas las preguntas <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="faq-carousel" data-carousel>
+      <div class="faq-track" tabindex="0" role="region" aria-roledescription="carrusel" aria-label="Preguntas por servicio">{slides}</div>
+      <div class="faq-nav">
+        <button type="button" class="faq-arrow" data-prev aria-label="Servicio anterior">{icon("arrow-left")}</button>
+        <div class="faq-dots">{dots}</div>
+        <button type="button" class="faq-arrow" data-next aria-label="Servicio siguiente">{icon("arrow-right")}</button>
+      </div>
+    </div>
+  </div>
+</section>"""
 
 
 def fill_services(text):
     text = text.replace("{{svc_panels}}", svc_panels())
+    text = text.replace("{{svc_panels_sum}}", svc_panels(summary=True))
+    text = text.replace("{{preguntas_carrusel}}", preguntas_carrusel())
     for s in SERVICIOS:
         text = text.replace("{{svc:" + s["slug"] + "}}", esc(s["name"]))
+        text = text.replace("{{svc_preguntas:" + s["slug"] + "}}", svc_preguntas(s["slug"]))
+        text = text.replace("{{svc_nav:" + s["slug"] + "}}", svc_nav(s["slug"]))
+    text = re.sub(r"\{\{icon:([a-z0-9-]+)\}\}", lambda m: icon(m.group(1)), text)
     return text
 
 
@@ -724,6 +857,7 @@ def main():
     novedades = load_items("novedades")
     temas = load_temas()
     dudas = prep_dudas(load_items("dudas"), temas)
+    DUDAS_SLUGS.update(d["slug"] for d in dudas)
     everything = sorted(ideas + novedades, key=lambda d: d["date"], reverse=True)
 
     for path in sorted((SRC / "pages").rglob("*.html")):

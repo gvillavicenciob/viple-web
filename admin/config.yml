@@ -49,12 +49,30 @@ collections:
             widget: list
             allow_add: false
             summary: "{{fields.name}}"
-            hint: Cambia nombres o descripciones. No agregues ni quites servicios desde aquí (cada uno tiene su propia página).
+            hint: Cambia nombres, descripciones y preguntas frecuentes. No agregues ni quites servicios desde aquí (cada uno tiene su propia página).
             fields:
               - { label: Dirección de la página (no cambiar), name: slug, widget: hidden }
               - { label: Nombre, name: name, widget: string, hint: "Título completo: se usa en la página del servicio, la portada y /servicios/." }
               - { label: Nombre corto para el menú, name: menu, widget: string, required: false, hint: "Opcional. Si lo dejas vacío, el menú desplegable usa el nombre completo." }
               - { label: Descripción breve, name: summary, widget: text }
+              - label: Preguntas frecuentes de este servicio
+                name: preguntas
+                widget: list
+                required: false
+                summary: "{{fields.pregunta}}"
+                label_singular: pregunta
+                hint: "Se muestran en el carrusel «¿Tienes preguntas?» de la portada y en «Preguntas relacionadas» de la página del servicio. Recomendado: 2 o 3 por servicio. Puedes reordenarlas arrastrándolas."
+                fields:
+                  - { label: Pregunta, name: pregunta, widget: string }
+                  - label: Respuesta publicada (opcional)
+                    name: respuesta
+                    widget: relation
+                    collection: dudas
+                    value_field: "{{slug}}"
+                    search_fields: [title]
+                    display_fields: [title]
+                    required: false
+                    hint: "Si eliges una respuesta de «¿Tienes preguntas?», el enlace lleva directo a ella. Si la dejas vacía, lleva a la página «¿Tienes preguntas?»."
 
   # ---------------- ¿TIENES PREGUNTAS? (dudas) ----------------
   # (content/dudas, se publican en /dudas/<archivo>/; el enlace no cambia aunque edites el título)
