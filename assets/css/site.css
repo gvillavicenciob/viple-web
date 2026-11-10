@@ -626,3 +626,34 @@ h1,h2{font-weight:700;letter-spacing:-.01em;color:var(--navy-ui)}
 .is-home .hdr-nav .sub-toggle{color:var(--white)}
 .is-home .hdr-top{margin-bottom:14px}
 @media (max-width:1199px){.is-home .hdr-top{margin-bottom:0}}
+
+/* ----- Ajustes 10 nov (3): tarjetas uniformes, textos justificados sin cortar palabras ----- */
+/* Nunca se cortan palabras con guion: si no cabe, la palabra completa pasa a la línea siguiente */
+*{hyphens:manual !important;-webkit-hyphens:manual !important}
+:root{--card-py:24px;--card-px:28px}
+
+/* Mismo relleno interior en todas las tarjetas */
+.hero-card,.svc-card,.sit-name,.sit-desc,.how-item,.faq-slide,.rel-q,.svc-cta,
+.dd-item a,.ed-card,.pres-card{padding:var(--card-py) var(--card-px)}
+
+/* Textos de las tarjetas y de las franjas azules: justificados */
+.sit-desc p,.how-item p,.svc-card .svc-sum,.dd-item p,.ed-card p,.pres-txt p,.post-card p,
+.svc-hero p,.page-head p,.ed-featured p,.faq-head p,.svc-intro p,.foot-txt{
+  text-align:justify;text-justify:inter-word;text-wrap:pretty}
+.sit-desc p,.how-item p{width:100%}
+
+/* Menos espacio antes de «Cómo trabajamos contigo» (de 80 px a 40 px) */
+.svc-sit{padding-bottom:20px}
+.svc-how{padding-top:20px}
+
+/* Franjas azules con título a la izquierda y descripción a la derecha */
+.svc-hero--split h1,.head-split h1{font-size:clamp(1.9rem,3.2vw,2.8rem);line-height:1.12;max-width:none}
+.svc-hero--split p,.head-split p{max-width:none;margin-top:0}
+.head-split .wrap{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:48px;align-items:center}
+
+@media (max-width:900px){
+  :root{--card-py:20px;--card-px:22px}
+  .head-split .wrap{grid-template-columns:1fr;gap:16px}
+  .svc-sit{padding-bottom:16px}
+  .svc-how{padding-top:16px}
+}
