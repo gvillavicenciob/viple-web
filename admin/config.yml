@@ -32,12 +32,168 @@ media_folder: assets/uploads
 public_folder: /assets/uploads
 
 collections:
-  # ---------------- CÓMO MEJORAR EL TRABAJO LEGAL ----------------
+  # ---------------- SERVICIOS ----------------
+  # Nombres y descripciones breves que se muestran en el menú, la portada y /servicios/.
+  - name: servicios
+    label: Nuestros servicios
+    delete: false
+    editor:
+      preview: false
+    files:
+      - label: Listado de servicios
+        name: listado
+        file: content/servicios.json
+        fields:
+          - label: Servicios
+            name: servicios
+            widget: list
+            allow_add: false
+            summary: "{{fields.name}}"
+            hint: Cambia nombres o descripciones. No agregues ni quites servicios desde aquí (cada uno tiene su propia página).
+            fields:
+              - { label: Dirección de la página (no cambiar), name: slug, widget: hidden }
+              - { label: Nombre, name: name, widget: string, hint: "Título completo: se usa en la página del servicio, la portada y /servicios/." }
+              - { label: Nombre corto para el menú, name: menu, widget: string, required: false, hint: "Opcional. Si lo dejas vacío, el menú desplegable usa el nombre completo." }
+              - { label: Descripción breve, name: summary, widget: text }
+
+  # ---------------- ¿TIENES PREGUNTAS? (dudas) ----------------
+  # (content/dudas, se publican en /dudas/<archivo>/; el enlace no cambia aunque edites el título)
+  - name: dudas
+    label: ¿Tienes preguntas?
+    label_singular: Pregunta
+    description: Preguntas y respuestas de «¿Tienes preguntas?» del menú (/dudas/). Puedes escribir la respuesta o pegarla desde Word.
+    folder: content/dudas
+    create: true
+    delete: true
+    extension: json
+    format: json
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    preview_path: "dudas/{{slug}}"
+    summary: "{{title}} · {{audience}} · {{topic}}"
+    sortable_fields: [date, title]
+    view_filters:
+      - label: Borradores
+        field: draft
+        pattern: true
+      - label: Destacadas en la portada
+        field: featured_home
+        pattern: true
+      - label: Para personas
+        field: audience
+        pattern: personas
+      - label: Para negocios
+        field: audience
+        pattern: negocios
+      - label: Para ambos
+        field: audience
+        pattern: ambos
+    view_groups:
+      - label: Tema
+        field: topic
+      - label: Público
+        field: audience
+    fields:
+      - label: Título o pregunta
+        name: title
+        widget: string
+      - label: ¿A quién le sirve esta nota?
+        name: audience
+        widget: select
+        options:
+          - { label: Personas, value: personas }
+          - { label: Negocios, value: negocios }
+          - { label: Ambos, value: ambos }
+      - label: Tema
+        name: topic
+        widget: relation
+        collection: temas_dudas
+        value_field: id
+        search_fields: [name]
+        display_fields: [name]
+        options_length: 100
+        hint: Si el tema que necesitas no existe, créalo en «¿Tienes preguntas? · Temas» y vuelve aquí.
+      - label: Respuesta
+        name: body
+        widget: markdown
+        hint: Puedes escribir aquí o copiar y pegar desde Word; luego revisa títulos, listas y negritas con la barra de formato.
+      - label: Resumen
+        name: summary
+        widget: text
+        required: false
+        hint: Una o dos líneas para la tarjeta del listado. Si lo dejas vacío, se usa el inicio de la respuesta.
+      - label: Archivo de apoyo
+        name: attachment
+        widget: file
+        required: false
+        hint: Por ejemplo, el Word o PDF original o un modelo descargable. Aparece como enlace al final de la respuesta.
+      - label: Destacar en la portada
+        name: featured_home
+        widget: boolean
+        default: false
+        required: false
+        hint: La portada muestra hasta 3 notas destacadas (las más recientes). Si no destacas ninguna, muestra las 3 últimas publicadas.
+      - label: Fecha
+        name: date
+        widget: datetime
+        date_format: DD/MM/YYYY
+        time_format: false
+        format: YYYY-MM-DD
+        picker_utc: true
+        required: false
+        hint: Si la dejas vacía, se usa la fecha en que creaste la entrada.
+      - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
+      - label: Fuentes
+        name: sources
+        widget: list
+        required: false
+        summary: "{{fields.title}}"
+        hint: Opcional. Normas, resoluciones o artículos citados.
+        fields:
+          - { label: Nombre de la fuente, name: title, widget: string }
+          - { label: Enlace (https://…), name: url, widget: string, required: false }
+      - label: Borrador (no publicar todavía)
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+
+  # ---------------- ¿TIENES PREGUNTAS? · TEMAS ----------------
+  # (content/temas-dudas). Cada nota de dudas se asocia a un tema por su identificador.
+  - name: temas_dudas
+    label: ¿Tienes preguntas? · Temas
+    label_singular: Tema
+    description: Temas para filtrar las preguntas de «¿Tienes preguntas?» del menú (/dudas/). En la web solo aparecen los temas que tienen al menos una nota publicada. Puedes cambiar el nombre visible y el orden cuando quieras; el identificador no se cambia.
+    folder: content/temas-dudas
+    create: true
+    delete: true
+    extension: json
+    format: json
+    identifier_field: name
+    slug: "{{id}}"
+    summary: "{{order}} · {{name}}"
+    sortable_fields: [order, name]
+    fields:
+      - label: Nombre visible
+        name: name
+        widget: string
+      - label: Identificador (no cambiar después de crear el tema)
+        name: id
+        widget: string
+        pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Solo minúsculas sin tildes, números y guiones. Ej.: compras-y-reclamos"]
+        hint: Se usa para enlazar las notas con este tema. Si después cambias el nombre visible, las notas siguen asociadas.
+      - label: Orden
+        name: order
+        widget: number
+        value_type: int
+        default: 10
+        hint: Los temas se muestran de menor a mayor.
+
+  # ---------------- ¿TU EQUIPO ODIA A LEGAL? (notas) ----------------
   # (los archivos se guardan en content/notas y se publican en /notas/)
   - name: notas
-    label: Cómo mejorar el trabajo legal
+    label: ¿Tu equipo odia a Legal?
     label_singular: Artículo
-    description: Artículos sobre cómo organizar y mejorar el trabajo legal en una empresa. Se muestran en la pestaña «Cómo mejorar el trabajo legal».
+    description: Artículos sobre cómo organizar y mejorar el trabajo legal en una empresa. Se muestran en «¿Tu equipo odia a Legal?» del menú (/notas/).
     folder: content/notas
     create: true
     delete: true
@@ -116,113 +272,57 @@ collections:
         default: false
         required: false
 
-  # ---------------- TEMAS DE DUDAS ----------------
-  # (content/temas-dudas). Cada nota de dudas se asocia a un tema por su identificador.
-  - name: temas_dudas
-    label: Temas de dudas
-    label_singular: Tema
-    description: Temas de «Te ayudamos con tus dudas». En la web solo aparecen los temas que tienen al menos una nota publicada. Puedes cambiar el nombre visible y el orden cuando quieras; el identificador no se cambia.
-    folder: content/temas-dudas
-    create: true
-    delete: true
-    extension: json
-    format: json
-    identifier_field: name
-    slug: "{{id}}"
-    summary: "{{order}} · {{name}}"
-    sortable_fields: [order, name]
-    fields:
-      - label: Nombre visible
-        name: name
-        widget: string
-      - label: Identificador (no cambiar después de crear el tema)
-        name: id
-        widget: string
-        pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Solo minúsculas sin tildes, números y guiones. Ej.: compras-y-reclamos"]
-        hint: Se usa para enlazar las notas con este tema. Si después cambias el nombre visible, las notas siguen asociadas.
-      - label: Orden
-        name: order
-        widget: number
-        value_type: int
-        default: 10
-        hint: Los temas se muestran de menor a mayor.
-
-  # ---------------- NOTAS DE DUDAS ----------------
-  # (content/dudas, se publican en /dudas/<archivo>/; el enlace no cambia aunque edites el título)
-  - name: dudas
-    label: Notas de dudas
-    label_singular: Nota
-    description: Preguntas y respuestas de «Te ayudamos con tus dudas». Puedes escribir la respuesta o pegarla desde Word.
-    folder: content/dudas
+  # ---------------- PRESENTACIONES ESPECIALES ----------------
+  # (los archivos se guardan en content/presentaciones y se muestran en /presentaciones/)
+  - name: presentaciones
+    label: Presentaciones especiales
+    label_singular: Presentación
+    description: Presentaciones que ya preparaste, mostradas como diapositivas en imagen dentro de la web (no se ofrece ningún archivo para descargar). Exporta las diapositivas desde PowerPoint como imágenes JPG y súbelas en orden.
+    folder: content/presentaciones
     create: true
     delete: true
     extension: json
     format: json
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    preview_path: "dudas/{{slug}}"
-    summary: "{{title}} · {{audience}} · {{topic}}"
+    media_folder: /assets/uploads/presentaciones
+    public_folder: /assets/uploads/presentaciones
+    summary: "{{title}} · {{date}}"
     sortable_fields: [date, title]
     view_filters:
       - label: Borradores
         field: draft
         pattern: true
-      - label: Destacadas en la portada
-        field: featured_home
-        pattern: true
-      - label: Para personas
-        field: audience
-        pattern: personas
-      - label: Para negocios
-        field: audience
-        pattern: negocios
-      - label: Para ambos
-        field: audience
-        pattern: ambos
-    view_groups:
-      - label: Tema
-        field: topic
-      - label: Público
-        field: audience
     fields:
-      - label: Título o pregunta
-        name: title
-        widget: string
-      - label: ¿A quién le sirve esta nota?
-        name: audience
-        widget: select
-        options:
-          - { label: Personas, value: personas }
-          - { label: Negocios, value: negocios }
-          - { label: Ambos, value: ambos }
-      - label: Tema
-        name: topic
-        widget: relation
-        collection: temas_dudas
-        value_field: id
-        search_fields: [name]
-        display_fields: [name]
-        options_length: 100
-        hint: Si el tema que necesitas no existe, créalo en «Temas de dudas» y vuelve aquí.
-      - label: Respuesta
-        name: body
-        widget: markdown
-        hint: Puedes escribir aquí o copiar y pegar desde Word; luego revisa títulos, listas y negritas con la barra de formato.
+      - { label: Título, name: title, widget: string }
       - label: Resumen
         name: summary
         widget: text
+        hint: Dos o tres líneas que expliquen de qué trata la presentación.
+      - label: Diapositivas
+        name: slides
+        widget: list
         required: false
-        hint: Una o dos líneas para la tarjeta del listado. Si lo dejas vacío, se usa el inicio de la respuesta.
-      - label: Archivo de apoyo
-        name: attachment
-        widget: file
+        collapsed: true
+        add_to_top: false
+        label_singular: diapositiva
+        hint: Sube una imagen por diapositiva, en el orden en que deben verse (JPG, de preferencia de 1600 px de ancho y menos de 300 KB cada una). Puedes reordenarlas arrastrándolas.
+        field: { label: Imagen de la diapositiva, name: image, widget: image, choose_url: false }
+      - label: Texto que acompaña la presentación
+        name: body
+        widget: markdown
         required: false
-        hint: Por ejemplo, el Word o PDF original o un modelo descargable. Aparece como enlace al final de la respuesta.
-      - label: Destacar en la portada
-        name: featured_home
-        widget: boolean
-        default: false
+        hint: Opcional, pero recomendado. Google no puede leer el texto dentro de las imágenes; un resumen o los puntos principales aquí ayudan a que te encuentren.
+      - label: O enlace a la presentación en otro sitio
+        name: link
+        widget: string
         required: false
-        hint: La portada muestra hasta 3 notas destacadas (las más recientes). Si no destacas ninguna, muestra las 3 últimas publicadas.
+        hint: Opcional. Solo si la presentación está publicada fuera de la web (por ejemplo, Canva). Si subiste diapositivas, se usan las diapositivas.
+      - label: Imagen de portada
+        name: image
+        widget: image
+        required: false
+        choose_url: false
+        hint: Opcional. Aparece en el listado. Si la dejas vacía, se usa la primera diapositiva.
       - label: Fecha
         name: date
         widget: datetime
@@ -231,17 +331,7 @@ collections:
         format: YYYY-MM-DD
         picker_utc: true
         required: false
-        hint: Si la dejas vacía, se usa la fecha en que creaste la entrada.
-      - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
-      - label: Fuentes
-        name: sources
-        widget: list
-        required: false
-        summary: "{{fields.title}}"
-        hint: Opcional. Normas, resoluciones o artículos citados.
-        fields:
-          - { label: Nombre de la fuente, name: title, widget: string }
-          - { label: Enlace (https://…), name: url, widget: string, required: false }
+        hint: Las más recientes aparecen primero. Si la dejas vacía, se usa la fecha en que creaste la entrada.
       - label: Borrador (no publicar todavía)
         name: draft
         widget: boolean
@@ -252,7 +342,7 @@ collections:
   - name: novedades
     label: Novedades
     label_singular: Novedad
-    description: Nuevas normas, cambios regulatorios y asuntos de interés. Se muestran en la pestaña «Novedades».
+    description: Nuevas normas, cambios regulatorios y asuntos de interés. Se muestran en «Novedades» del menú (/novedades/).
     folder: content/novedades
     create: true
     delete: true
@@ -320,93 +410,3 @@ collections:
         widget: boolean
         default: false
         required: false
-
-  # ---------------- PRESENTACIONES ESPECIALES ----------------
-  # (los archivos se guardan en content/presentaciones y se muestran en /presentaciones/)
-  - name: presentaciones
-    label: Presentaciones especiales
-    label_singular: Presentación
-    description: Presentaciones que ya preparaste, mostradas como diapositivas en imagen dentro de la web (no se ofrece ningún archivo para descargar). Exporta las diapositivas desde PowerPoint como imágenes JPG y súbelas en orden.
-    folder: content/presentaciones
-    create: true
-    delete: true
-    extension: json
-    format: json
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    media_folder: /assets/uploads/presentaciones
-    public_folder: /assets/uploads/presentaciones
-    summary: "{{title}} · {{date}}"
-    sortable_fields: [date, title]
-    view_filters:
-      - label: Borradores
-        field: draft
-        pattern: true
-    fields:
-      - { label: Título, name: title, widget: string }
-      - label: Resumen
-        name: summary
-        widget: text
-        hint: Dos o tres líneas que expliquen de qué trata la presentación.
-      - label: Diapositivas
-        name: slides
-        widget: list
-        required: false
-        collapsed: true
-        add_to_top: false
-        label_singular: diapositiva
-        hint: Sube una imagen por diapositiva, en el orden en que deben verse (JPG, de preferencia de 1600 px de ancho y menos de 300 KB cada una). Puedes reordenarlas arrastrándolas.
-        field: { label: Imagen de la diapositiva, name: image, widget: image, choose_url: false }
-      - label: Texto que acompaña la presentación
-        name: body
-        widget: markdown
-        required: false
-        hint: Opcional, pero recomendado. Google no puede leer el texto dentro de las imágenes; un resumen o los puntos principales aquí ayudan a que te encuentren.
-      - label: O enlace a la presentación en otro sitio
-        name: link
-        widget: string
-        required: false
-        hint: Opcional. Solo si la presentación está publicada fuera de la web (por ejemplo, Canva). Si subiste diapositivas, se usan las diapositivas.
-      - label: Imagen de portada
-        name: image
-        widget: image
-        required: false
-        choose_url: false
-        hint: Opcional. Aparece en el listado. Si la dejas vacía, se usa la primera diapositiva.
-      - label: Fecha
-        name: date
-        widget: datetime
-        date_format: DD/MM/YYYY
-        time_format: false
-        format: YYYY-MM-DD
-        picker_utc: true
-        required: false
-        hint: Las más recientes aparecen primero. Si la dejas vacía, se usa la fecha en que creaste la entrada.
-      - label: Borrador (no publicar todavía)
-        name: draft
-        widget: boolean
-        default: false
-        required: false
-
-  # ---------------- SERVICIOS ----------------
-  # Nombres y descripciones breves que se muestran en el menú, la portada y /servicios/.
-  - name: servicios
-    label: Servicios (nombres y descripciones)
-    delete: false
-    editor:
-      preview: false
-    files:
-      - label: Listado de servicios
-        name: listado
-        file: content/servicios.json
-        fields:
-          - label: Servicios
-            name: servicios
-            widget: list
-            allow_add: false
-            summary: "{{fields.name}}"
-            hint: Cambia nombres o descripciones. No agregues ni quites servicios desde aquí (cada uno tiene su propia página).
-            fields:
-              - { label: Dirección de la página (no cambiar), name: slug, widget: hidden }
-              - { label: Nombre, name: name, widget: string, hint: "Título completo: se usa en la página del servicio, la portada y /servicios/." }
-              - { label: Nombre corto para el menú, name: menu, widget: string, required: false, hint: "Opcional. Si lo dejas vacío, el menú desplegable usa el nombre completo." }
-              - { label: Descripción breve, name: summary, widget: text }
