@@ -399,7 +399,7 @@ def build_editorial(cfg, items):
     else:
         listing = empty_box(cfg["empty"])
     content = f'''
-<div class="page-head ed-head head-split">
+<div class="page-head ed-head">
   <div class="wrap">
     <h1>{cfg["h1"]}</h1>
     <p>{cfg["intro"]}.</p>

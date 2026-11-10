@@ -657,3 +657,18 @@ h1,h2{font-weight:700;letter-spacing:-.01em;color:var(--navy-ui)}
   .svc-sit{padding-bottom:16px}
   .svc-how{padding-top:16px}
 }
+
+/* ----- Ajustes 10 nov (4) ----- */
+/* Pie: logo centrado sobre su texto */
+.site-footer .cols > div:first-child{display:flex;flex-direction:column;align-items:center}
+.foot-logo{margin:0 auto 16px}
+/* Páginas principales: título arriba, descripción abajo, ocupando todo el ancho (márgenes laterales iguales) */
+.page-head h1,.page-head p,.ed-head h1,.ed-head p{max-width:none}
+.head-center h1{text-align:center}
+/* Pregunta de la caja azul de cada servicio: justificada */
+.svc-cta p{text-align:justify;text-justify:inter-word;text-wrap:pretty}
+/* «Cómo trabajamos contigo»: tarjetas del mismo tamaño y texto secundario a la misma altura */
+.how-grid{grid-template-rows:auto auto;align-items:stretch}
+.how-item{display:grid;grid-row:span 2;grid-template-rows:subgrid;row-gap:10px;align-content:start}
+.how-item h3{margin-bottom:0;align-self:start}
+@media (max-width:900px){.how-grid{grid-template-rows:none}.how-item{grid-row:auto;grid-template-rows:auto}}
