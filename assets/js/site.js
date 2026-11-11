@@ -84,6 +84,30 @@
     update();
   });
 
+  // Presentaciones especiales: filtro por servicio (no cambia la dirección de la página)
+  var pf = document.querySelector('[data-pres-filtros]');
+  if (pf) {
+    var pItems = Array.prototype.slice.call(document.querySelectorAll('[data-pres-list] .pres-item'));
+    var pBtns = pf.querySelectorAll('[data-filtro]');
+    var pSel = pf.querySelector('[data-filtro-select]');
+    var pCount = pf.querySelector('[data-pf-count]');
+    var filtrar = function (cat) {
+      var n = 0;
+      pItems.forEach(function (it) {
+        var ok = !cat || it.getAttribute('data-cat') === cat;
+        it.hidden = !ok;
+        if (ok) n++;
+      });
+      pBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-filtro') === cat ? 'true' : 'false'); });
+      if (pSel) pSel.value = cat;
+      if (pCount) pCount.textContent = n === 1 ? '1 presentación' : n + ' presentaciones';
+    };
+    pBtns.forEach(function (b) { b.addEventListener('click', function () { filtrar(b.getAttribute('data-filtro')); }); });
+    if (pSel) pSel.addEventListener('change', function () { filtrar(pSel.value); });
+    pf.hidden = false;
+    filtrar('');
+  }
+
   // Botón «Copiar enlace» de los artículos
   document.querySelectorAll('[data-copy]').forEach(function (b) {
     b.addEventListener('click', function () {

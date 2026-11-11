@@ -10,5 +10,85 @@
 <body>
   <!-- Panel de administración (Decap CMS). La configuración está en config.yml -->
   <script src="https://unpkg.com/decap-cms@3.17.1/dist/decap-cms.js"></script>
+  <script>
+  /*
+   * Campo «viple-texto»: texto con contador orientativo de caracteres y propuesta automática.
+   * Opciones en config.yml:
+   *   desde: campo del que se toma la propuesta (p. ej. title)
+   *   modo: "slug" (minúsculas sin tildes y con guiones) o "texto" (copia literal)
+   *   recomendado: [mínimo, máximo] de caracteres (solo orientativo, no bloquea)
+   *   sufijo: texto que la web agrega al final si falta (se cuenta en el total)
+   *   multilinea: true para un cuadro de varias líneas
+   * Propuesta: en una entrada nueva, al entrar en el campo vacío se completa con el título actual;
+   * el botón «Generar desde el título» la vuelve a calcular cuando quieras.
+   * Cambiar el título después NUNCA cambia este campo solo (la dirección web queda estable).
+   */
+  (function () {
+    if (!window.CMS || !window.createClass || !window.h) return;
+    var h = window.h;
+    function aSlug(t) {
+      return String(t || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+    var Control = window.createClass({
+      opcion: function (k) { var f = this.props.field; return f && f.get ? f.get(k) : undefined; },
+      // Decap no vuelve a dibujar este campo cuando cambia otro, así que el título se lee en el momento
+      entrada: function () { return this.props.getEntry ? this.props.getEntry() : this.props.entry; },
+      propuesta: function () {
+        var desde = this.opcion('desde'), e = this.entrada();
+        if (!desde || !e || !e.getIn) return '';
+        var t = e.getIn(['data', desde]) || '';
+        return this.opcion('modo') === 'slug' ? aSlug(t) : String(t).trim();
+      },
+      esNueva: function () { var e = this.entrada(); return !!(e && e.get && e.get('newRecord')); },
+      alEntrar: function (ev) {
+        if (this.props.setActiveStyle) this.props.setActiveStyle(ev);
+        // Solo en presentaciones nuevas y si el campo está vacío: se completa con la propuesta
+        if (!this.props.value && this.esNueva()) {
+          var p = this.propuesta();
+          if (p) this.props.onChange(p);
+        }
+      },
+      cambiar: function (ev) { this.props.onChange(ev.target.value); },
+      usar: function (ev) {
+        ev.preventDefault();
+        var p = this.propuesta();
+        if (p) this.props.onChange(p);
+      },
+      render: function () {
+        var v = this.props.value || '';
+        var multi = !!this.opcion('multilinea');
+        var attrs = {
+          id: this.props.forID, className: this.props.classNameWrapper, value: v,
+          onChange: this.cambiar, onFocus: this.alEntrar, onBlur: this.props.setInactiveStyle
+        };
+        var campo = multi ? h('textarea', Object.assign({ rows: 3, style: { minHeight: '90px' } }, attrs))
+                          : h('input', Object.assign({ type: 'text' }, attrs));
+        var extra = [];
+        var rec = this.opcion('recomendado');
+        if (rec && rec.toJS) rec = rec.toJS();
+        if (rec && rec.length === 2) {
+          var sufijo = this.opcion('sufijo') || '';
+          var total = v.trim().length;
+          if (sufijo && v.trim() && v.trim().slice(-sufijo.trim().length) !== sufijo.trim()) total += sufijo.length;
+          var ok = total >= rec[0] && total <= rec[1];
+          var msg = total + ' caracteres' + (sufijo && total !== v.trim().length ? ' (con «' + sufijo.trim() + '»)' : '') +
+            ' · recomendado ' + rec[0] + '–' + rec[1] + (ok ? ' ✓' : '');
+          extra.push(h('div', { key: 'c', style: { fontSize: '13px', marginTop: '6px', color: ok ? '#1d7a46' : '#a35c00' } }, msg));
+        }
+        if (this.opcion('desde')) {
+          extra.push(h('button', {
+            key: 'b', type: 'button', onClick: this.usar,
+            style: { marginTop: '8px', padding: '6px 12px', border: '1px solid #c9d5e6', borderRadius: '6px',
+                     background: '#fff', color: '#16234f', cursor: 'pointer', fontSize: '13px' }
+          }, 'Generar desde el título'));
+        }
+        return h('div', {}, campo, extra);
+      }
+    });
+    var Vista = window.createClass({ render: function () { return h('p', {}, this.props.value || ''); } });
+    window.CMS.registerWidget('viple-texto', Control, Vista);
+  })();
+  </script>
 </body>
 </html>

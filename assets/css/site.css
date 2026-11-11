@@ -725,3 +725,50 @@ h1,h2{font-weight:700;letter-spacing:-.01em;color:var(--navy-ui)}
   .site-footer{padding-bottom:calc(30px + 72px + env(safe-area-inset-bottom, 0px))}
 }
 .svc-hero h1{text-wrap:balance}
+
+/* ----- Presentaciones especiales (11 nov) ----- */
+/* Catálogo: una presentación por fila, el resumen usa todo el ancho disponible */
+.pres-list{grid-template-columns:minmax(0,1fr);gap:20px}
+.pres-card{grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:28px;align-items:start;padding:var(--card-py) var(--card-px)}
+/* Carátula completa: proporción 16:9, sin recortes ni deformación, fondo uniforme en los bordes libres */
+.pres-img{aspect-ratio:16/9;background:var(--soft);border:1px solid #dfe6f0;border-radius:8px}
+.pres-img img{width:100%;height:100%;object-fit:contain}
+.pres-txt{gap:10px;min-width:0}
+.pres-txt h2{font-family:var(--serif);font-weight:700;font-size:clamp(1.15rem,1.8vw,1.4rem);line-height:1.25;color:var(--navy-ui);letter-spacing:0}
+.pres-cat{align-self:flex-start;font-size:.8rem;font-weight:500;color:var(--navy-ui);background:var(--pastel-sky);border-radius:999px;padding:3px 12px}
+.pres-sum p{text-align:justify;text-justify:inter-word;text-wrap:pretty;color:#3d4556;font-size:1rem;line-height:1.6}
+.pres-sum p + p{margin-top:.7em}
+.pres-item[hidden]{display:none}
+
+/* Filtros por servicio (los muestra el JavaScript; sin él se ven todas las presentaciones) */
+.pres-filtros{margin-bottom:24px}
+.pres-filtros-t{font-family:var(--serif);font-weight:600;color:var(--navy-ui);margin-bottom:10px}
+.pf-btns{display:flex;flex-wrap:wrap;gap:10px}
+.pf-btns button{font:inherit;font-size:.92rem;padding:7px 16px;border:1px solid #c9d5e6;border-radius:999px;background:var(--white);color:var(--navy-ui);cursor:pointer}
+.pf-btns button:hover{border-color:var(--steel)}
+.pf-btns button[aria-pressed="true"]{background:var(--navy-ui);border-color:var(--navy-ui);color:var(--white);font-weight:500}
+.pf-btns button:focus-visible,.pf-sel select:focus-visible{outline:3px solid var(--link);outline-offset:2px}
+.pf-sel{display:none}
+.pf-sel select{font:inherit;width:100%;padding:10px 12px;border:1px solid #c9d5e6;border-radius:8px;background:var(--white);color:var(--navy-ui)}
+.pf-count{font-size:.9rem;color:#5b6375;margin-top:12px}
+
+/* Página de cada presentación: sin texto repetido arriba del título; resumen a todo el ancho */
+.pres-head .pres-sum{margin-top:18px}
+.pres-head .pres-sum p{color:#dbe3ef;font-size:1.08rem;line-height:1.6}
+.pres-cat-link{display:inline-block;margin-bottom:14px;font-size:.85rem;font-weight:500;color:var(--navy-ui);background:var(--pastel-sky);border-radius:999px;padding:3px 12px;text-decoration:none}
+.pres-cat-link:hover{background:var(--white)}
+.slides-track{background:var(--soft)}
+.slide{aspect-ratio:16/9;max-height:72vh}
+.slide img{width:100%;height:100%;max-height:none;object-fit:contain}
+
+@media (max-width:760px){
+  .pres-card{grid-template-columns:1fr;gap:16px}
+  .pf-btns,.pres-filtros-t{display:none}
+  .pf-sel{display:block}
+  .pf-sel span{display:block;font-weight:500;color:var(--navy-ui);margin-bottom:6px}
+}
+@media (max-width:640px){
+  /* En el celular, alineación izquierda para evitar espacios grandes entre palabras */
+  .pres-sum p{text-align:left}
+}
+@media (max-width:640px){.pres-head p{text-align:left}}

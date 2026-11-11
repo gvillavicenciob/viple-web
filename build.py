@@ -18,6 +18,7 @@ import json
 import math
 import re
 import shutil
+import unicodedata
 from pathlib import Path
 from urllib.parse import quote
 
@@ -729,14 +730,66 @@ ICONO_PRES = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
               '<path d="M7 12l3-3 2 2 4-4"/></svg>')
 
 
+def slugify(texto):
+    """Minúsculas sin tildes, números y guiones (para direcciones web)."""
+    t = unicodedata.normalize("NFKD", str(texto or "")).encode("ascii", "ignore").decode("ascii").lower()
+    return re.sub(r"[^a-z0-9]+", "-", t).strip("-")
+
+
+def recortar(texto, n=155):
+    """Texto plano de hasta ~n caracteres, cortado en una palabra completa."""
+    t = re.sub(r"\s+", " ", str(texto or "")).strip()
+    if len(t) <= n:
+        return t
+    t = t[:n].rsplit(" ", 1)[0].rstrip(",;:")
+    return t + "…"
+
+
 def pres_slides(it):
     return [s for s in (it.get("slides") or []) if isinstance(s, str) and s.strip()]
+
+
+def prep_presentaciones(items):
+    """Dirección estable y metadatos SEO con valores predeterminados (sin modificar los datos guardados)."""
+    vistos = {}
+    for it in items:
+        # Slug: el guardado en el panel; si no existe (entradas antiguas), el nombre del archivo sin tildes.
+        # Nunca se deriva del título, para que cambiar el título no cambie la dirección.
+        it["pslug"] = slugify(it.get("slug")) or slugify(it["slug"])
+        it["url"] = f"/presentaciones/{it['pslug']}/"
+        cat = str(it.get("categoria") or "").strip()
+        it["cat"] = cat if cat in SERVICE_NAMES else ""
+        if cat and not it["cat"]:
+            print(f'  ! Presentación con categoría desconocida «{cat}» (se muestra solo en «Todas»): {it["slug"]}')
+        it["seo_title"] = titulo_seo(str(it.get("title_seo") or "").strip() or str(it.get("title") or "").strip())
+        it["seo_desc"] = (str(it.get("meta_description") or "").strip()
+                          or recortar(it.get("summary")) or PRESENTACIONES["intro"])
+        if it["pslug"] in vistos:
+            print(f'  ! Dos presentaciones con la misma dirección /presentaciones/{it["pslug"]}/: {vistos[it["pslug"]]} y {it["slug"]}')
+        vistos[it["pslug"]] = it["slug"]
+    # Aviso: el mismo archivo de imagen usado en dos presentaciones (p. ej. dos veces «1.jpg»)
+    usos = {}
+    for it in items:
+        for sld in pres_slides(it):
+            usos.setdefault(sld, set()).add(it["slug"])
+    repetidas = sorted(k for k, v in usos.items() if len(v) > 1)
+    if repetidas:
+        print("  ! Imágenes compartidas por varias presentaciones (una puede haber sobrescrito a la otra): "
+              + ", ".join(repetidas[:6]) + (" …" if len(repetidas) > 6 else ""))
+    return items
+
+
+def parrafos(texto):
+    """Respeta los párrafos del resumen (líneas en blanco) sin cambiar su contenido."""
+    partes = [x.strip() for x in re.split(r"\n\s*\n", str(texto or "")) if x.strip()]
+    return "".join(f"<p>{esc(x)}</p>" for x in partes)
 
 
 def pres_card(it):
     slides = pres_slides(it)
     portada = it.get("image") or (slides[0] if slides else "")
-    img = f'<img src="{esc(portada)}" alt="" loading="lazy">' if portada else ICONO_PRES
+    img = (f'<img src="{esc(portada)}" alt="Carátula: {esc(it.get("title"))}" loading="lazy">'
+           if portada else ICONO_PRES)
     tag, attrs, more = "div", "", ""
     if slides:
         tag, attrs = "a", f' href="{it["url"]}"'
@@ -744,14 +797,33 @@ def pres_card(it):
         tag, attrs = "a", f' href="{esc(it["link"])}" target="_blank" rel="noopener"'
     if tag == "a":
         more = '<span class="pres-more">Ver presentación <span aria-hidden="true">→</span></span>'
-    return f'''<li><{tag} class="pres-card"{attrs}>
+    cat = (f'<span class="pres-cat">{esc(SERVICE_NAMES[it["cat"]])}</span>' if it["cat"] else "")
+    return f'''<li class="pres-item" data-cat="{it["cat"]}"><{tag} class="pres-card"{attrs}>
       <div class="pres-img">{img}</div>
       <div class="pres-txt">
-        <h3>{esc(it.get("title"))}</h3>
-        <p>{esc(it.get("summary"))}</p>
+        {cat}
+        <h2>{esc(it.get("title"))}</h2>
+        <div class="pres-sum">{parrafos(it.get("summary"))}</div>
         {more}
       </div>
     </{tag}></li>'''
+
+
+def pres_filtros(items):
+    """Filtros por categoría (solo en el navegador, sin direcciones nuevas). Ocultos si no hay JavaScript."""
+    usadas = [s for s in SERVICIOS if any(i["cat"] == s["slug"] for i in items)]
+    if not usadas:
+        return ""
+    btns = '<button type="button" data-filtro="" aria-pressed="true">Todas</button>' + "".join(
+        f'<button type="button" data-filtro="{s["slug"]}" aria-pressed="false">{esc(s["name"])}</button>' for s in usadas)
+    opts = '<option value="">Todas</option>' + "".join(
+        f'<option value="{s["slug"]}">{esc(s["name"])}</option>' for s in usadas)
+    return f'''<div class="pres-filtros" data-pres-filtros hidden>
+      <p class="pres-filtros-t" id="pf-t">Filtrar por servicio</p>
+      <div class="pf-btns" role="group" aria-labelledby="pf-t">{btns}</div>
+      <label class="pf-sel"><span>Filtrar por servicio</span><select data-filtro-select>{opts}</select></label>
+      <p class="pf-count" aria-live="polite" data-pf-count></p>
+    </div>'''
 
 
 def render_presentacion(it):
@@ -767,12 +839,14 @@ def render_presentacion(it):
            '<button type="button" data-next aria-label="Diapositiva siguiente">→</button></div>') if n > 1 else ""
     body = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
     texto = f'<div class="prose pres-body">{body}</div>' if body.strip() else ""
+    cat = (f'<a class="pres-cat-link" href="/servicios/{it["cat"]}/">{esc(SERVICE_NAMES[it["cat"]])}</a>'
+           if it["cat"] else "")
     content = f'''
-<div class="page-head">
+<div class="page-head pres-head">
   <div class="wrap">
-    <div class="crumbs"><a href="/presentaciones/">{PRESENTACIONES["h1"]}</a></div>
+    {cat}
     <h1>{esc(it.get("title"))}</h1>
-    <p>{esc(it.get("summary"))}</p>
+    <div class="pres-sum">{parrafos(it.get("summary"))}</div>
   </div>
 </div>
 <section class="pres-view">
@@ -785,15 +859,21 @@ def render_presentacion(it):
     <a class="back" href="/presentaciones/">← Ver todas las presentaciones</a>
   </div>
 </section>'''
-    render(it["url"], content, f'{it.get("title")} | Viple Consultores', it.get("summary") or PRESENTACIONES["intro"],
-           nav="presentaciones", og_image=it.get("image") or slides[0], lastmod=max_fecha(it["date"]))
+    render(it["url"], content, it["seo_title"], it["seo_desc"],
+           nav="presentaciones", og_image=it.get("image") or slides[0], og_type="article",
+           lastmod=max_fecha(it["date"]))
 
 
 def build_presentaciones(items):
     cfg = PRESENTACIONES
-    listing = ('<ul class="pres-list">' + "".join(pres_card(i) for i in items) + "</ul>") if items else empty_box(cfg["empty"])
+    items = prep_presentaciones(items)
+    if items:
+        listing = (pres_filtros(items) + '<ul class="pres-list" data-pres-list>'
+                   + "".join(pres_card(i) for i in items) + "</ul>")
+    else:
+        listing = empty_box(cfg["empty"])
     content = f'''
-<div class="page-head">
+<div class="page-head pres-head">
   <div class="wrap">
     <h1>{cfg["h1"]}</h1>
     <p>{cfg["intro"]}</p>

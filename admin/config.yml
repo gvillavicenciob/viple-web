@@ -21,6 +21,11 @@ publish_mode: editorial_workflow
 
 locale: es
 
+# Nombres de archivo y direcciones web sin tildes ni caracteres especiales
+slug:
+  encoding: ascii
+  clean_accents: true
+
 # Permite probar el panel en tu computadora (npx decap-server). No afecta al sitio publicado.
 local_backend: true
 site_url: https://vipleconsultores.com
@@ -243,31 +248,58 @@ collections:
         required: false
 
   # ---------------- PRESENTACIONES ESPECIALES ----------------
-  # (los archivos se guardan en content/presentaciones y se muestran en /presentaciones/)
+  # (content/presentaciones; cada una se publica en /presentaciones/<slug>/)
   - name: presentaciones
     label: Presentaciones especiales
     label_singular: Presentación
-    description: Presentaciones que ya preparaste, mostradas como diapositivas en imagen dentro de la web (no se ofrece ningún archivo para descargar). Exporta las diapositivas desde PowerPoint como imágenes JPG y súbelas en orden.
+    description: "Presentaciones mostradas como diapositivas en imagen dentro de la web (no se ofrece ningún archivo para descargar). Exporta las diapositivas como JPG y súbelas en orden. IMPORTANTE: antes de subirlas, ponles nombres propios de cada presentación (p. ej. inmobiliarias-01.jpg, inmobiliarias-02.jpg…); si dos presentaciones usan «1.jpg», una reemplaza las imágenes de la otra."
     folder: content/presentaciones
     create: true
     delete: true
     extension: json
     format: json
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    identifier_field: title
+    slug: "{{fields.slug}}"
     media_folder: /assets/uploads/presentaciones
     public_folder: /assets/uploads/presentaciones
-    summary: "{{title}} · {{date}}"
+    preview_path: "presentaciones/{{slug}}"
+    summary: "{{title}} · {{categoria}} · {{date}}"
     sortable_fields: [date, title]
     view_filters:
       - label: Borradores
         field: draft
         pattern: true
+    view_groups:
+      - label: Categoría
+        field: categoria
     fields:
-      - { label: Título, name: title, widget: string }
+      - label: Título visible (H1)
+        name: title
+        widget: string
+        hint: Título grande de la página de la presentación y de su tarjeta en el catálogo.
+      - label: Dirección (slug)
+        name: slug
+        widget: viple-texto
+        desde: title
+        modo: slug
+        pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Solo minúsculas sin tildes, números y guiones. Ej.: datos-personales-inmobiliarias"]
+        hint: "La página será vipleconsultores.com/presentaciones/<slug>/. Se propone sola a partir del título mientras la presentación es nueva; puedes acortarla. Después de guardar ya no cambia aunque modifiques el título. No la cambies después de publicar."
+      - label: Categoría (servicio)
+        name: categoria
+        widget: select
+        required: false
+        options:
+          - { label: Estructuramos tu negocio, value: estructura-empresarial }
+          - { label: Protegemos tu inversión, value: protegemos-tu-inversion }
+          - { label: Contratos que funcionan en la práctica, value: contratos }
+          - { label: Protección de datos personales, value: proteccion-de-datos }
+          - { label: Prácticas comerciales y reclamos, value: reclamos-y-denuncias }
+          - { label: Diseño de herramientas legales, value: herramientas-legales }
+        hint: Servicio con el que se relaciona. Sirve para los filtros del catálogo. Si la dejas vacía, la presentación aparece solo en «Todas».
       - label: Resumen
         name: summary
         widget: text
-        hint: Dos o tres líneas que expliquen de qué trata la presentación.
+        hint: Visible en la tarjeta del catálogo y debajo del título en la página de la presentación. Si no completas la metadescripción, su inicio se usa para Google.
       - label: Diapositivas
         name: slides
         widget: list
@@ -275,7 +307,7 @@ collections:
         collapsed: true
         add_to_top: false
         label_singular: diapositiva
-        hint: Sube una imagen por diapositiva, en el orden en que deben verse (JPG, de preferencia de 1600 px de ancho y menos de 300 KB cada una). Puedes reordenarlas arrastrándolas.
+        hint: "Una imagen por diapositiva, en orden (JPG de unos 1600 px de ancho y menos de 300 KB). Usa nombres de archivo propios de esta presentación (p. ej. inmobiliarias-01.jpg). Puedes reordenarlas arrastrándolas."
         field: { label: Imagen de la diapositiva, name: image, widget: image, choose_url: false }
       - label: Texto que acompaña la presentación
         name: body
@@ -292,7 +324,23 @@ collections:
         widget: image
         required: false
         choose_url: false
-        hint: Opcional. Aparece en el listado. Si la dejas vacía, se usa la primera diapositiva.
+        hint: Opcional. Aparece en el catálogo (se ve completa, en formato 16:9). Si la dejas vacía, se usa la primera diapositiva.
+      - label: Título SEO (pestaña del navegador y Google)
+        name: title_seo
+        widget: viple-texto
+        desde: title
+        modo: texto
+        recomendado: [50, 60]
+        sufijo: " | Viple Consultores"
+        required: false
+        hint: "Se propone igual al título visible mientras la presentación es nueva; edítalo libremente (uno no cambia al otro). Si no termina en «| Viple Consultores», se agrega solo. Si lo dejas vacío, se usa el título visible."
+      - label: Metadescripción (Google)
+        name: meta_description
+        widget: viple-texto
+        multilinea: true
+        recomendado: [140, 160]
+        required: false
+        hint: Resumen breve para Google. Si la dejas vacía, se usa el inicio del resumen.
       - label: Fecha
         name: date
         widget: datetime
@@ -300,8 +348,9 @@ collections:
         time_format: false
         format: YYYY-MM-DD
         picker_utc: true
+        default: "{{now}}"
         required: false
-        hint: Las más recientes aparecen primero. Si la dejas vacía, se usa la fecha en que creaste la entrada.
+        hint: Fecha de publicación (se completa con la de hoy); las más recientes aparecen primero.
       - label: Borrador (no publicar todavía)
         name: draft
         widget: boolean

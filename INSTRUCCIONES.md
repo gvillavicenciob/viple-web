@@ -104,13 +104,18 @@ Si una pregunta está marcada como publicada pero le falta la respuesta, un dato
 
 ## «Presentaciones especiales» desde el panel
 
-Las presentaciones se muestran como diapositivas en imagen dentro de la web, con botones para avanzar y retroceder. No se ofrece ningún archivo para descargar.
+Las presentaciones se muestran como diapositivas en imagen dentro de la web, con botones para avanzar y retroceder. No se ofrece ningún archivo para descargar. Cada una tiene su página en /presentaciones/<slug>/ con su propio título SEO, metadescripción y canonical.
 
-1. En PowerPoint: **Archivo → Exportar → Cambiar el tipo de archivo → JPEG**, guarda y elige **Todas las diapositivas**. Se crea una carpeta con una imagen por diapositiva.
-2. En `/admin` abre **Presentaciones especiales → Nueva Presentación**.
-3. Escribe el **Título** y el **Resumen**. En **Diapositivas** pulsa **Add diapositiva** y sube cada imagen en orden.
-4. Opcional: escribe el **Texto que acompaña la presentación** (ayuda a que Google la encuentre) y una **Imagen de portada**.
-5. Pulsa **Guardar**. Queda como borrador: no se publica (ver la sección siguiente).
+1. Exporta las diapositivas como JPG (PowerPoint: **Archivo → Exportar → Cambiar el tipo de archivo → JPEG**; Canva: **Compartir → Descargar → JPG**).
+2. **Renombra las imágenes** con un nombre propio de la presentación (`inmobiliarias-01.jpg`, `inmobiliarias-02.jpg`…). Todas se guardan en la misma carpeta: si dos presentaciones usan `1.jpg`, una reemplaza a la otra. El build avisa si detecta imágenes compartidas.
+3. En `/admin` abre **Presentaciones especiales → Nueva Presentación**.
+4. **Título visible (H1)** y **Resumen**. Haz clic en **Dirección (slug)**: se propone a partir del título (o pulsa **Generar desde el título**); puedes acortarla. Después de guardar no cambia aunque cambies el título.
+5. **Categoría (servicio)**: alimenta los filtros del catálogo (solo se muestran las categorías con presentaciones; los filtros no crean páginas nuevas).
+6. **Diapositivas**: **Add diapositiva** y sube cada imagen en orden. Opcional: **Texto que acompaña la presentación** e **Imagen de portada** (se ve completa, en 16:9).
+7. **Título SEO** (se propone el título visible; ~50–60 caracteres) y **Metadescripción** (~140–160). Los contadores son orientativos. Vacíos: se usan el título visible y el inicio del resumen.
+8. Pulsa **Guardar**. Queda como borrador: no se publica (ver la sección siguiente).
+
+Presentaciones antiguas sin slug: su dirección se forma con el nombre del archivo sin tildes (no cambia con el título).
 
 ## Flujo editorial: revisar antes de publicar (sin gastar créditos)
 
