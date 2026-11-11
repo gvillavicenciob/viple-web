@@ -3,10 +3,11 @@ Construye el sitio de Viple Consultores en la carpeta _site/.
 
 - Envuelve cada página de src/pages/ con la plantilla común src/layout.html
   (encabezado, menú y pie de página).
-- Genera las secciones «Cómo mejorar el trabajo legal» (content/notas), «Te ayudamos
-  con tus dudas» (content/dudas, temas en content/temas-dudas) y
-  «Novedades» (content/novedades) a partir de los artículos guardados
-  desde el panel de administración (/admin).
+- Genera «¿Tienes preguntas?» (/preguntas/, una página por pregunta publicada) desde
+  content/preguntas, «¿Tu equipo odia a Legal?» (/gestion-legal/) desde content/notas,
+  «Novedades» y «Presentaciones especiales», con los contenidos guardados desde el panel (/admin).
+- Las secciones sin contenido publicado llevan noindex y no entran en el sitemap.
+- El sitemap usa fechas editoriales guardadas (nunca la fecha del build).
 
 Netlify ejecuta este archivo automáticamente en cada publicación.
 Para probarlo en tu computadora:  python build.py
@@ -26,34 +27,39 @@ ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
 OUT = ROOT / "_site"
 SITE_URL = "https://vipleconsultores.com"
+ORG_ID = SITE_URL + "/#organization"
 DEFAULT_AUTHOR = "Gabriel Villavicencio Bedoya"
 
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
          "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
 
-# Sección editorial «Ideas y análisis» (se guarda en content/notas)
+# Fecha de la última modificación de las plantillas de los listados generados aquí
+# (actualízala solo si cambias el texto o el diseño del listado)
+LISTADOS_LASTMOD = "2026-11-10"
+
+# «¿Tu equipo odia a Legal?»: artículos en content/notas, publicados en /gestion-legal/
 IDEAS = {
     "name": "notas",
+    "base": "gestion-legal",
     "label": "¿Tu equipo odia a Legal?",
     "h1": "Cómo organizar el trabajo legal para que no se convierta en un cuello de botella",
     "intro": ("Consejos prácticos para que tu equipo sepa qué contratos puede cerrar con condiciones ya aprobadas, "
               "cuándo conviene involucrar a un abogado en un proyecto y cómo aprovechar lo que ya negoció con un "
               "cliente para llegar mejor preparado al siguiente acuerdo"),
     "empty": "Muy pronto publicaremos los primeros artículos.",
-    "nav": "notas",
+    "nav": "gestion-legal",
     "featured_label": "Artículo destacado",
     "more": "Leer artículo →",
     "related": "Otros artículos",
 }
 
-# Sección «Te ayudamos con tus dudas» (notas en content/dudas, temas en content/temas-dudas)
-DUDAS = {
-    "name": "dudas",
-    "label": "Te ayudamos con tus dudas",
+# «¿Tienes preguntas?»: preguntas en content/preguntas, publicadas en /preguntas/<slug>/
+PREGUNTAS = {
+    "base": "preguntas",
+    "label": "¿Tienes preguntas?",
     "intro": "Encuentra respuestas a preguntas legales sobre situaciones de tu vida diaria o de tu negocio.",
-    "empty": "Muy pronto publicaremos las primeras respuestas.",
+    "empty": "Muy pronto publicaremos las respuestas a las preguntas más frecuentes.",
 }
-PUBLICOS = {"personas": "Para personas", "negocios": "Para negocios", "ambos": "Para personas y negocios"}
 
 # Sección «Novedades» (sin cambios de diseño por ahora)
 NOVEDADES = {
@@ -170,31 +176,26 @@ def svc_panels(summary=False):
     return f'<div class="svc-cards{" with-sum" if summary else ""}">{cards}</div>'
 
 
-# Enlaces de las preguntas: a la respuesta elegida en el panel (si existe) o a «¿Tienes preguntas?»
-DUDAS_SLUGS = set()
+# Preguntas publicadas (se cargan en main() desde content/preguntas)
+PUBLICADAS = []
 
 
-def pregunta_url(p):
-    slug = str(p.get("respuesta") or "").strip()
-    return f"/dudas/{slug}/" if slug in DUDAS_SLUGS else "/dudas/"
+def q_url(q):
+    return f"/{PREGUNTAS['base']}/{q['slug']}/"
 
 
-def preguntas_de(s):
-    return [p for p in (s.get("preguntas") or []) if isinstance(p, dict) and str(p.get("pregunta") or "").strip()]
-
-
-def pregunta_items(s):
-    return "".join(f'<li><a href="{pregunta_url(p)}"><span>{esc(p["pregunta"])}</span>{icon("arrow-right", "q-arrow")}</a></li>'
-                   for p in preguntas_de(s))
+def q_items(qs):
+    return "".join(f'<li><a href="{q_url(q)}"><span>{esc(q["pregunta"])}</span>{icon("arrow-right", "q-arrow")}</a></li>'
+                   for q in qs)
 
 
 def svc_preguntas(slug):
-    s = next((x for x in SERVICIOS if x["slug"] == slug), None)
-    if not s or not preguntas_de(s):
+    qs = [q for q in PUBLICADAS if q["servicio_asociado"] == slug]
+    if not qs:
         return ""
     return f"""<div class="rel-q">
       <h2>Preguntas relacionadas</h2>
-      <ul>{pregunta_items(s)}</ul>
+      <ul>{q_items(qs)}</ul>
     </div>"""
 
 
@@ -212,33 +213,25 @@ def svc_nav(slug):
     return f'<div class="wrap"><nav class="svc-nav" aria-label="Otros servicios">{links}</nav></div>'
 
 
-def preguntas_carrusel():
-    con = [s for s in SERVICIOS if preguntas_de(s)]
-    if not con:
+def destacadas_portada():
+    qs = [q for q in PUBLICADAS if q.get("destacada")]
+    qs.sort(key=lambda q: (q["orden_portada"], q["_svc_i"], q["orden"], q["pregunta"]))
+    return qs[:5]
+
+
+def preguntas_portada():
+    qs = destacadas_portada()
+    if not qs:
         return ""
-    n = len(con)
-    slides = ""
-    for i, s in enumerate(con, 1):
-        slides += f"""<div class="faq-slide" role="group" aria-roledescription="diapositiva" aria-label="{i} de {n}: {esc(s["name"])}">
-          <a class="faq-svc" href="/servicios/{s["slug"]}/">{icon(SVC_ICONS.get(s["slug"], "doc-check"))}<span>{esc(s["name"])}</span></a>
-          <ul class="faq-q">{pregunta_items(s)}</ul>
-        </div>"""
-    dots = "".join(f'<button type="button" data-dot="{i}" aria-label="Ver preguntas de {esc(s["name"])}"></button>'
-                   for i, s in enumerate(con))
     return f"""<section class="home-faq">
   <div class="wrap faq-grid">
     <div class="faq-head">
       <h2>¿Tienes preguntas?</h2>
       <p>Preguntas frecuentes sobre cada uno de nuestros servicios.</p>
-      <a class="faq-all" href="/dudas/">Ver todas las preguntas <span aria-hidden="true">→</span></a>
     </div>
-    <div class="faq-carousel" data-carousel>
-      <div class="faq-track" tabindex="0" role="region" aria-roledescription="carrusel" aria-label="Preguntas por servicio">{slides}</div>
-      <div class="faq-nav">
-        <button type="button" class="faq-arrow" data-prev aria-label="Servicio anterior">{icon("arrow-left")}</button>
-        <div class="faq-dots">{dots}</div>
-        <button type="button" class="faq-arrow" data-next aria-label="Servicio siguiente">{icon("arrow-right")}</button>
-      </div>
+    <div class="faq-list">
+      <ul class="faq-q">{q_items(qs)}</ul>
+      <a class="faq-all" href="/{PREGUNTAS['base']}/">Ver todas las preguntas <span aria-hidden="true">→</span></a>
     </div>
   </div>
 </section>"""
@@ -247,7 +240,7 @@ def preguntas_carrusel():
 def fill_services(text):
     text = text.replace("{{svc_panels}}", svc_panels())
     text = text.replace("{{svc_panels_sum}}", svc_panels(summary=True))
-    text = text.replace("{{preguntas_carrusel}}", preguntas_carrusel())
+    text = text.replace("{{preguntas_portada}}", preguntas_portada())
     for s in SERVICIOS:
         text = text.replace("{{svc:" + s["slug"] + "}}", esc(s["name"]))
         text = text.replace("{{svc_preguntas:" + s["slug"] + "}}", svc_preguntas(s["slug"]))
@@ -257,7 +250,10 @@ def fill_services(text):
 
 
 def render(url, content, title, description, nav="", logo="cuadrado",
-           og_image="/assets/img/logo-cuadrado.png", og_type="website", head_extra=""):
+           og_image="/assets/img/logo-cuadrado.png", og_type="website", head_extra="",
+           noindex=False, lastmod=None):
+    if noindex:
+        head_extra = '<meta name="robots" content="noindex, follow">\n' + head_extra
     page = LAYOUT
     for key, val in {
         "{{title}}": esc(title),
@@ -280,8 +276,14 @@ def render(url, content, title, description, nav="", logo="cuadrado",
         dest = OUT / url.strip("/")
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(page, encoding="utf-8")
-    if not url.endswith(".html"):
-        SITEMAP.append(url)
+    # Sitemap: solo direcciones canónicas, indexables y publicadas
+    if not url.endswith(".html") and not noindex:
+        SITEMAP.append((url, lastmod))
+
+
+def max_fecha(*fechas):
+    validas = [f for f in fechas if f and re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(f))]
+    return max(validas) if validas else None
 
 
 def parse_page(path):
@@ -294,7 +296,7 @@ def parse_page(path):
 
 # ---------- Carga de artículos ----------
 
-def load_items(name):
+def load_items(name, base=None):
     items = []
     folder = ROOT / "content" / name
     if not folder.exists():
@@ -313,7 +315,7 @@ def load_items(name):
             m = re.match(r"(\d{4}-\d{2}-\d{2})", f.stem)
             data["date"] = m.group(1) if m else ""
         data["collection"] = name
-        data["url"] = f"/{name}/{f.stem}/"
+        data["url"] = f"/{base or name}/{f.stem}/"
         data["minutes"] = minutos_lectura(data.get("body"))
         items.append(data)
     items.sort(key=lambda d: (d["date"], d["slug"]), reverse=True)
@@ -388,7 +390,7 @@ def ed_featured(item, cfg):
 
 
 def build_editorial(cfg, items):
-    name = cfg["name"]
+    name = cfg["base"]
     if items:
         featured = next((i for i in items if i.get("featured")), items[0])
         rest = [i for i in items if i is not featured]
@@ -410,7 +412,8 @@ def build_editorial(cfg, items):
     {listing}
   </div>
 </section>'''
-    render(f"/{name}/", content, f'{cfg["label"]} | Viple Consultores', cfg["intro"] + ".", nav=cfg["nav"])
+    render(f"/{name}/", content, f'{cfg["label"]} | Viple Consultores', cfg["intro"] + ".", nav=cfg["nav"],
+           noindex=not items, lastmod=max_fecha(LISTADOS_LASTMOD, *(i["date"] for i in items)))
 
     for item in items:
         render_article(cfg, item, items)
@@ -438,7 +441,7 @@ def related(item, items, n=3):
 
 
 def render_article(cfg, item, items):
-    name = cfg["name"]
+    name = cfg["base"]
     body_html = markdown.markdown(item.get("body") or "", extensions=["extra", "sane_lists"])
     author = item.get("author") or DEFAULT_AUTHOR
     cat = item.get("category") or ""
@@ -498,179 +501,158 @@ def render_article(cfg, item, items):
                   f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>')
     render(item["url"], content, f'{item.get("title")} | Viple Consultores',
            item.get("summary") or cfg["intro"], nav=cfg["nav"], og_image=image,
-           og_type="article", head_extra=head_extra)
+           og_type="article", head_extra=head_extra, lastmod=max_fecha(item["date"]))
 
 
-# ---------- Sección «Te ayudamos con tus dudas» ----------
+# ---------- Sección «¿Tienes preguntas?» (content/preguntas) ----------
 
-def load_temas():
-    temas = {}
-    folder = ROOT / "content" / "temas-dudas"
+SERVICE_NAMES = {s["slug"]: s["name"] for s in SERVICIOS}
+SERVICE_ORDER = {s["slug"]: i for i, s in enumerate(SERVICIOS)}
+
+
+def texto_plano(md):
+    txt = re.sub(r"<[^>]+>", " ", markdown.markdown(md or ""))
+    return re.sub(r"\s+", " ", html.unescape(txt)).strip()
+
+
+def _num(v, default):
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return default
+
+
+def load_preguntas():
+    """Lee content/preguntas. Solo devuelve las publicadas y completas; los borradores no salen del repositorio."""
+    folder = ROOT / "content" / "preguntas"
+    publicadas, total, revisar = [], 0, []
     for f in (sorted(folder.glob("*.json")) if folder.exists() else []):
         try:
-            t = json.loads(f.read_text(encoding="utf-8"))
+            d = json.loads(f.read_text(encoding="utf-8"))
         except Exception as e:
-            print(f"  ! No se pudo leer el tema {f.name}: {e}")
+            print(f"  ! No se pudo leer la pregunta {f.name}: {e}")
             continue
-        tid = str(t.get("id") or f.stem).strip()
-        try:
-            orden = int(t.get("order", 99))
-        except (TypeError, ValueError):
-            orden = 99
-        temas[tid] = {"id": tid, "name": t.get("name") or tid, "order": orden}
-    return temas
-
-
-def texto_plano(md, n=170):
-    txt = re.sub(r"<[^>]+>", " ", markdown.markdown(md or ""))
-    txt = re.sub(r"\s+", " ", html.unescape(txt)).strip()
-    return txt if len(txt) <= n else txt[:n].rsplit(" ", 1)[0] + "…"
-
-
-def prep_dudas(items, temas):
-    revisar = []
-    for it in items:
-        aud = str(it.get("audience") or "").strip().lower()
-        it["aud"] = aud if aud in PUBLICOS else ""
-        it["tema"] = temas.get(str(it.get("topic") or "").strip())
-        it["resumen"] = it.get("summary") or texto_plano(it.get("body"))
-        if not it["aud"] or not it["tema"]:
-            revisar.append(it["slug"])
+        total += 1
+        if d.get("publicada") is not True:
+            continue
+        q = {
+            "pregunta": str(d.get("pregunta") or "").strip(),
+            "slug": str(d.get("slug") or f.stem).strip(),
+            "servicio_asociado": str(d.get("servicio_asociado") or "").strip(),
+            "respuesta": str(d.get("respuesta") or "").strip(),
+            "title": str(d.get("title") or "").strip(),
+            "meta_description": str(d.get("meta_description") or "").strip(),
+            "destacada": d.get("destacada") is True,
+            "fecha": str(d.get("fecha_actualizacion") or "")[:10],
+            "orden": _num(d.get("orden"), 99),
+            "orden_portada": _num(d.get("orden_portada"), 99),
+        }
+        faltan = [k for k, v in (("pregunta", q["pregunta"]), ("respuesta", q["respuesta"]), ("title", q["title"]),
+                                 ("meta_description", q["meta_description"]))
+                  if not v]
+        if q["servicio_asociado"] not in SERVICE_NAMES:
+            faltan.append("servicio_asociado")
+        if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", q["slug"]):
+            faltan.append("slug")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", q["fecha"]):
+            faltan.append("fecha_actualizacion")
+        if faltan:
+            revisar.append(f'{f.name} (falta: {", ".join(faltan)})')
+            continue
+        q["_svc_i"] = SERVICE_ORDER[q["servicio_asociado"]]
+        publicadas.append(q)
     if revisar:
-        print("  ! Dudas sin público o tema válido (solo visibles en «Ver todo»): " + ", ".join(revisar))
-    return items
+        print("  ! Preguntas marcadas como publicadas pero incompletas (NO se publican): " + "; ".join(revisar))
+    vistos = set()
+    for q in list(publicadas):
+        if q["slug"] in vistos:
+            print(f'  ! Slug repetido, se omite: {q["slug"]}')
+            publicadas.remove(q)
+        vistos.add(q["slug"])
+    publicadas.sort(key=lambda q: (q["_svc_i"], q["orden"], q["pregunta"]))
+    return publicadas, total
 
 
-def duda_card(it):
-    tema = it["tema"]["name"] if it["tema"] else ""
-    tid = it["tema"]["id"] if it["tema"] else ""
-    aud = PUBLICOS.get(it["aud"], "")
-    meta = (f'<span class="dd-topic">{esc(tema)}</span>' if tema else "") + \
-           (f'<span class="dd-aud">{aud}</span>' if aud else "")
-    return f'''<li class="dd-item" data-aud="{it["aud"]}" data-topic="{esc(tid)}">
-      <a href="{it["url"]}">
-        <span class="dd-meta">{meta}</span>
-        <h3>{esc(it.get("title"))}</h3>
-        <p>{esc(it["resumen"])}</p>
-        <span class="dd-more">Leer respuesta →</span>
-      </a>
-    </li>'''
+def titulo_seo(t):
+    t = t.strip()
+    return t if t.endswith("| Viple Consultores") else f"{t} | Viple Consultores"
 
 
-def build_dudas(items, temas):
-    name = DUDAS["name"]
-    if items:
-        usados = {it["tema"]["id"] for it in items if it["tema"]}
-        lista = sorted((t for t in temas.values() if t["id"] in usados), key=lambda t: (t["order"], t["name"]))
-        topic_btns = ('<button type="button" data-topic="" aria-pressed="true">Todos los temas</button>' +
-                      "".join(f'<button type="button" data-topic="{esc(t["id"])}" aria-pressed="false">{esc(t["name"])}</button>'
-                              for t in lista))
-        listing = f'''<div class="dd-filters" data-dd-filters>
-      <p class="dd-q" id="dd-q-aud">¿Qué información buscas?</p>
-      <div class="seg" role="group" aria-labelledby="dd-q-aud">
-        <button type="button" data-aud="todo" aria-pressed="true">Ver todo</button>
-        <button type="button" data-aud="personas" aria-pressed="false">Para mí</button>
-        <button type="button" data-aud="negocios" aria-pressed="false">Para mi negocio</button>
-      </div>
-      <h2 class="dd-h" id="dd-q-topic">Explora por tema</h2>
-      <div class="chips" role="group" aria-labelledby="dd-q-topic">{topic_btns}</div>
-    </div>
-    <p class="dd-count" aria-live="polite" data-dd-count></p>
-    <ul class="dd-list" data-dd-list>{"".join(duda_card(it) for it in items)}</ul>
-    <p class="dd-none" data-dd-none hidden>Todavía no hay preguntas para esta combinación. Prueba con otro tema o con «Ver todo».</p>'''
-    else:
-        listing = empty_box(DUDAS["empty"])
-    content = f'''
-<div class="page-head ed-head">
-  <div class="wrap">
-    <h1>{DUDAS["label"]}</h1>
-    <p>{DUDAS["intro"]}</p>
-  </div>
-</div>
-<section class="ed dd">
-  <div class="wrap">
-    {listing}
-  </div>
-</section>'''
-    render(f"/{name}/", content, f'{DUDAS["label"]} | Viple Consultores', DUDAS["intro"], nav="dudas")
-    for it in items:
-        render_duda(it, items)
-
-
-def render_duda(it, items):
-    name = DUDAS["name"]
-    body_html = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
-    author = it.get("author") or DEFAULT_AUTHOR
-    tema = it["tema"]["name"] if it["tema"] else ""
-    aud = PUBLICOS.get(it["aud"], "")
-    adjunto = ""
-    if it.get("attachment"):
-        adjunto = (f'<p class="dd-file"><a href="{esc(it["attachment"])}" target="_blank" rel="noopener">'
-                   f'Descargar archivo de apoyo</a></p>')
-    sources = [x for x in (it.get("sources") or []) if isinstance(x, dict) and (x.get("url") or x.get("title"))]
-    sources_html = ""
-    if sources:
-        lis = "".join(
-            f'<li><a href="{esc(x["url"])}" target="_blank" rel="noopener">{esc(x.get("title") or x["url"])}</a></li>'
-            if x.get("url") else f'<li>{esc(x.get("title"))}</li>' for x in sources)
-        sources_html = f'<aside class="ed-sources"><h2>Fuentes</h2><ul>{lis}</ul></aside>'
-    otros = [i for i in items if i is not it]
-    mismo = [i for i in otros if i["tema"] and it["tema"] and i["tema"]["id"] == it["tema"]["id"]]
-    rel = (mismo + [i for i in otros if i not in mismo])[:3]
-    rel_html = (f'''<section class="ed-related">
-  <div class="wrap">
-    <h2>Otras preguntas</h2>
-    <ul class="dd-list">{"".join(duda_card(i) for i in rel)}</ul>
-  </div>
-</section>''' if rel else "")
-    tags = (f'<span class="ed-cat">{esc(tema)}</span>' if tema else "") + \
-           (f'<span class="dd-aud on-dark">{aud}</span>' if aud else "")
-    content = f'''
+def render_pregunta(q):
+    base = PREGUNTAS["base"]
+    svc = q["servicio_asociado"]
+    body_html = markdown.markdown(q["respuesta"], extensions=["extra", "sane_lists"])
+    content = f"""
 <div class="page-head ed-head ed-article-head">
   <div class="wrap ed-narrow">
-    <a class="ed-back-top" href="/{name}/">← {DUDAS["label"]}</a>
-    <div class="dd-tags">{tags}</div>
-    <h1>{esc(it.get("title"))}</h1>
-    <p class="ed-byline">Por {esc(author)} <span aria-hidden="true">·</span> <time datetime="{it["date"]}">{fecha_larga(it["date"])}</time> <span aria-hidden="true">·</span> {it["minutes"]} min de lectura</p>
+    <a class="ed-back-top" href="/{base}/">← {PREGUNTAS["label"]}</a>
+    <span class="ed-cat">{esc(SERVICE_NAMES[svc])}</span>
+    <h1>{esc(q["pregunta"])}</h1>
+    <p class="ed-byline">Actualizado el <time datetime="{q["fecha"]}">{fecha_larga(q["fecha"])}</time></p>
   </div>
 </div>
 <section class="ed">
   <article class="wrap ed-narrow">
     <div class="prose ed-prose">{body_html}</div>
-    {adjunto}
-    {sources_html}
-    {share_links(it)}
-    <a class="back" href="/{name}/">← Volver a {DUDAS["label"]}</a>
-  </article>
-</section>
-{rel_html}'''
-    ld = {"@context": "https://schema.org", "@type": "Article", "headline": it.get("title"),
-          "description": it["resumen"], "datePublished": it["date"],
-          "author": {"@type": "Person", "name": author},
-          "publisher": {"@type": "Organization", "name": "Viple Consultores", "url": SITE_URL},
-          "mainEntityOfPage": SITE_URL + it["url"]}
-    render(it["url"], content, f'{it.get("title")} | Viple Consultores', it["resumen"], nav="dudas",
-           og_type="article",
-           head_extra=f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>')
-
-
-def dudas_home(items):
-    destacadas = [i for i in items if i.get("featured_home")]
-    elegidas = (destacadas or items)[:3]
-    if elegidas:
-        cuerpo = f'<ul class="dd-list dd-home">{"".join(duda_card(i) for i in elegidas)}</ul>'
-    else:
-        cuerpo = f'<p class="dd-soon">{esc(DUDAS["empty"])}</p>'
-    return f'''<section class="home-dudas">
-  <div class="wrap">
-    <div class="section-head reveal">
-      <h2>¿Tienes preguntas?</h2>
-      <p>{DUDAS["intro"]}</p>
+    <p class="q-svc">Servicio relacionado: <a href="/servicios/{svc}/">{esc(SERVICE_NAMES[svc])} <span aria-hidden="true">→</span></a></p>
+    <div class="q-cta">
+      <p>¿Quieres revisar tu caso?</p>
+      <a class="btn" href="/contacto/">Conversemos</a>
     </div>
-    {cuerpo}
-    <p class="dd-all"><a href="/dudas/">Ver todas las preguntas →</a></p>
+    {share_links({"url": q_url(q), "title": q["pregunta"]})}
+    <a class="back" href="/{base}/">← Volver a {PREGUNTAS["label"]}</a>
+  </article>
+</section>"""
+    ld = {"@context": "https://schema.org", "@type": "FAQPage", "url": SITE_URL + q_url(q),
+          "mainEntity": [{"@type": "Question", "name": q["pregunta"],
+                          "acceptedAnswer": {"@type": "Answer", "text": texto_plano(q["respuesta"])}}]}
+    render(q_url(q), content, titulo_seo(q["title"]), q["meta_description"], nav="preguntas", og_type="article",
+           head_extra=f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>',
+           lastmod=q["fecha"])
+
+
+def build_preguntas(publicadas):
+    base = PREGUNTAS["base"]
+    if publicadas:
+        grupos = ""
+        for s in SERVICIOS:
+            qs = [q for q in publicadas if q["servicio_asociado"] == s["slug"]]
+            if not qs:
+                continue
+            lis = "".join(f'<li><a href="{q_url(q)}">{esc(q["pregunta"])}</a></li>' for q in qs)
+            grupos += f"""<details class="acc">
+      <summary><span class="acc-ico">{icon(SVC_ICONS.get(s["slug"], "doc-check"))}</span><span class="acc-name">{esc(s["name"])}</span><span class="acc-n">{len(qs)}</span></summary>
+      <ul class="acc-list">{lis}</ul>
+    </details>"""
+        listing = f'<div class="acc-group">{grupos}</div>'
+        ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": PREGUNTAS["label"],
+              "url": f"{SITE_URL}/{base}/",
+              "mainEntity": {"@type": "ItemList", "itemListElement": [
+                  {"@type": "ListItem", "position": i, "url": SITE_URL + q_url(q), "name": q["pregunta"]}
+                  for i, q in enumerate(publicadas, 1)]}}
+        head_extra = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
+    else:
+        listing = (f'<div class="empty"><img src="/assets/img/logo-cuadrado.png" alt="">'
+                   f'<p>{esc(PREGUNTAS["empty"])}</p>'
+                   f'<p>Si tienes una consulta, <a href="/contacto/">conversemos</a>.</p></div>')
+        head_extra = ""
+    content = f"""
+<div class="page-head ed-head">
+  <div class="wrap">
+    <h1>{PREGUNTAS["label"]}</h1>
+    <p>{PREGUNTAS["intro"]}</p>
   </div>
-</section>'''
+</div>
+<section class="ed">
+  <div class="wrap">
+    {listing}
+  </div>
+</section>"""
+    render(f"/{base}/", content, f'{PREGUNTAS["label"]} | Viple Consultores', PREGUNTAS["intro"], nav="preguntas",
+           head_extra=head_extra, noindex=not publicadas,
+           lastmod=max_fecha(LISTADOS_LASTMOD, *(q["fecha"] for q in publicadas)))
+    for q in publicadas:
+        render_pregunta(q)
 
 
 # ---------- Sección «Novedades» ----------
@@ -694,7 +676,8 @@ def build_novedades(items):
     {listing}
   </div>
 </section>'''
-    render(f"/{name}/", content, f'{cfg["eyebrow"]} | Viple Consultores', cfg["intro"], nav=cfg["nav"])
+    render(f"/{name}/", content, f'{cfg["eyebrow"]} | Viple Consultores', cfg["intro"], nav=cfg["nav"],
+           noindex=not items, lastmod=max_fecha(LISTADOS_LASTMOD, *(i["date"] for i in items)))
 
     for item in items:
         body_html = markdown.markdown(item.get("body") or "", extensions=["extra", "sane_lists"])
@@ -729,7 +712,7 @@ def build_novedades(items):
 </section>'''
         render(item["url"], content, f'{item.get("title")} | Viple Consultores',
                item.get("summary") or cfg["intro"], nav=cfg["nav"],
-               og_image=item.get("image") or "/assets/img/logo-cuadrado.png")
+               og_image=item.get("image") or "/assets/img/logo-cuadrado.png", lastmod=max_fecha(item["date"]))
 
 
 # ---------- Sección «Presentaciones especiales» (content/presentaciones) ----------
@@ -803,7 +786,7 @@ def render_presentacion(it):
   </div>
 </section>'''
     render(it["url"], content, f'{it.get("title")} | Viple Consultores', it.get("summary") or PRESENTACIONES["intro"],
-           nav="presentaciones", og_image=it.get("image") or slides[0])
+           nav="presentaciones", og_image=it.get("image") or slides[0], lastmod=max_fecha(it["date"]))
 
 
 def build_presentaciones(items):
@@ -821,7 +804,8 @@ def build_presentaciones(items):
     {listing}
   </div>
 </section>'''
-    render("/presentaciones/", content, f'{cfg["h1"]} | Viple Consultores', cfg["intro"], nav="presentaciones")
+    render("/presentaciones/", content, f'{cfg["h1"]} | Viple Consultores', cfg["intro"], nav="presentaciones",
+           noindex=not items, lastmod=max_fecha(LISTADOS_LASTMOD, *(i["date"] for i in items)))
     for it in items:
         if pres_slides(it):
             render_presentacion(it)
@@ -838,7 +822,7 @@ def latest_block(all_items):
     <div class="section-head reveal">
       <h2>Lo último publicado</h2>
       <p>Artículos sobre cómo mejorar el trabajo legal, nuevas normas y asuntos de interés para tu empresa.
-      <br><a href="/notas/" style="color:var(--navy)">Ver «¿Tu equipo odia a Legal?»</a> · <a href="/novedades/" style="color:var(--navy)">Ver novedades</a></p>
+      <br><a href="/gestion-legal/" style="color:var(--navy)">Ver «¿Tu equipo odia a Legal?»</a> · <a href="/novedades/" style="color:var(--navy)">Ver novedades</a></p>
     </div>
     <div class="posts">{cards}</div>
   </div>
@@ -847,18 +831,36 @@ def latest_block(all_items):
 
 # ---------- Construcción ----------
 
+def service_ld(slug, body):
+    """Nodo Service de cada página de servicio, con el título y la descripción visibles del hero."""
+    m = re.search(r'<section class="svc-hero[^"]*">.*?<h1>(.*?)</h1>\s*<p>(.*?)</p>', body, re.S)
+    if not m:
+        return ""
+    limpio = lambda t: html.unescape(re.sub(r"<[^>]+>", "", t)).strip()
+    ld = {"@context": "https://schema.org", "@type": "Service",
+          "@id": f"{SITE_URL}/servicios/{slug}/#service",
+          "name": limpio(m.group(1)), "description": limpio(m.group(2)),
+          "url": f"{SITE_URL}/servicios/{slug}/",
+          "serviceType": SERVICE_NAMES.get(slug, ""),
+          "provider": {"@type": ["Organization", "LegalService"], "@id": ORG_ID,
+                       "name": "Viple Consultores", "url": SITE_URL + "/"},
+          "areaServed": {"@type": "Country", "name": "Perú"}}
+    return f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
+
+
 def main():
     # En Windows/OneDrive alguna carpeta puede quedar bloqueada: se borra lo posible y se sobrescribe el resto
     shutil.rmtree(OUT, ignore_errors=True)
     OUT.mkdir(exist_ok=True)
     shutil.copytree(ROOT / "assets", OUT / "assets", dirs_exist_ok=True)
     shutil.copytree(ROOT / "admin", OUT / "admin", dirs_exist_ok=True)
+    # Redirecciones 301 de Netlify (direcciones antiguas → nuevas)
+    shutil.copy2(ROOT / "_redirects", OUT / "_redirects")
 
-    ideas = load_items("notas")
+    ideas = load_items("notas", base=IDEAS["base"])
     novedades = load_items("novedades")
-    temas = load_temas()
-    dudas = prep_dudas(load_items("dudas"), temas)
-    DUDAS_SLUGS.update(d["slug"] for d in dudas)
+    publicadas, total_preguntas = load_preguntas()
+    PUBLICADAS[:] = publicadas
     everything = sorted(ideas + novedades, key=lambda d: d["date"], reverse=True)
 
     for path in sorted((SRC / "pages").rglob("*.html")):
@@ -873,26 +875,40 @@ def main():
             url = "/404.html"
         meta, body = parse_page(path)
         body = body.replace("{{latest}}", latest_block(everything))
-        body = body.replace("{{dudas_home}}", dudas_home(dudas))
         body = fill_services(body)
         meta["title"] = fill_services(meta.get("title", "Viple Consultores")).replace("&amp;", "&")
+        # Fecha de última modificación: la guardada en la página, o la de las preguntas que muestra
+        lastmod = meta.get("lastmod")
+        head_extra = ""
+        if url == "/":
+            lastmod = max_fecha(lastmod, *(q["fecha"] for q in destacadas_portada()))
+        m = re.fullmatch(r"/servicios/([a-z0-9-]+)/", url)
+        if m:
+            slug = m.group(1)
+            lastmod = max_fecha(lastmod, *(q["fecha"] for q in publicadas if q["servicio_asociado"] == slug))
+            head_extra = service_ld(slug, body)
+        if not lastmod and url != "/404.html":
+            print(f"  ! Sin fecha de última modificación (se omite lastmod): {url}")
         render(url, body, meta.get("title", "Viple Consultores"), meta.get("description", ""),
                nav=meta.get("nav", ""), logo=meta.get("logo", "cuadrado"),
-               og_image=meta.get("og_image", "/assets/img/logo-cuadrado.png"))
+               og_image=meta.get("og_image", "/assets/img/logo-cuadrado.png"),
+               head_extra=head_extra, lastmod=lastmod)
 
     build_editorial(IDEAS, ideas)
-    build_dudas(dudas, temas)
+    build_preguntas(publicadas)
     build_novedades(novedades)
     build_presentaciones(load_items("presentaciones"))
 
-    urls = "".join(f"<url><loc>{SITE_URL}{u}</loc></url>" for u in SITEMAP)
+    urls = ""
+    for u, lm in SITEMAP:
+        urls += f"<url><loc>{SITE_URL}{u}</loc>" + (f"<lastmod>{lm}</lastmod>" if lm else "") + "</url>"
     (OUT / "sitemap.xml").write_text(
         f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>',
         encoding="utf-8")
     (OUT / "robots.txt").write_text(f"User-agent: *\nDisallow: /admin/\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
-    print(f"Sitio generado en _site/ · {len(SITEMAP)} páginas · "
-          f"{len(ideas)} artículos · {len(dudas)} dudas · {len(novedades)} novedades")
+    print(f"Sitio generado en _site/ - {len(SITEMAP)} paginas en el sitemap - "
+          f"{len(ideas)} articulos - {len(publicadas)} de {total_preguntas} preguntas publicadas - {len(novedades)} novedades")
 
 
 if __name__ == "__main__":

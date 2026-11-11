@@ -49,176 +49,128 @@ collections:
             widget: list
             allow_add: false
             summary: "{{fields.name}}"
-            hint: Cambia nombres, descripciones y preguntas frecuentes. No agregues ni quites servicios desde aquí (cada uno tiene su propia página).
+            hint: Cambia nombres o descripciones (las preguntas se editan en «¿Tienes preguntas?»). No agregues ni quites servicios desde aquí (cada uno tiene su propia página).
             fields:
               - { label: Dirección de la página (no cambiar), name: slug, widget: hidden }
               - { label: Nombre, name: name, widget: string, hint: "Título completo: se usa en la página del servicio, la portada y /servicios/." }
               - { label: Nombre corto para el menú, name: menu, widget: string, required: false, hint: "Opcional. Si lo dejas vacío, el menú desplegable usa el nombre completo." }
               - { label: Descripción breve, name: summary, widget: text }
-              - label: Preguntas frecuentes de este servicio
-                name: preguntas
-                widget: list
-                required: false
-                summary: "{{fields.pregunta}}"
-                label_singular: pregunta
-                hint: "Se muestran en el carrusel «¿Tienes preguntas?» de la portada y en «Preguntas relacionadas» de la página del servicio. Recomendado: 2 o 3 por servicio. Puedes reordenarlas arrastrándolas."
-                fields:
-                  - { label: Pregunta, name: pregunta, widget: string }
-                  - label: Respuesta publicada (opcional)
-                    name: respuesta
-                    widget: relation
-                    collection: dudas
-                    value_field: "{{slug}}"
-                    search_fields: [title]
-                    display_fields: [title]
-                    required: false
-                    hint: "Si eliges una respuesta de «¿Tienes preguntas?», el enlace lleva directo a ella. Si la dejas vacía, lleva a la página «¿Tienes preguntas?»."
 
-  # ---------------- ¿TIENES PREGUNTAS? (dudas) ----------------
-  # (content/dudas, se publican en /dudas/<archivo>/; el enlace no cambia aunque edites el título)
-  - name: dudas
+  # ---------------- ¿TIENES PREGUNTAS? ----------------
+  # Fuente única de las preguntas: content/preguntas/<slug>.json.
+  # Se usan en /preguntas/ (índice por servicio), /preguntas/<slug>/ (respuesta), la portada (destacadas)
+  # y «Preguntas relacionadas» de cada servicio. Solo se muestran las que tienen «Publicada» marcada
+  # y están completas (respuesta, título SEO, descripción SEO y fecha de actualización).
+  - name: preguntas
     label: ¿Tienes preguntas?
     label_singular: Pregunta
-    description: Preguntas y respuestas de «¿Tienes preguntas?» del menú (/dudas/). Puedes escribir la respuesta o pegarla desde Word.
-    folder: content/dudas
+    description: "Preguntas y respuestas de «¿Tienes preguntas?» (/preguntas/). Una pregunta solo aparece en la web si marcas «Publicada» y completas la respuesta, el título SEO, la descripción SEO y la fecha de actualización. Para ver cómo queda sin publicarla: márcala como publicada, pulsa Guardar y abre la vista previa; recién llega a la web con «Publicar ahora»."
+    folder: content/preguntas
     create: true
     delete: true
     extension: json
     format: json
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    preview_path: "dudas/{{slug}}"
-    summary: "{{title}} · {{audience}} · {{topic}}"
-    sortable_fields: [date, title]
+    identifier_field: pregunta
+    slug: "{{fields.slug}}"
+    preview_path: "preguntas/{{slug}}"
+    summary: "{{pregunta}} · {{servicio_asociado}}"
+    sortable_fields: [pregunta, fecha_actualizacion, orden]
     view_filters:
-      - label: Borradores
-        field: draft
+      - label: Publicadas
+        field: publicada
         pattern: true
+      - label: Borradores (no publicadas)
+        field: publicada
+        pattern: false
       - label: Destacadas en la portada
-        field: featured_home
+        field: destacada
         pattern: true
-      - label: Para personas
-        field: audience
-        pattern: personas
-      - label: Para negocios
-        field: audience
-        pattern: negocios
-      - label: Para ambos
-        field: audience
-        pattern: ambos
     view_groups:
-      - label: Tema
-        field: topic
-      - label: Público
-        field: audience
+      - label: Servicio
+        field: servicio_asociado
     fields:
-      - label: Título o pregunta
-        name: title
+      - label: Pregunta
+        name: pregunta
         widget: string
-      - label: ¿A quién le sirve esta nota?
-        name: audience
+        hint: Es el título grande (H1) de la página de la respuesta; se muestra completa.
+      - label: Dirección (slug)
+        name: slug
+        widget: string
+        pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Solo minúsculas sin tildes, números y guiones. Ej.: promociones-whatsapp"]
+        hint: "La página será vipleconsultores.com/preguntas/<slug>/. No la cambies después de publicar (los enlaces compartidos dejarían de funcionar)."
+      - label: Servicio asociado
+        name: servicio_asociado
         widget: select
         options:
-          - { label: Personas, value: personas }
-          - { label: Negocios, value: negocios }
-          - { label: Ambos, value: ambos }
-      - label: Tema
-        name: topic
-        widget: relation
-        collection: temas_dudas
-        value_field: id
-        search_fields: [name]
-        display_fields: [name]
-        options_length: 100
-        hint: Si el tema que necesitas no existe, créalo en «¿Tienes preguntas? · Temas» y vuelve aquí.
+          - { label: Estructuramos tu negocio, value: estructura-empresarial }
+          - { label: Protegemos tu inversión, value: protegemos-tu-inversion }
+          - { label: Contratos que funcionan en la práctica, value: contratos }
+          - { label: Protección de datos personales, value: proteccion-de-datos }
+          - { label: Prácticas comerciales y reclamos, value: reclamos-y-denuncias }
+          - { label: Diseño de herramientas legales, value: herramientas-legales }
       - label: Respuesta
-        name: body
+        name: respuesta
         widget: markdown
-        hint: Puedes escribir aquí o copiar y pegar desde Word; luego revisa títulos, listas y negritas con la barra de formato.
-      - label: Resumen
-        name: summary
+        required: false
+        hint: Párrafos, listas y enlaces. Puedes pegar desde Word y revisar el formato con la barra. Obligatoria para publicar.
+      - label: Título SEO (pestaña del navegador y Google)
+        name: title
+        widget: string
+        required: false
+        hint: "Idealmente hasta unos 60 caracteres. Si no termina en «| Viple Consultores», se agrega solo. Obligatorio para publicar."
+      - label: Descripción SEO (meta description)
+        name: meta_description
         widget: text
         required: false
-        hint: Una o dos líneas para la tarjeta del listado. Si lo dejas vacío, se usa el inicio de la respuesta.
-      - label: Archivo de apoyo
-        name: attachment
-        widget: file
-        required: false
-        hint: Por ejemplo, el Word o PDF original o un modelo descargable. Aparece como enlace al final de la respuesta.
-      - label: Destacar en la portada
-        name: featured_home
+        hint: Idealmente hasta unos 155 caracteres; resume la respuesta. Obligatoria para publicar.
+      - label: Publicada
+        name: publicada
         widget: boolean
         default: false
         required: false
-        hint: La portada muestra hasta 3 notas destacadas (las más recientes). Si no destacas ninguna, muestra las 3 últimas publicadas.
-      - label: Fecha
-        name: date
+        hint: Márcala solo cuando la respuesta y los datos SEO estén completos. Si falta algo, la web no la muestra aunque esté marcada.
+      - label: Destacada en la portada
+        name: destacada
+        widget: boolean
+        default: false
+        required: false
+        hint: La portada muestra hasta 5 preguntas que estén destacadas Y publicadas. Destacar no publica.
+      - label: Orden dentro del servicio
+        name: orden
+        widget: number
+        value_type: int
+        default: 10
+        required: false
+        hint: Las preguntas de cada servicio se muestran de menor a mayor.
+      - label: Orden en la portada
+        name: orden_portada
+        widget: number
+        value_type: int
+        required: false
+        hint: Solo para destacadas. De menor a mayor (1 = primera).
+      - label: Fecha de actualización
+        name: fecha_actualizacion
         widget: datetime
         date_format: DD/MM/YYYY
         time_format: false
         format: YYYY-MM-DD
         picker_utc: true
         required: false
-        hint: Si la dejas vacía, se usa la fecha en que creaste la entrada.
-      - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
-      - label: Fuentes
-        name: sources
-        widget: list
-        required: false
-        summary: "{{fields.title}}"
-        hint: Opcional. Normas, resoluciones o artículos citados.
-        fields:
-          - { label: Nombre de la fuente, name: title, widget: string }
-          - { label: Enlace (https://…), name: url, widget: string, required: false }
-      - label: Borrador (no publicar todavía)
-        name: draft
-        widget: boolean
-        default: false
-        required: false
-
-  # ---------------- ¿TIENES PREGUNTAS? · TEMAS ----------------
-  # (content/temas-dudas). Cada nota de dudas se asocia a un tema por su identificador.
-  - name: temas_dudas
-    label: ¿Tienes preguntas? · Temas
-    label_singular: Tema
-    description: Temas para filtrar las preguntas de «¿Tienes preguntas?» del menú (/dudas/). En la web solo aparecen los temas que tienen al menos una nota publicada. Puedes cambiar el nombre visible y el orden cuando quieras; el identificador no se cambia.
-    folder: content/temas-dudas
-    create: true
-    delete: true
-    extension: json
-    format: json
-    identifier_field: name
-    slug: "{{id}}"
-    summary: "{{order}} · {{name}}"
-    sortable_fields: [order, name]
-    fields:
-      - label: Nombre visible
-        name: name
-        widget: string
-      - label: Identificador (no cambiar después de crear el tema)
-        name: id
-        widget: string
-        pattern: ["^[a-z0-9]+(-[a-z0-9]+)*$", "Solo minúsculas sin tildes, números y guiones. Ej.: compras-y-reclamos"]
-        hint: Se usa para enlazar las notas con este tema. Si después cambias el nombre visible, las notas siguen asociadas.
-      - label: Orden
-        name: order
-        widget: number
-        value_type: int
-        default: 10
-        hint: Los temas se muestran de menor a mayor.
+        hint: Pon la fecha en que escribiste o cambiaste de verdad la respuesta. Se muestra en la página y se usa en el sitemap. Obligatoria para publicar.
 
   # ---------------- ¿TU EQUIPO ODIA A LEGAL? (notas) ----------------
-  # (los archivos se guardan en content/notas y se publican en /notas/)
+  # (los archivos se guardan en content/notas y se publican en /gestion-legal/)
   - name: notas
     label: ¿Tu equipo odia a Legal?
     label_singular: Artículo
-    description: Artículos sobre cómo organizar y mejorar el trabajo legal en una empresa. Se muestran en «¿Tu equipo odia a Legal?» del menú (/notas/).
+    description: Artículos sobre cómo organizar y mejorar el trabajo legal en una empresa. Se muestran en «¿Tu equipo odia a Legal?» del menú (/gestion-legal/).
     folder: content/notas
     create: true
     delete: true
     extension: json
     format: json
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
-    preview_path: "notas/{{slug}}"
+    preview_path: "gestion-legal/{{slug}}"
     summary: "{{title}} · {{category}} · {{date}}"
     sortable_fields: [date, title, category]
     view_filters:
