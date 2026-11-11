@@ -1,8 +1,6 @@
 {
-  "title": "Protección de datos personales en inmobiliarias: riesgos, multas y obligaciones",
-  "slug": "datos-personales-inmobiliarias",
-  "categoria": "proteccion-de-datos",
-  "summary": "Las empresas inmobiliarias recopilan datos personales desde el primer contacto con un posible comprador. Esta presentación explica las principales obligaciones de la Ley de Protección de Datos Personales en Perú, los riesgos más frecuentes en la captación de clientes, campañas de marketing, videovigilancia y gestión de información, así como las multas impuestas por la Autoridad Nacional de Protección de Datos Personales (ANPD). También presenta criterios prácticos para evaluar el cumplimiento normativo, identificar riesgos y priorizar medidas para prevenir infracciones.",
+  "draft": false,
+  "meta_description": "Obligaciones de la Ley de Protección de Datos Personales para inmobiliarias en Perú: riesgos en captación de clientes y marketing, y multas de la ANPD.",
   "slides": [
     "/assets/uploads/presentaciones/inmobiliarias-01.jpg",
     "/assets/uploads/presentaciones/inmobiliarias-02.jpg",
@@ -16,8 +14,10 @@
     "/assets/uploads/presentaciones/inmobiliarias-10.jpg",
     "/assets/uploads/presentaciones/inmobiliarias-11.jpg"
   ],
-  "title_seo": "Datos personales en inmobiliarias",
-  "meta_description": "Obligaciones de la Ley de Protección de Datos Personales para inmobiliarias en Perú: riesgos en captación de clientes y marketing, y multas de la ANPD.",
+  "summary": "Las empresas inmobiliarias recopilan datos personales desde el primer contacto con un posible comprador. Esta presentación explica las principales obligaciones de la Ley de Protección de Datos Personales en Perú, los riesgos más frecuentes en la captación de clientes, campañas de marketing, videovigilancia y gestión de información, así como las multas impuestas por la Autoridad Nacional de Protección de Datos Personales (ANPD). También presenta criterios prácticos para evaluar el cumplimiento normativo, identificar riesgos y priorizar medidas para prevenir infracciones.",
+  "slug": "proteccion-datos-personales-inmobiliarias",
   "date": "2026-11-11",
-  "draft": false
+  "categoria": "proteccion-de-datos",
+  "title_seo": "Protección de datos personales en inmobiliarias | Viple",
+  "title": "Protección de datos personales en inmobiliarias: riesgos, multas y obligaciones"
 }
