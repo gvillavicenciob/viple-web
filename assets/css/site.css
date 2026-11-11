@@ -807,3 +807,9 @@ html.slides-open{overflow:hidden}
   .slides.is-zoom{padding-bottom:64px}
   .slides.is-zoom .slide img{max-height:calc(100svh - 150px)}
 }
+
+/* Celular: menos espacio entre las tarjetas de la portada y «Lo que podemos hacer por ti» (de 92 px a 40 px) */
+@media (max-width:760px){
+  .home-hero{padding-bottom:16px}
+  .home-svc{padding-top:24px}
+}
