@@ -298,7 +298,18 @@ collections:
           - { label: Protección de datos personales, value: proteccion-de-datos }
           - { label: Prácticas comerciales y reclamos, value: reclamos-y-denuncias }
           - { label: Diseño de herramientas legales, value: herramientas-legales }
-        hint: Servicio con el que se relaciona. Sirve para los filtros del catálogo. Si la dejas vacía, la presentación aparece solo en «Todas».
+          - { label: Otros, value: otros }
+        hint: Servicio con el que se relaciona. Elige «Otros» si el tema no corresponde a ninguno de los servicios. Sirve para el filtro «Servicio» del catálogo; si la dejas vacía, la presentación aparece solo en «Todos».
+      - label: Sector económico
+        name: sector
+        widget: select
+        required: false
+        options:
+          - { label: Retail, value: retail }
+          - { label: Colegios, value: colegios }
+          - { label: Inmobiliarias, value: inmobiliarias }
+          - { label: Otros, value: otros }
+        hint: Sector al que está dirigida. Sirve para el filtro «Sector» del catálogo. Elige «Otros» si no corresponde a ninguno; si lo dejas vacío, la presentación aparece solo en «Todos».
       - label: Resumen (tarjeta y encabezado)
         name: summary
         widget: text

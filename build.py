@@ -737,6 +737,17 @@ PRESENTACIONES = {
     "empty": "Muy pronto publicaremos nuestras primeras presentaciones.",
 }
 
+# Divisiones del catálogo de presentaciones (además de los servicios).
+# Para agregar un sector: añádelo aquí y en el campo «Sector económico» de admin/config.yml (mismo valor).
+CAT_OTROS = ("otros", "Otros")
+SECTORES = [
+    ("retail", "Retail"),
+    ("colegios", "Colegios"),
+    ("inmobiliarias", "Inmobiliarias"),
+    ("otros", "Otros"),
+]
+SECTOR_NAMES = dict(SECTORES)
+
 ICONO_PRES = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" '
               'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
               '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4M8 20h8"/>'
@@ -804,9 +815,13 @@ def prep_presentaciones(items):
         it["pslug"] = slugify(it.get("slug")) or slugify(it["slug"])
         it["url"] = f"/presentaciones/{it['pslug']}/"
         cat = str(it.get("categoria") or "").strip()
-        it["cat"] = cat if cat in SERVICE_NAMES else ""
+        it["cat"] = cat if (cat in SERVICE_NAMES or cat == CAT_OTROS[0]) else ""
         if cat and not it["cat"]:
-            print(f'  ! Presentación con categoría desconocida «{cat}» (se muestra solo en «Todas»): {it["slug"]}')
+            print(f'  ! Presentación con categoría desconocida «{cat}» (se muestra solo en «Todos»): {it["slug"]}')
+        sec = str(it.get("sector") or "").strip()
+        it["sector"] = sec if sec in SECTOR_NAMES else ""
+        if sec and not it["sector"]:
+            print(f'  ! Presentación con sector desconocido «{sec}» (se muestra solo en «Todos»): {it["slug"]}')
         it["seo_title"] = titulo_seo(str(it.get("title_seo") or "").strip() or str(it.get("title") or "").strip())
         it["seo_desc"] = (str(it.get("meta_description") or "").strip()
                           or recortar(it.get("summary")) or PRESENTACIONES["intro"])
@@ -843,8 +858,13 @@ def pres_card(it):
         tag, attrs = "a", f' href="{esc(it["link"])}" target="_blank" rel="noopener"'
     if tag == "a":
         more = '<span class="pres-more">Ver presentación <span aria-hidden="true">→</span></span>'
-    cat = (f'<span class="pres-cat">{esc(PRES_CAT[it["cat"]])}</span>' if it["cat"] else "")
-    return f'''<li class="pres-item" data-cat="{it["cat"]}"><{tag} class="pres-card"{attrs}>
+    etiquetas = [("pres-cat", cat_nombre(it["cat"]))] if it["cat"] else []
+    if it["sector"]:
+        etiquetas.append(("pres-cat pres-sec", f'Sector: {SECTOR_NAMES[it["sector"]]}' if it["sector"] == "otros"
+                          else SECTOR_NAMES[it["sector"]]))
+    cat = (f'<span class="pres-tags">' + "".join(f'<span class="{c}">{esc(e)}</span>' for c, e in etiquetas)
+           + '</span>') if etiquetas else ""
+    return f'''<li class="pres-item" data-cat="{it["cat"]}" data-sector="{it["sector"]}"><{tag} class="pres-card"{attrs}>
       <div class="pres-img">{img}</div>
       <div class="pres-txt">
         {cat}
@@ -855,19 +875,39 @@ def pres_card(it):
     </{tag}></li>'''
 
 
+def cat_nombre(c):
+    return CAT_OTROS[1] if c == CAT_OTROS[0] else PRES_CAT[c]
+
+
+def pf_grupo(dim, titulo, opciones):
+    """Un grupo de filtros (botones en escritorio y lista desplegable en el celular)."""
+    tid = f"pf-t-{dim}"
+    btns = f'<button type="button" data-valor="" aria-pressed="true">Todos</button>' + "".join(
+        f'<button type="button" data-valor="{v}" aria-pressed="false">{esc(n)}</button>' for v, n in opciones)
+    opts = '<option value="">Todos</option>' + "".join(f'<option value="{v}">{esc(n)}</option>' for v, n in opciones)
+    return f'''<div class="pf-grupo" data-dim="{dim}">
+        <p class="pres-filtros-t" id="{tid}">{titulo}</p>
+        <div class="pf-btns" role="group" aria-labelledby="{tid}">{btns}</div>
+        <label class="pf-sel"><span>{titulo}</span><select>{opts}</select></label>
+      </div>'''
+
+
 def pres_filtros(items):
-    """Filtros por categoría (solo en el navegador, sin direcciones nuevas). Ocultos si no hay JavaScript."""
-    usadas = [s for s in SERVICIOS if any(i["cat"] == s["slug"] for i in items)]
-    if not usadas:
+    """Filtros por servicio y por sector (solo en el navegador, sin direcciones nuevas). Ocultos sin JavaScript.
+    Cada filtro muestra solo las opciones que tienen presentaciones; «Otros» va al final."""
+    cats = [(s["slug"], PRES_CAT[s["slug"]]) for s in SERVICIOS if any(i["cat"] == s["slug"] for i in items)]
+    if any(i["cat"] == CAT_OTROS[0] for i in items):
+        cats.append(CAT_OTROS)
+    secs = [(v, n) for v, n in SECTORES if any(i["sector"] == v for i in items)]
+    grupos = ""
+    if cats:
+        grupos += pf_grupo("cat", "Servicio", cats)
+    if secs:
+        grupos += pf_grupo("sector", "Sector", secs)
+    if not grupos:
         return ""
-    btns = '<button type="button" data-filtro="" aria-pressed="true">Todas</button>' + "".join(
-        f'<button type="button" data-filtro="{s["slug"]}" aria-pressed="false">{esc(PRES_CAT[s["slug"]])}</button>' for s in usadas)
-    opts = '<option value="">Todas</option>' + "".join(
-        f'<option value="{s["slug"]}">{esc(PRES_CAT[s["slug"]])}</option>' for s in usadas)
     return f'''<div class="pres-filtros" data-pres-filtros hidden>
-      <p class="pres-filtros-t" id="pf-t">Filtrar por servicio</p>
-      <div class="pf-btns" role="group" aria-labelledby="pf-t">{btns}</div>
-      <label class="pf-sel"><span>Filtrar por servicio</span><select data-filtro-select>{opts}</select></label>
+      <div class="pf-grupos">{grupos}</div>
       <p class="pf-count" aria-live="polite" data-pf-count></p>
     </div>'''
 
@@ -890,7 +930,7 @@ def render_presentacion(it):
     body = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
     texto = f'<div class="prose pres-body">{body}</div>' if body.strip() else ""
     cat = (f'<a class="pres-cat-link" href="/servicios/{it["cat"]}/">{esc(PRES_CAT[it["cat"]])}</a>'
-           if it["cat"] else "")
+           if it["cat"] in SERVICE_NAMES else "")
     content = f'''
 <div class="page-head pres-head">
   <div class="wrap">

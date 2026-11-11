@@ -813,3 +813,12 @@ html.slides-open{overflow:hidden}
   .home-hero{padding-bottom:16px}
   .home-svc{padding-top:24px}
 }
+
+/* Presentaciones: dos filtros (Servicio y Sector) y varias etiquetas por tarjeta */
+.pf-grupos{display:flex;flex-direction:column;gap:18px}
+.pres-tags{display:flex;flex-wrap:wrap;gap:6px}
+@media (max-width:760px){
+  .pf-grupos{gap:12px}
+  .pf-grupo .pres-filtros-t{display:none}
+}
+.pres-sec{background:#e3eee7;color:#2f5a44}
