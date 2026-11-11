@@ -1,0 +1,8 @@
+# Redirecciones permanentes (Netlify). Se copian a _site/ en cada build.
+# Direcciones antiguas de las secciones renombradas el 10 nov 2026.
+/dudas       /preguntas/              301
+/dudas/      /preguntas/              301
+/dudas/*     /preguntas/:splat        301
+/notas       /gestion-legal/          301
+/notas/      /gestion-legal/          301
+/notas/*     /gestion-legal/:splat    301

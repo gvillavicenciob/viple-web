@@ -57,44 +57,6 @@
     document.addEventListener('click', function (e) { if (!li.contains(e.target) && li.classList.contains('open')) set(false); });
   });
 
-  // «Te ayudamos con tus dudas»: filtros combinados de público y tema
-  var dd = document.querySelector('[data-dd-filters]');
-  if (dd) {
-    var items = Array.prototype.slice.call(document.querySelectorAll('[data-dd-list] .dd-item'));
-    var audBtns = dd.querySelectorAll('.seg button');
-    var topicBtns = dd.querySelectorAll('.chips button');
-    var count = document.querySelector('[data-dd-count]');
-    var none = document.querySelector('[data-dd-none]');
-    var state = { aud: 'todo', topic: '' };
-    var audOk = function (it) {
-      var a = it.getAttribute('data-aud');
-      return state.aud === 'todo' || a === state.aud || a === 'ambos';
-    };
-    var apply = function () {
-      // Temas disponibles para el público elegido
-      topicBtns.forEach(function (b) {
-        var id = b.getAttribute('data-topic');
-        if (!id) return;
-        b.hidden = !items.some(function (it) { return audOk(it) && it.getAttribute('data-topic') === id; });
-      });
-      var active = dd.querySelector('.chips button[data-topic="' + state.topic + '"]');
-      if (!active || active.hidden) state.topic = '';
-      topicBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-topic') === state.topic ? 'true' : 'false'); });
-      audBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-aud') === state.aud ? 'true' : 'false'); });
-      var n = 0;
-      items.forEach(function (it) {
-        var show = audOk(it) && (!state.topic || it.getAttribute('data-topic') === state.topic);
-        it.hidden = !show;
-        if (show) n++;
-      });
-      if (count) count.textContent = n === 1 ? '1 pregunta' : n + ' preguntas';
-      if (none) none.hidden = n > 0;
-    };
-    audBtns.forEach(function (b) { b.addEventListener('click', function () { state.aud = b.getAttribute('data-aud'); apply(); }); });
-    topicBtns.forEach(function (b) { b.addEventListener('click', function () { state.topic = b.getAttribute('data-topic'); apply(); }); });
-    apply();
-  }
-
   // Visor de diapositivas (Presentaciones especiales)
   document.querySelectorAll('[data-slides]').forEach(function (box) {
     var track = box.querySelector('.slides-track');
@@ -122,37 +84,29 @@
     update();
   });
 
-  // Carrusel «¿Tienes preguntas?» de la portada (una diapositiva por servicio)
-  document.querySelectorAll('[data-carousel]').forEach(function (box) {
-    var track = box.querySelector('.faq-track');
-    var prev = box.querySelector('[data-prev]');
-    var next = box.querySelector('[data-next]');
-    var dots = box.querySelectorAll('[data-dot]');
-    var total = track.children.length;
-    var pos = 0, timer;
-    var current = function () { return pos; };
-    var go = function (i) { pos = Math.max(0, Math.min(total - 1, i)); track.scrollLeft = pos * track.clientWidth; update(); };
-    // Al deslizar con el dedo o el trackpad, la posición se toma cuando termina el desplazamiento
-    track.addEventListener('scroll', function () {
-      clearTimeout(timer);
-      timer = setTimeout(function () { if (track.clientWidth) { pos = Math.round(track.scrollLeft / track.clientWidth); update(); } }, 150);
-    });
-    var update = function () {
-      var i = pos;
-      if (prev) prev.disabled = i <= 0;
-      if (next) next.disabled = i >= total - 1;
-      dots.forEach(function (d, n) { d.setAttribute('aria-current', n === i ? 'true' : 'false'); });
+  // Presentaciones especiales: filtro por servicio (no cambia la dirección de la página)
+  var pf = document.querySelector('[data-pres-filtros]');
+  if (pf) {
+    var pItems = Array.prototype.slice.call(document.querySelectorAll('[data-pres-list] .pres-item'));
+    var pBtns = pf.querySelectorAll('[data-filtro]');
+    var pSel = pf.querySelector('[data-filtro-select]');
+    var pCount = pf.querySelector('[data-pf-count]');
+    var filtrar = function (cat) {
+      var n = 0;
+      pItems.forEach(function (it) {
+        var ok = !cat || it.getAttribute('data-cat') === cat;
+        it.hidden = !ok;
+        if (ok) n++;
+      });
+      pBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-filtro') === cat ? 'true' : 'false'); });
+      if (pSel) pSel.value = cat;
+      if (pCount) pCount.textContent = n === 1 ? '1 presentación' : n + ' presentaciones';
     };
-    if (prev) prev.addEventListener('click', function () { go(current() - 1); });
-    if (next) next.addEventListener('click', function () { go(current() + 1); });
-    dots.forEach(function (d) { d.addEventListener('click', function () { go(+d.getAttribute('data-dot')); }); });
-    track.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowRight') { e.preventDefault(); go(current() + 1); }
-      if (e.key === 'ArrowLeft') { e.preventDefault(); go(current() - 1); }
-    });
-    window.addEventListener('resize', function () { go(pos); });
-    update();
-  });
+    pBtns.forEach(function (b) { b.addEventListener('click', function () { filtrar(b.getAttribute('data-filtro')); }); });
+    if (pSel) pSel.addEventListener('change', function () { filtrar(pSel.value); });
+    pf.hidden = false;
+    filtrar('');
+  }
 
   // Botón «Copiar enlace» de los artículos
   document.querySelectorAll('[data-copy]').forEach(function (b) {

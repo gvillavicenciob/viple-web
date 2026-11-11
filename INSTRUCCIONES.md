@@ -8,8 +8,9 @@
 | `src/layout.html` | Encabezado, menú y pie de página comunes a todas las páginas. |
 | `assets/` | Estilos, logos, foto e imágenes subidas desde el panel. |
 | `admin/` | El panel de administración (`/admin`). |
-| `content/notas`, `content/dudas`, `content/temas-dudas`, `content/novedades` | Lo que crees desde el panel en «¿Tu equipo odia a Legal?», «¿Tienes preguntas?», «¿Tienes preguntas? · Temas» y «Novedades» (se llenan solos). |
-| `content/servicios.json` | Nombres, descripciones breves y preguntas frecuentes de los seis servicios (menú, portada, carrusel «¿Tienes preguntas?» y /servicios/). |
+| `content/preguntas`, `content/notas`, `content/novedades`, `content/presentaciones` | Lo que crees desde el panel en «¿Tienes preguntas?» (/preguntas/), «¿Tu equipo odia a Legal?» (/gestion-legal/), «Novedades» y «Presentaciones especiales» (se llenan solos). |
+| `_redirects` | Redirecciones 301 de Netlify (por ejemplo /dudas/ → /preguntas/ y /notas/ → /gestion-legal/). Se copia a `_site/` en cada build. |
+| `content/servicios.json` | Nombres y descripciones breves de los seis servicios (menú, portada y /servicios/). |
 | `build.py`, `netlify.toml`, `requirements.txt` | Instrucciones para que Netlify arme el sitio. No hace falta tocarlos. |
 | `_site/` | El sitio ya armado, generado automáticamente. **No subirlo a GitHub.** |
 
@@ -71,33 +72,50 @@ pero el panel no puede guardar nada.
 
 Ya no tienes que arrastrar carpetas a Netlify: todo cambio en GitHub se publica automáticamente.
 
-## «Te ayudamos con tus dudas» desde el panel
+## «¿Tienes preguntas?» desde el panel
 
-**Publicar una nota preparada en Word**
-1. En `/admin`, entra a **¿Tienes preguntas?** → **Nueva Pregunta**.
-2. Escribe la pregunta en **Título o pregunta**.
-3. Elige **¿A quién le sirve esta nota?** (Personas, Negocios o Ambos) y el **Tema**.
-4. En **Respuesta**, copia el texto desde Word y pégalo. Revisa títulos, listas y negritas con la barra de formato.
-5. Opcional: sube el Word o PDF original en **Archivo de apoyo**.
-6. Pulsa **Publicar → Publicar ahora**. En 1–2 minutos aparece en la web.
+Cada pregunta es una entrada de la colección **¿Tienes preguntas?** (`content/preguntas/<slug>.json`). Es la fuente única: de ahí salen el índice /preguntas/ (acordeón por servicio), la página de cada respuesta (/preguntas/<slug>/), la lista de la portada y las «Preguntas relacionadas» de cada servicio.
 
-**Corregir una nota**: ábrela, cambia lo necesario (texto, público o tema) y vuelve a publicar. Su enlace no cambia aunque cambies el título.
+| Campo | Para qué sirve |
+|---|---|
+| Pregunta | Título grande (H1) de la página; se muestra completa. |
+| Dirección (slug) | La página será /preguntas/<slug>/. No cambiarla después de publicar. |
+| Servicio asociado | Grupo del acordeón y página de servicio donde aparece. |
+| Respuesta | Párrafos, listas y enlaces (se puede pegar desde Word). |
+| Título SEO / Descripción SEO | Pestaña del navegador y Google (~60 y ~155 caracteres). |
+| Publicada | Solo las publicadas **y completas** aparecen en la web. |
+| Destacada en la portada | La portada muestra hasta 5 destacadas **y** publicadas (destacar no publica). |
+| Orden dentro del servicio / Orden en la portada | Orden de menor a mayor. |
+| Fecha de actualización | Fecha real del último cambio de la respuesta; se ve en la página y va al sitemap. |
 
-**Crear o renombrar un tema**: entra a **¿Tienes preguntas? · Temas**. Para uno nuevo, pon el nombre visible, un identificador corto (minúsculas y guiones, por ejemplo `compras-y-reclamos`) y el orden. Para renombrar, cambia solo el **Nombre visible**. El identificador no se toca, así las notas siguen asociadas. Un tema aparece en la web cuando tiene al menos una nota publicada.
+**Publicar una respuesta**
+1. Abre la pregunta (las 14 iniciales ya existen como borradores, sin respuesta).
+2. Escribe o pega la **Respuesta**, completa **Título SEO**, **Descripción SEO** y **Fecha de actualización**.
+3. Marca **Publicada** y pulsa **Guardar**: se genera una vista previa gratuita. Revísala.
+4. **Publicar → Publicar ahora**: Netlify reconstruye el sitio (un build, 15 créditos) y la pregunta aparece en su página, en el índice, en su servicio y, si está destacada, en la portada.
 
-**Destacar una pregunta en la portada**: marca **Destacar en la portada** en la nota y publícala. La portada muestra hasta 3 destacadas; si no hay ninguna, muestra las 3 más recientes.
+Si una pregunta está marcada como publicada pero le falta la respuesta, un dato SEO o la fecha, la web **no** la muestra (el build lo avisa en el registro de Netlify).
 
-**Cambiar el nombre o la descripción de un servicio**: entra a **Servicios (nombres y descripciones)**. El cambio se aplica a la vez en el menú, la portada, /servicios/ y la página del servicio.
+**Noindex automático**: /preguntas/, /gestion-legal/, /novedades/ y /presentaciones/ llevan `noindex` y quedan fuera del sitemap mientras no tengan nada publicado. Se retira solo en el build que publica el primer contenido.
+
+**Cambiar el nombre o la descripción de un servicio**: entra a **Nuestros servicios**. El cambio se aplica a la vez en el menú, la portada, /servicios/ y la página del servicio.
+
+**Fecha de los cambios hechos a mano**: si cambias el texto de una página de `src/pages/`, actualiza también `"lastmod"` (AAAA-MM-DD) en su primera línea. Esa fecha va al sitemap; el build nunca usa su propia fecha.
 
 ## «Presentaciones especiales» desde el panel
 
-Las presentaciones se muestran como diapositivas en imagen dentro de la web, con botones para avanzar y retroceder. No se ofrece ningún archivo para descargar.
+Las presentaciones se muestran como diapositivas en imagen dentro de la web, con botones para avanzar y retroceder. No se ofrece ningún archivo para descargar. Cada una tiene su página en /presentaciones/<slug>/ con su propio título SEO, metadescripción y canonical.
 
-1. En PowerPoint: **Archivo → Exportar → Cambiar el tipo de archivo → JPEG**, guarda y elige **Todas las diapositivas**. Se crea una carpeta con una imagen por diapositiva.
-2. En `/admin` abre **Presentaciones especiales → Nueva Presentación**.
-3. Escribe el **Título** y el **Resumen**. En **Diapositivas** pulsa **Add diapositiva** y sube cada imagen en orden.
-4. Opcional: escribe el **Texto que acompaña la presentación** (ayuda a que Google la encuentre) y una **Imagen de portada**.
-5. Pulsa **Guardar**. Queda como borrador: no se publica (ver la sección siguiente).
+1. Exporta las diapositivas como JPG (PowerPoint: **Archivo → Exportar → Cambiar el tipo de archivo → JPEG**; Canva: **Compartir → Descargar → JPG**).
+2. **Renombra las imágenes** con un nombre propio de la presentación (`inmobiliarias-01.jpg`, `inmobiliarias-02.jpg`…). Todas se guardan en la misma carpeta: si dos presentaciones usan `1.jpg`, una reemplaza a la otra. El build avisa si detecta imágenes compartidas.
+3. En `/admin` abre **Presentaciones especiales → Nueva Presentación**.
+4. **Título visible (H1)** y **Resumen (tarjeta y encabezado)**. Haz clic en **Dirección (slug)**: se propone a partir del título (o pulsa **Generar desde el título**); puedes acortarla. Después de guardar no cambia aunque cambies el título.
+5. **Categoría (servicio)**: alimenta los filtros del catálogo (solo se muestran las categorías con presentaciones; los filtros no crean páginas nuevas).
+6. **Diapositivas**: **Add diapositiva** y sube cada imagen en orden. Opcional, pero recomendado: **Contenido de la presentación en texto** (los puntos principales de las diapositivas, unas 150–300 palabras, sin repetir el resumen; Google no lee las imágenes) e **Imagen de portada** (se ve completa, en 16:9).
+7. **Título SEO** (se propone el título visible; ~50–60 caracteres) y **Metadescripción** (~140–160). Los contadores son orientativos. Vacíos: se usan el título visible y el inicio del resumen.
+8. Pulsa **Guardar**. Queda como borrador: no se publica (ver la sección siguiente).
+
+Presentaciones antiguas sin slug: su dirección se forma con el nombre del archivo sin tildes (no cambia con el título).
 
 ## Flujo editorial: revisar antes de publicar (sin gastar créditos)
 
