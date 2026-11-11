@@ -1,8 +1,6 @@
 {
-  "title": "Protección de datos personales en centros médicos: obligaciones, riesgos y multas",
-  "slug": "datos-personales-centros-medicos",
-  "categoria": "proteccion-de-datos",
-  "summary": "Los centros médicos y clínicas manejan información sensible de sus pacientes, lo que exige especial cuidado para cumplir con la Ley de Protección de Datos Personales en Perú.\n\nEsta presentación explica las principales obligaciones legales, los riesgos asociados al manejo de historias clínicas, campañas de marketing, proveedores y acceso a información médica, así como las multas impuestas por la Autoridad Nacional de Protección de Datos Personales (ANPD).\n\nTambién presenta casos prácticos, criterios para identificar los puntos de mayor exposición y preguntas para evaluar si un establecimiento de salud está preparado para acreditar su cumplimiento ante una fiscalización.",
+  "draft": false,
+  "meta_description": "Conoce las obligaciones de protección de datos personales en centros médicos y clínicas en Perú, los riesgos del manejo de datos de salud y multas de la ANPD.",
   "slides": [
     "/assets/uploads/presentaciones/centros-medicos-01.jpg",
     "/assets/uploads/presentaciones/centros-medicos-02.jpg",
@@ -16,8 +14,10 @@
     "/assets/uploads/presentaciones/centros-medicos-10.jpg",
     "/assets/uploads/presentaciones/centros-medicos-11.jpg"
   ],
-  "title_seo": "Datos personales en centros médicos",
-  "meta_description": "Obligaciones de protección de datos para centros médicos en Perú: historias clínicas, marketing, proveedores y multas de la ANPD, con casos prácticos.",
+  "summary": "Los centros médicos y clínicas manejan información sensible de sus pacientes, lo que exige especial cuidado para cumplir con la Ley de Protección de Datos Personales en Perú.\n\nEsta presentación explica las principales obligaciones legales, los riesgos asociados al manejo de historias clínicas, campañas de marketing, proveedores y acceso a información médica, así como las multas impuestas por la Autoridad Nacional de Protección de Datos Personales (ANPD).\n\nTambién presenta casos prácticos, criterios para identificar los puntos de mayor exposición y preguntas para evaluar si un establecimiento de salud está preparado para acreditar su cumplimiento ante una fiscalización.",
+  "slug": "proteccion-datos-personales-centros-medicos",
   "date": "2026-11-11",
-  "draft": false
+  "categoria": "proteccion-de-datos",
+  "title_seo": "Protección de datos personales en centros médicos | Viple",
+  "title": "Protección de datos personales en centros médicos: obligaciones, riesgos y multas"
 }
