@@ -68,6 +68,7 @@
     var go = function (i) { track.scrollLeft = Math.max(0, Math.min(total - 1, i)) * track.clientWidth; update(); };
     var update = function () {
       var i = current();
+      box.dataset.i = i;
       if (count) count.textContent = (i + 1) + ' / ' + total;
       if (prev) prev.disabled = i <= 0;
       if (next) next.disabled = i >= total - 1;
@@ -81,6 +82,26 @@
     });
     // Sin menú contextual sobre las diapositivas (no impide una captura de pantalla, pero evita «Guardar imagen»)
     box.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    // Ampliar: la diapositiva ocupa toda la ventana; Esc o el mismo botón la cierran
+    var zoom = box.querySelector('[data-zoom]');
+    if (zoom) {
+      var label = zoom.querySelector('span');
+      var setZoom = function (on) {
+        var i = +box.dataset.i || 0;
+        box.classList.toggle('is-zoom', on);
+        document.documentElement.classList.toggle('slides-open', on);
+        zoom.setAttribute('aria-pressed', on ? 'true' : 'false');
+        zoom.setAttribute('aria-label', on ? 'Cerrar vista ampliada' : 'Ampliar');
+        if (label) label.textContent = on ? 'Cerrar' : 'Ampliar';
+        window.requestAnimationFrame(function () { go(i); });
+        track.focus({ preventScroll: true });
+      };
+      zoom.addEventListener('click', function () { setZoom(!box.classList.contains('is-zoom')); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && box.classList.contains('is-zoom')) setZoom(false);
+      });
+      window.addEventListener('resize', function () { go(+box.dataset.i || 0); });
+    }
     update();
   });
 

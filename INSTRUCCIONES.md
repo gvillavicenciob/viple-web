@@ -10,7 +10,7 @@
 | `admin/` | El panel de administración (`/admin`). |
 | `content/preguntas`, `content/notas`, `content/novedades`, `content/presentaciones` | Lo que crees desde el panel en «¿Tienes preguntas?» (/preguntas/), «¿Tu equipo odia a Legal?» (/gestion-legal/), «Novedades» y «Presentaciones especiales» (se llenan solos). |
 | `_redirects` | Redirecciones 301 de Netlify (por ejemplo /dudas/ → /preguntas/ y /notas/ → /gestion-legal/). Se copia a `_site/` en cada build. |
-| `content/servicios.json` | Nombres y descripciones breves de los seis servicios (menú, portada y /servicios/). |
+| `content/servicios.json` | Fuente única de los servicios: nombre, nombre del menú, nombre corto como categoría de presentaciones y descripción breve. Su orden es el del menú, la portada, /servicios/, /contacto/, el acordeón de preguntas y la navegación entre servicios. Agregar un servicio requiere además su página en `src/pages/servicios/<slug>.html` y su opción en los campos «Servicio asociado» y «Categoría» de `admin/config.yml`. |
 | `build.py`, `netlify.toml`, `requirements.txt` | Instrucciones para que Netlify arme el sitio. No hace falta tocarlos. |
 | `_site/` | El sitio ya armado, generado automáticamente. **No subirlo a GitHub.** |
 
@@ -110,8 +110,9 @@ Las presentaciones se muestran como diapositivas en imagen dentro de la web, con
 2. **Renombra las imágenes** con un nombre propio de la presentación (`inmobiliarias-01.jpg`, `inmobiliarias-02.jpg`…). Todas se guardan en la misma carpeta: si dos presentaciones usan `1.jpg`, una reemplaza a la otra. El build avisa si detecta imágenes compartidas.
 3. En `/admin` abre **Presentaciones especiales → Nueva Presentación**.
 4. **Título visible (H1)** y **Resumen (tarjeta y encabezado)**. Haz clic en **Dirección (slug)**: se propone a partir del título (o pulsa **Generar desde el título**); puedes acortarla. Después de guardar no cambia aunque cambies el título.
-5. **Categoría (servicio)**: alimenta los filtros del catálogo (solo se muestran las categorías con presentaciones; los filtros no crean páginas nuevas).
-6. **Diapositivas**: **Add diapositiva** y sube cada imagen en orden. Opcional, pero recomendado: **Contenido de la presentación en texto** (los puntos principales de las diapositivas, unas 150–300 palabras, sin repetir el resumen; Google no lee las imágenes) e **Imagen de portada** (se ve completa, en 16:9).
+5. **Categoría (servicio)**: alimenta los filtros del catálogo (solo se muestran las categorías con presentaciones; los filtros no crean páginas nuevas). «Asociaciones» corresponde al servicio Constitución de asociaciones.
+6. **Diapositivas**: **Add diapositiva** y sube cada imagen en orden. Opcional, pero recomendado: **Contenido de la presentación en texto** (los puntos principales de las diapositivas, unas 150–300 palabras, sin repetir el resumen; Google no lee las imágenes) e **Imagen de portada** (se ve completa).
+   - Formato: sirven diapositivas horizontales (16:9) y verticales (por ejemplo 4:5, 720 × 900 px); la web detecta sola la proporción de cada imagen y la muestra completa, ajustada a la pantalla. No hace falta elegir formato ni recortar nada. El botón **Ampliar** del visor muestra la diapositiva a pantalla completa para leer textos pequeños.
 7. **Título SEO** (se propone el título visible; ~50–60 caracteres) y **Metadescripción** (~140–160). Los contadores son orientativos. Vacíos: se usan el título visible y el inicio del resumen.
 8. Pulsa **Guardar**. Queda como borrador: no se publica (ver la sección siguiente).
 

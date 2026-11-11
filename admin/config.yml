@@ -59,6 +59,7 @@ collections:
               - { label: Dirección de la página (no cambiar), name: slug, widget: hidden }
               - { label: Nombre, name: name, widget: string, hint: "Título completo: se usa en la página del servicio, la portada y /servicios/." }
               - { label: Nombre corto para el menú, name: menu, widget: string, required: false, hint: "Opcional. Si lo dejas vacío, el menú desplegable usa el nombre completo." }
+              - { label: Nombre corto como categoría de presentaciones, name: categoria_corta, widget: string, required: false, hint: "Opcional. Etiqueta y filtro en Presentaciones especiales (p. ej. «Asociaciones»). Si lo dejas vacío, se usa el nombre completo." }
               - { label: Descripción breve, name: summary, widget: text }
 
   # ---------------- ¿TIENES PREGUNTAS? ----------------
@@ -108,6 +109,7 @@ collections:
         widget: select
         options:
           - { label: Estructuramos tu negocio, value: estructura-empresarial }
+          - { label: Constitución de asociaciones, value: constitucion-asociaciones }
           - { label: Protegemos tu inversión, value: protegemos-tu-inversion }
           - { label: Contratos que funcionan en la práctica, value: contratos }
           - { label: Protección de datos personales, value: proteccion-de-datos }
@@ -290,6 +292,7 @@ collections:
         required: false
         options:
           - { label: Estructuramos tu negocio, value: estructura-empresarial }
+          - { label: Asociaciones, value: constitucion-asociaciones }
           - { label: Protegemos tu inversión, value: protegemos-tu-inversion }
           - { label: Contratos que funcionan en la práctica, value: contratos }
           - { label: Protección de datos personales, value: proteccion-de-datos }
