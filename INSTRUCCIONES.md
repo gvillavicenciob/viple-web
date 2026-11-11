@@ -109,9 +109,9 @@ Las presentaciones se muestran como diapositivas en imagen dentro de la web, con
 1. Exporta las diapositivas como JPG (PowerPoint: **Archivo → Exportar → Cambiar el tipo de archivo → JPEG**; Canva: **Compartir → Descargar → JPG**).
 2. **Renombra las imágenes** con un nombre propio de la presentación (`inmobiliarias-01.jpg`, `inmobiliarias-02.jpg`…). Todas se guardan en la misma carpeta: si dos presentaciones usan `1.jpg`, una reemplaza a la otra. El build avisa si detecta imágenes compartidas.
 3. En `/admin` abre **Presentaciones especiales → Nueva Presentación**.
-4. **Título visible (H1)** y **Resumen**. Haz clic en **Dirección (slug)**: se propone a partir del título (o pulsa **Generar desde el título**); puedes acortarla. Después de guardar no cambia aunque cambies el título.
+4. **Título visible (H1)** y **Resumen (tarjeta y encabezado)**. Haz clic en **Dirección (slug)**: se propone a partir del título (o pulsa **Generar desde el título**); puedes acortarla. Después de guardar no cambia aunque cambies el título.
 5. **Categoría (servicio)**: alimenta los filtros del catálogo (solo se muestran las categorías con presentaciones; los filtros no crean páginas nuevas).
-6. **Diapositivas**: **Add diapositiva** y sube cada imagen en orden. Opcional: **Texto que acompaña la presentación** e **Imagen de portada** (se ve completa, en 16:9).
+6. **Diapositivas**: **Add diapositiva** y sube cada imagen en orden. Opcional, pero recomendado: **Contenido de la presentación en texto** (los puntos principales de las diapositivas, unas 150–300 palabras, sin repetir el resumen; Google no lee las imágenes) e **Imagen de portada** (se ve completa, en 16:9).
 7. **Título SEO** (se propone el título visible; ~50–60 caracteres) y **Metadescripción** (~140–160). Los contadores son orientativos. Vacíos: se usan el título visible y el inicio del resumen.
 8. Pulsa **Guardar**. Queda como borrador: no se publica (ver la sección siguiente).
 

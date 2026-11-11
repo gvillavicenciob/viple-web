@@ -296,10 +296,10 @@ collections:
           - { label: Prácticas comerciales y reclamos, value: reclamos-y-denuncias }
           - { label: Diseño de herramientas legales, value: herramientas-legales }
         hint: Servicio con el que se relaciona. Sirve para los filtros del catálogo. Si la dejas vacía, la presentación aparece solo en «Todas».
-      - label: Resumen
+      - label: Resumen (tarjeta y encabezado)
         name: summary
         widget: text
-        hint: Visible en la tarjeta del catálogo y debajo del título en la página de la presentación. Si no completas la metadescripción, su inicio se usa para Google.
+        hint: Presenta la presentación en pocas líneas. Se ve en la tarjeta del catálogo y debajo del título, en la franja azul. Si no completas la metadescripción, su inicio se usa para Google.
       - label: Diapositivas
         name: slides
         widget: list
@@ -309,11 +309,11 @@ collections:
         label_singular: diapositiva
         hint: "Una imagen por diapositiva, en orden (JPG de unos 1600 px de ancho y menos de 300 KB). Usa nombres de archivo propios de esta presentación (p. ej. inmobiliarias-01.jpg). Puedes reordenarlas arrastrándolas."
         field: { label: Imagen de la diapositiva, name: image, widget: image, choose_url: false }
-      - label: Texto que acompaña la presentación
+      - label: Contenido de la presentación en texto (debajo de las diapositivas, ayuda a Google)
         name: body
         widget: markdown
         required: false
-        hint: Opcional, pero recomendado. Google no puede leer el texto dentro de las imágenes; un resumen o los puntos principales aquí ayudan a que te encuentren.
+        hint: Opcional, pero recomendado. Google no lee el texto dentro de las imágenes. Escribe aquí los puntos principales de las diapositivas (unas 150–300 palabras); no repitas el resumen. Se ve solo en la página de la presentación, debajo del visor.
       - label: O enlace a la presentación en otro sitio
         name: link
         widget: string

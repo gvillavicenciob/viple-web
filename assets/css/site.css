@@ -772,3 +772,10 @@ h1,h2{font-weight:700;letter-spacing:-.01em;color:var(--navy-ui)}
   .pres-sum p{text-align:left}
 }
 @media (max-width:640px){.pres-head p{text-align:left}}
+
+/* Celular: todo el texto justificado pasa a alineado a la izquierda (evita espacios grandes entre palabras) */
+@media (max-width:640px){
+  .page-head p,.detail .body p,.foot-txt,.svc-cta p,.pres-sum p,
+  .sit-desc p,.how-item p,.svc-card .svc-sum,.dd-item p,.ed-card p,.pres-txt p,.post-card p,
+  .svc-hero p,.ed-featured p,.faq-head p,.svc-intro p{text-align:left;hyphens:manual;-webkit-hyphens:manual}
+}
