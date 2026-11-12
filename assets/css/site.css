@@ -863,35 +863,47 @@ html.slides-open{overflow:hidden}
 .nov-more summary:hover{text-decoration:underline;text-underline-offset:3px}
 .nov-more summary:focus-visible{outline:2px solid var(--link);outline-offset:3px}
 .about-h2{font-size:clamp(2rem,3.6vw,3rem);line-height:1.08;margin-bottom:40px}
-/* Quién soy (portada): a la izquierda foto (160 px), nombre, credenciales y botones; a la derecha la presentación */
-.about.about-home{grid-template-columns:310px minmax(0,1fr);grid-template-rows:auto auto 1fr;
-  grid-template-areas:"foto bio" "datos bio" "btns bio";gap:0 56px;align-items:start}
-.about-home .portrait{grid-area:foto;width:160px;margin-bottom:26px}
-.about-home .portrait::after{inset:8px -8px -8px 8px}
-.about-home .about-datos{grid-area:datos}
-.about-home .about-bio{grid-area:bio}
-.about-home .about-btns{grid-area:btns;align-self:start}
-.about-name{font-family:var(--serif);font-weight:700;font-size:1.25rem;line-height:1.2;color:var(--navy-ui);margin-bottom:2px}
-.home-about .role{margin-bottom:14px;font-size:.95rem}
-.home-about .creds{gap:8px;margin-bottom:20px}
-.home-about .creds li{font-size:.92rem;line-height:1.45;padding-left:20px}
+/* «Hola, soy Gabriel» (portada, #quien-soy): presentación a la izquierda, foto a la derecha centrada
+   en el alto del texto; debajo, «Formación» y los botones */
+.about-home{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:64px;align-items:center}
+.about-home .about-h2{margin-bottom:24px}
 .about-bio p{font-size:1.08rem;line-height:1.7;color:#2a3352;font-weight:400;text-align:justify;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manual}
 .about-bio p + p{margin-top:1em}
-@media (max-width:640px){.about-bio p{text-align:left;font-size:1rem}}
+.about-foto{margin:0}
+.about-foto .portrait::after{inset:10px -10px -10px 10px}
+.about-foto figcaption{margin-top:20px;font-size:.88rem;line-height:1.4;color:var(--sage-dark)}
+.about-foto figcaption strong{display:block;font-family:var(--serif);font-weight:700;font-size:.95rem;color:var(--navy-ui)}
+.about-formacion{margin-top:44px;padding-top:28px;border-top:1px solid #dfe6f0}
+.about-formacion h3{font-family:var(--serif);font-weight:700;font-size:1.1rem;color:var(--navy-ui);margin-bottom:14px}
+.home-about .creds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 40px;margin:0}
+.home-about .creds li{font-family:var(--sans);font-size:.98rem;line-height:1.5;padding-left:22px;color:#2a3352}
+.about-pie{margin-top:32px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px}
 .about-btns{display:flex;flex-wrap:wrap;gap:10px}
-.about-li{margin:-6px 0 20px;font-size:.95rem}
+.about-btns .btn{padding:9px 22px}
+.about-li{margin:0;font-size:.95rem}
 .about-li a{color:var(--link);font-weight:500;text-decoration:underline;text-underline-offset:3px}
 .about-li a:hover{color:var(--navy-ui)}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.about-btns .btn{padding:9px 22px}
+@media (max-width:900px){
+  .about-home{grid-template-columns:minmax(0,1fr) 150px;gap:32px}
+  .home-about .creds{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .about-bio p{text-align:left;font-size:1rem}
+  /* Celular: saludo, foto, presentación */
+  .about-home{grid-template-columns:1fr;gap:0}
+  .about-bio{display:contents}
+  .about-home .about-h2{order:1}
+  .about-foto{order:2;margin-bottom:26px}
+  .about-foto .portrait{width:140px}
+  .about-bio p{order:3}
+  .about-formacion{margin-top:36px}
+}
 /* Anclas de la portada: el encabezado fijo no tapa el título */
 #novedades,#quien-soy{scroll-margin-top:calc(var(--header-h) + 4px)}
 @media (max-width:900px){
   .home-nov,.home-about{padding:52px 0}
   .about-h2{margin-bottom:28px}
-  .about.about-home{grid-template-columns:minmax(0,1fr);grid-template-areas:"foto" "datos" "bio" "btns";gap:0}
-  .about-home .portrait{width:130px;margin-bottom:22px}
-  .about-home .about-bio{margin-bottom:24px}
 }
 
 
