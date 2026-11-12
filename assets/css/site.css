@@ -780,7 +780,7 @@ h1,h2{font-weight:700;letter-spacing:-.01em;color:var(--navy-ui)}
 @media (max-width:640px){
   .page-head p,.detail .body p,.foot-txt,.svc-cta p,.pres-sum p,
   .sit-desc p,.how-item p,.svc-card .svc-sum,.dd-item p,.ed-card p,.pres-txt p,.post-card p,
-  .svc-hero p,.ed-featured p,.faq-head p,.svc-intro p{text-align:left;hyphens:manual;-webkit-hyphens:manual}
+  .svc-hero p,.ed-featured p,.faq-head p,.svc-intro p,.about-bio p{text-align:left;hyphens:manual;-webkit-hyphens:manual}
 }
 
 /* Servicios: si el número de tarjetas es impar, la última queda centrada (mismo tamaño, sin tarjetas vacías) */
@@ -863,28 +863,31 @@ html.slides-open{overflow:hidden}
 .nov-more summary:hover{text-decoration:underline;text-underline-offset:3px}
 .nov-more summary:focus-visible{outline:2px solid var(--link);outline-offset:3px}
 .about-h2{font-size:clamp(2rem,3.6vw,3rem);line-height:1.08;margin-bottom:40px}
-/* Foto a ~la mitad (200 px en vez de 360 px) y bloque de texto que no supera la altura de la foto */
-.home-about .about{grid-template-columns:200px minmax(0,1fr);gap:48px;align-items:center}
-.home-about .portrait::after{inset:10px -10px -10px 10px}
-.about-name{font-family:var(--serif);font-weight:700;font-size:1.3rem;line-height:1.2;color:var(--navy-ui);margin-bottom:2px}
+/* Quién soy (portada): a la izquierda foto (160 px), nombre, credenciales y botones; a la derecha la presentación */
+.about.about-home{grid-template-columns:310px minmax(0,1fr);grid-template-rows:auto auto 1fr;
+  grid-template-areas:"foto bio" "datos bio" "btns bio";gap:0 56px;align-items:start}
+.about-home .portrait{grid-area:foto;width:160px;margin-bottom:26px}
+.about-home .portrait::after{inset:8px -8px -8px 8px}
+.about-home .about-datos{grid-area:datos}
+.about-home .about-bio{grid-area:bio}
+.about-home .about-btns{grid-area:btns;align-self:start}
+.about-name{font-family:var(--serif);font-weight:700;font-size:1.25rem;line-height:1.2;color:var(--navy-ui);margin-bottom:2px}
 .home-about .role{margin-bottom:14px;font-size:.95rem}
-.home-about .creds{gap:6px;margin-bottom:16px}
-.home-about .creds li{font-size:.95rem;line-height:1.45;padding-left:22px}
+.home-about .creds{gap:8px;margin-bottom:20px}
+.home-about .creds li{font-size:.92rem;line-height:1.45;padding-left:20px}
+.about-bio p{font-size:1.08rem;line-height:1.7;color:#2a3352;font-weight:400;text-align:justify;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manual}
+.about-bio p + p{margin-top:1em}
+@media (max-width:640px){.about-bio p{text-align:left;font-size:1rem}}
 .about-btns{display:flex;flex-wrap:wrap;gap:10px}
 .about-btns .btn{padding:9px 22px}
-@media (min-width:901px) and (max-width:1100px){
-  .home-about .about{gap:32px}
-  .home-about .creds{gap:4px}
-  .home-about .creds li{font-size:.9rem;line-height:1.4}
-}
 /* Anclas de la portada: el encabezado fijo no tapa el título */
 #novedades,#quien-soy{scroll-margin-top:calc(var(--header-h) + 4px)}
 @media (max-width:900px){
   .home-nov,.home-about{padding:52px 0}
   .about-h2{margin-bottom:28px}
-  .home-about .about{gap:32px}
-  .home-about .about{grid-template-columns:1fr}
-  .home-about .portrait{max-width:150px}
+  .about.about-home{grid-template-columns:minmax(0,1fr);grid-template-areas:"foto" "datos" "bio" "btns";gap:0}
+  .about-home .portrait{width:130px;margin-bottom:22px}
+  .about-home .about-bio{margin-bottom:24px}
 }
 
 
