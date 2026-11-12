@@ -6,3 +6,6 @@
 /notas       /gestion-legal/          301
 /notas/      /gestion-legal/          301
 /notas/*     /gestion-legal/:splat    301
+# Dirección de la presentación de accionistas acortada el 12 nov 2026.
+/presentaciones/derechos-de-los-accionistas-en-sociedades-anonimas-en-el-peru-que-puedes-hacer-segun-tu-porcentaje-de-participacion   /presentaciones/derechos-de-los-accionistas-en-el-peru/   301
+/presentaciones/derechos-de-los-accionistas-en-sociedades-anonimas-en-el-peru-que-puedes-hacer-segun-tu-porcentaje-de-participacion/  /presentaciones/derechos-de-los-accionistas-en-el-peru/   301

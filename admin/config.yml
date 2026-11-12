@@ -78,7 +78,7 @@ collections:
     format: json
     identifier_field: pregunta
     slug: "{{fields.slug}}"
-    preview_path: "preguntas/{{slug}}"
+    preview_path: "preguntas/{{fields.slug}}"
     summary: "{{pregunta}} · {{servicio_asociado}}"
     sortable_fields: [pregunta, fecha_actualizacion, orden]
     view_filters:

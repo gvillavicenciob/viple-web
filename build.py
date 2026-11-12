@@ -592,6 +592,16 @@ def titulo_seo(t):
     return f"{t} | Viple Consultores"
 
 
+def aviso_legal(que):
+    """Aviso legal estándar al final de las respuestas y de las presentaciones (texto fijo, igual en todas)."""
+    return (f'<aside class="aviso-legal" aria-label="Aviso legal"><p><strong>Aviso legal:</strong> '
+            f'{que} tiene carácter general e informativo y no constituye asesoría legal, '
+            f'ni crea una relación abogado-cliente. Su contenido puede no reflejar cambios normativos o criterios '
+            f'posteriores a su publicación y no debe utilizarse como sustituto de una evaluación profesional de '
+            f'un caso concreto. Antes de tomar decisiones, consulta con un abogado que pueda analizar tu situación '
+            f'particular.</p></aside>')
+
+
 def render_pregunta(q):
     base = PREGUNTAS["base"]
     svc = q["servicio_asociado"]
@@ -608,6 +618,7 @@ def render_pregunta(q):
 <section class="ed">
   <article class="wrap ed-narrow">
     <div class="prose ed-prose">{body_html}</div>
+    {aviso_legal("La información contenida en esta respuesta")}
     <p class="q-svc">Servicio relacionado: <a href="/servicios/{svc}/">{esc(SERVICE_NAMES[svc])} <span aria-hidden="true">→</span></a></p>
     <div class="q-cta">
       <p>¿Quieres revisar tu caso?</p>
@@ -946,6 +957,7 @@ def render_presentacion(it):
       {nav}
     </div>
     {texto}
+    {aviso_legal("La información contenida en esta presentación")}
     <a class="back" href="/presentaciones/">← Ver todas las presentaciones</a>
   </div>
 </section>'''

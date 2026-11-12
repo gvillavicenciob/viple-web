@@ -827,3 +827,10 @@ html.slides-open{overflow:hidden}
    (en el celular, alineado a la izquierda para no dejar espacios grandes) */
 .pres-head h1{max-width:none;text-align:justify;text-align-last:left;text-wrap:wrap;hyphens:manual;-webkit-hyphens:manual}
 @media (max-width:640px){.pres-head h1{text-align:left}}
+
+/* Aviso legal al final de respuestas y presentaciones */
+.aviso-legal{margin:32px 0 8px;padding:14px 18px;border-left:3px solid #c9d5e6;background:var(--soft);border-radius:0 8px 8px 0}
+.aviso-legal p{font-size:.88rem;line-height:1.55;color:#5b6375;text-align:justify;text-justify:inter-word;margin:0}
+.aviso-legal strong{color:var(--navy-ui);font-weight:600}
+.pres-view .aviso-legal{max-width:980px;margin-left:auto;margin-right:auto}
+@media (max-width:640px){.aviso-legal p{text-align:left}}
