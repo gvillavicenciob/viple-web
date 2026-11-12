@@ -935,3 +935,10 @@ html.slides-open{overflow:hidden}
   .at-subnav-l{gap:8px}
   .at-subnav a{font-size:.88rem;padding:6px 13px}
 }
+
+/* Desplegables del menú: «Ver todos…» subrayado y las opciones con sangría, para distinguirlos */
+.submenu li:first-child a{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.submenu li:not(:first-child) a{padding-left:38px}
+@media (max-width:1199px){
+  .submenu li:not(:first-child) a{padding-left:16px}
+}
