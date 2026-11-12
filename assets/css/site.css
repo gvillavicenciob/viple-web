@@ -822,3 +822,8 @@ html.slides-open{overflow:hidden}
   .pf-grupo .pres-filtros-t{display:none}
 }
 .pres-sec{background:#e3eee7;color:#2f5a44}
+
+/* Título de cada presentación en la franja azul: justificado, con los mismos márgenes que el resumen
+   (en el celular, alineado a la izquierda para no dejar espacios grandes) */
+.pres-head h1{max-width:none;text-align:justify;text-align-last:left;text-wrap:wrap;hyphens:manual;-webkit-hyphens:manual}
+@media (max-width:640px){.pres-head h1{text-align:left}}
