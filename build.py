@@ -5,7 +5,8 @@ Construye el sitio de Viple Consultores en la carpeta _site/.
   (encabezado, menú y pie de página).
 - Genera «¿Tienes preguntas?» (/preguntas/, una página por pregunta publicada) desde
   content/preguntas, «¿Tu equipo odia a Legal?» (/gestion-legal/) desde content/notas,
-  «Novedades» y «Presentaciones especiales», con los contenidos guardados desde el panel (/admin).
+  las novedades (bloque de la portada y una página por novedad), «Presentaciones especiales» y
+  «A qué estar atento» (/a-que-estar-atento/ y sus subsecciones), con los contenidos guardados desde el panel (/admin).
 - Las secciones sin contenido publicado llevan noindex y no entran en el sitemap.
 - El sitemap usa fechas editoriales guardadas (nunca la fecha del build).
 
@@ -62,15 +63,14 @@ PREGUNTAS = {
     "empty": "Muy pronto publicaremos las respuestas a las preguntas más frecuentes.",
 }
 
-# Sección «Novedades» (sin cambios de diseño por ahora)
+# «Novedades»: bloque de la portada (/#novedades) y una página por novedad (/novedades/<slug>/)
 NOVEDADES = {
     "name": "novedades",
     "nav": "novedades",
     "eyebrow": "Novedades",
-    "h1": "Novedades normativas y asuntos de interés",
+    "h2": "Novedades",
     "intro": "Nuevas normas, cambios regulatorios y temas de actualidad relevantes para tu empresa.",
     "item_label": "Novedad",
-    "empty": "Todavía no hay novedades publicadas. Vuelve pronto.",
 }
 
 LAYOUT = (SRC / "layout.html").read_text(encoding="utf-8")
@@ -188,6 +188,8 @@ def svc_links():
 
 # Preguntas publicadas (se cargan en main() desde content/preguntas)
 PUBLICADAS = []
+# Enlace «Novedades» del pie: solo si hay novedades publicadas (el bloque de la portada existe)
+FOOT_NOVEDADES = [""]
 
 
 def q_url(q):
@@ -275,6 +277,8 @@ def render(url, content, title, description, nav="", logo="cuadrado",
         "{{head_extra}}": head_extra,
         "{{brand}}": brand(logo),
         "{{svc_menu}}": svc_menu(),
+        "{{atento_menu}}": atento_menu(),
+        "{{foot_novedades}}": FOOT_NOVEDADES[0],
         "{{content}}": content,
     }.items():
         page = page.replace(key, val)
@@ -331,24 +335,6 @@ def load_items(name, base=None):
         items.append(data)
     items.sort(key=lambda d: (d["date"], d["slug"]), reverse=True)
     return items
-
-
-# ---------- Tarjeta genérica (Novedades y bloque del inicio) ----------
-
-def card(item):
-    thumb = (f'<img src="{esc(item["image"])}" alt="{esc(item.get("image_alt") or "")}" loading="lazy">'
-             if item.get("image") else "")
-    cat = item.get("category") or ""
-    pill = f'<span class="pill">{esc(cat)}</span>' if cat else ""
-    data_cat = f' data-cat="{esc(cat)}"' if item["collection"] == "novedades" else ""
-    return f'''<a class="post-card"{data_cat} href="{item["url"]}">
-      <div class="thumb">{thumb}</div>
-      <div class="txt">
-        <div class="meta">{pill}<time datetime="{item["date"]}">{fecha_larga(item["date"])}</time></div>
-        <h3>{esc(item.get("title"))}</h3>
-        <p>{esc(item.get("summary"))}</p>
-      </div>
-    </a>'''
 
 
 def empty_box(msg):
@@ -681,30 +667,50 @@ def build_preguntas(publicadas):
         render_pregunta(q)
 
 
-# ---------- Sección «Novedades» ----------
+# ---------- Novedades (bloque de la portada, id="novedades"; cada novedad conserva su página) ----------
 
-def build_novedades(items):
-    cfg = NOVEDADES
-    name = cfg["name"]
-    filters = filter_buttons(items)
-    listing = ('<div class="posts">' + "".join(card(i) for i in items) + "</div>") if items else empty_box(cfg["empty"])
-    content = f'''
-<div class="page-head">
+NOVEDADES_HOME_MAX = 3
+
+
+def nov_card(item):
+    """Tarjeta de novedad en la portada: título, fecha y resumen; imagen solo si existe."""
+    thumb = (f'<div class="thumb"><img src="{esc(item["image"])}" alt="{esc(item.get("image_alt") or "")}"'
+             f'{wh(item["image"])} loading="lazy" decoding="async"></div>' if item.get("image") else "")
+    return f'''<a class="post-card nov-card{'' if thumb else ' no-img'}" href="{item["url"]}">
+      {thumb}
+      <div class="txt">
+        <div class="meta"><time datetime="{item["date"]}">{fecha_larga(item["date"])}</time></div>
+        <h3>{esc(item.get("title"))}</h3>
+        <p>{esc(item.get("summary"))}</p>
+      </div>
+    </a>'''
+
+
+def novedades_portada(items):
+    """Hasta 3 novedades publicadas (más recientes primero); las demás en «Ver más novedades» dentro del mismo bloque.
+    Sin novedades publicadas, el bloque no se genera."""
+    if not items:
+        return ""
+    primeras, resto = items[:NOVEDADES_HOME_MAX], items[NOVEDADES_HOME_MAX:]
+    mas = (f'''<details class="nov-more">
+      <summary>Ver más novedades</summary>
+      <div class="posts">{"".join(nov_card(i) for i in resto)}</div>
+    </details>''' if resto else "")
+    return f'''<section class="home-nov" id="novedades" aria-labelledby="novedades-t">
   <div class="wrap">
-    <div class="eyebrow">{cfg["eyebrow"]}</div>
-    <h1>{cfg["h1"]}</h1>
-    <p>{cfg["intro"]}</p>
-  </div>
-</div>
-<section>
-  <div class="wrap">
-    {filters}
-    {listing}
+    <div class="svc-intro">
+      <h2 id="novedades-t">{NOVEDADES["h2"]}</h2>
+      <p>{NOVEDADES["intro"]}</p>
+    </div>
+    <div class="posts">{"".join(nov_card(i) for i in primeras)}</div>
+    {mas}
   </div>
 </section>'''
-    render(f"/{name}/", content, f'{cfg["eyebrow"]} | Viple Consultores', cfg["intro"], nav=cfg["nav"],
-           noindex=not items, lastmod=max_fecha(LISTADOS_LASTMOD, *(i["date"] for i in items)))
 
+
+def build_novedades(items):
+    """Solo las páginas individuales (/novedades/<slug>/). El listado /novedades/ se retiró: redirige a /#novedades."""
+    cfg = NOVEDADES
     for item in items:
         body_html = markdown.markdown(item.get("body") or "", extensions=["extra", "sane_lists"])
         cover = (f'<figure class="cover"><img src="{esc(item["image"])}" alt="{esc(item.get("image_alt") or "")}"></figure>'
@@ -722,7 +728,7 @@ def build_novedades(items):
         content = f'''
 <div class="page-head">
   <div class="wrap">
-    <div class="crumbs"><a href="/{name}/">{cfg["eyebrow"]}</a> / {esc(eyebrow)}</div>
+    <div class="crumbs"><a href="/#novedades">{cfg["eyebrow"]}</a> / {esc(eyebrow)}</div>
     <h1>{esc(item.get("title"))}</h1>
     <p><time datetime="{item["date"]}">{fecha_larga(item["date"])}</time> · Por {esc(author)}</p>
   </div>
@@ -733,7 +739,7 @@ def build_novedades(items):
     <div class="prose">{body_html}</div>
     {source}
     <div class="author-line">{photo}<div><strong>{esc(author)}</strong>Viple Consultores · Legal &amp; Compliance</div></div>
-    <a class="back" href="/{name}/">← Ver todas las {cfg["eyebrow"].lower()}</a>
+    <a class="back" href="/#novedades">← Ver todas las novedades</a>
   </article>
 </section>'''
         render(item["url"], content, f'{item.get("title")} | Viple Consultores',
@@ -815,7 +821,19 @@ def wh(src):
 
 
 def pres_slides(it):
-    return [s for s in (it.get("slides") or []) if isinstance(s, str) and s.strip()]
+    """Rutas de las diapositivas, en orden. Acepta texto («/ruta.jpg») o {imagen, alt} (A qué estar atento)."""
+    return [src for src, _ in slides_alt(it)]
+
+
+def slides_alt(it):
+    """Lista de (ruta, texto alternativo) de las diapositivas; el texto alternativo puede estar vacío."""
+    out = []
+    for s in (it.get("slides") or []):
+        if isinstance(s, str) and s.strip():
+            out.append((s.strip(), ""))
+        elif isinstance(s, dict) and str(s.get("imagen") or "").strip():
+            out.append((str(s["imagen"]).strip(), str(s.get("alt") or "").strip()))
+    return out
 
 
 def prep_presentaciones(items):
@@ -858,7 +876,9 @@ def parrafos(texto):
     return "".join(f"<p>{esc(x)}</p>" for x in partes)
 
 
-def pres_card(it):
+def pres_card(it, etiquetas=None, data=None):
+    """Tarjeta del catálogo (Presentaciones especiales y A qué estar atento).
+    etiquetas: [(clase, texto)]; data: atributos data-* para los filtros. Por defecto, los de presentaciones."""
     slides = pres_slides(it)
     portada = it.get("image") or (slides[0] if slides else "")
     img = (f'<img src="{esc(portada)}" alt="Carátula: {esc(it.get("title"))}"{wh(portada)} loading="lazy">'
@@ -870,13 +890,17 @@ def pres_card(it):
         tag, attrs = "a", f' href="{esc(it["link"])}" target="_blank" rel="noopener"'
     if tag == "a":
         more = '<span class="pres-more">Ver presentación <span aria-hidden="true">→</span></span>'
-    etiquetas = [("pres-cat", cat_nombre(it["cat"]))] if it["cat"] else []
-    if it["sector"]:
-        etiquetas.append(("pres-cat pres-sec", f'Sector: {SECTOR_NAMES[it["sector"]]}' if it["sector"] == "otros"
-                          else SECTOR_NAMES[it["sector"]]))
+    if etiquetas is None:
+        etiquetas = [("pres-cat", cat_nombre(it["cat"]))] if it["cat"] else []
+        if it["sector"]:
+            etiquetas.append(("pres-cat pres-sec", f'Sector: {SECTOR_NAMES[it["sector"]]}' if it["sector"] == "otros"
+                              else SECTOR_NAMES[it["sector"]]))
+    if data is None:
+        data = {"cat": it["cat"], "sector": it["sector"]}
+    data_attrs = "".join(f' data-{k}="{esc(v)}"' for k, v in data.items())
     cat = (f'<span class="pres-tags">' + "".join(f'<span class="{c}">{esc(e)}</span>' for c, e in etiquetas)
            + '</span>') if etiquetas else ""
-    return f'''<li class="pres-item" data-cat="{it["cat"]}" data-sector="{it["sector"]}"><{tag} class="pres-card"{attrs}>
+    return f'''<li class="pres-item"{data_attrs}><{tag} class="pres-card"{attrs}>
       <div class="pres-img">{img}</div>
       <div class="pres-txt">
         {cat}
@@ -924,21 +948,32 @@ def pres_filtros(items):
     </div>'''
 
 
-def render_presentacion(it):
-    slides = pres_slides(it)
-    n = len(slides)
+def visor(it):
+    """Visor de diapositivas (compartido por Presentaciones especiales y A qué estar atento): cada imagen completa,
+    en su proporción real, con flechas, posición («2 de 7»), teclado y «Ampliar». Sin descargas."""
+    lista = slides_alt(it)
+    n = len(lista)
     figs = ""
-    for i, s in enumerate(slides, 1):
-        lazy = "" if i == 1 else ' loading="lazy"'
-        figs += (f'<figure class="slide"><img src="{esc(s)}" alt="Diapositiva {i} de {n}: {esc(it.get("title"))}"'
-                 f'{wh(s)}{lazy} draggable="false"></figure>')
+    for i, (src, alt) in enumerate(lista, 1):
+        carga = ' fetchpriority="high"' if i == 1 else ' loading="lazy"'
+        alt = alt or f'Diapositiva {i} de {n}: {it.get("title") or ""}'
+        figs += (f'<figure class="slide"><img src="{esc(src)}" alt="{esc(alt)}"'
+                 f'{wh(src)}{carga} decoding="async" draggable="false"></figure>')
     flechas = ('<button type="button" data-prev aria-label="Diapositiva anterior">←</button>'
-               f'<span data-count aria-live="polite">1 / {n}</span>'
+               f'<span data-count aria-live="polite">1 de {n}</span>'
                '<button type="button" data-next aria-label="Diapositiva siguiente">→</button>') if n > 1 else ""
     # «Ampliar»: muestra la diapositiva ocupando toda la ventana (no descarga nada)
     nav = (f'<div class="slides-nav">{flechas}'
            f'<button type="button" class="slides-zoom" data-zoom aria-pressed="false" aria-label="Ampliar">'
            f'{icon("zoom")}<span>Ampliar</span></button></div>')
+    return f'''<div class="slides" data-slides>
+      <div class="slides-track" tabindex="0" role="region" aria-label="Diapositivas de la presentación">{figs}</div>
+      {nav}
+    </div>'''
+
+
+def render_presentacion(it):
+    slides = pres_slides(it)
     body = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
     texto = f'<div class="prose pres-body">{body}</div>' if body.strip() else ""
     cat = (f'<a class="pres-cat-link" href="/servicios/{it["cat"]}/">{esc(PRES_CAT[it["cat"]])}</a>'
@@ -953,10 +988,7 @@ def render_presentacion(it):
 </div>
 <section class="pres-view">
   <div class="wrap">
-    <div class="slides" data-slides>
-      <div class="slides-track" tabindex="0" role="region" aria-label="Diapositivas de la presentación">{figs}</div>
-      {nav}
-    </div>
+    {visor(it)}
     {texto}
     {aviso_legal("La información contenida en esta presentación")}
     <a class="back" href="/presentaciones/">← Ver todas las presentaciones</a>
@@ -994,22 +1026,260 @@ def build_presentaciones(items):
             render_presentacion(it)
 
 
-# ---------- Bloque «lo último» del inicio ----------
+# ---------- Sección «A qué estar atento» (content/a-que-estar-atento) ----------
+# Configuración compartida: de aquí salen las subsecciones, el desplegable del menú, el pie de página
+# y las opciones «Categoría» del panel (build.py las reescribe en _site/admin/config.yml).
+# Para agregar una materia: añádela aquí (id = dirección) y en admin/config.yml (entre las marcas), y vuelve a construir.
 
-def latest_block(all_items):
-    if not all_items:
+ATENTO = {
+    "base": "a-que-estar-atento",
+    "label": "A qué estar atento",
+    "intro": "Casos y decisiones de las autoridades que ayudan a identificar qué revisar en las prácticas de tu negocio.",
+    "title": "A qué estar atento | Viple Consultores",
+    "description": ("Casos y decisiones sobre datos personales, protección al consumidor y competencia desleal: "
+                    "qué revisar y qué tener en cuenta en tu negocio."),
+    "empty": "Próximamente incorporaremos análisis de casos y decisiones de las autoridades.",
+    "lastmod": "2026-11-11",
+}
+ATENTO_CATS = [
+    {"id": "proteccion-de-datos-personales", "name": "Protección de Datos Personales",
+     "intro": "Decisiones de la Autoridad Nacional de Protección de Datos (ANPD) que ayudan a identificar "
+              "qué revisar en el tratamiento de datos de tu negocio.",
+     "description": "Decisiones de la ANPD sobre protección de datos personales: qué revisar en el tratamiento de datos "
+                    "de clientes, trabajadores y proveedores de tu negocio.",
+     "empty": "Próximamente incorporaremos análisis de decisiones de la ANPD."},
+    {"id": "proteccion-al-consumidor", "name": "Protección al Consumidor",
+     "intro": "Decisiones del INDECOPI sobre protección al consumidor que ayudan a identificar "
+              "qué revisar en la relación de tu negocio con sus clientes.",
+     "description": "Decisiones del INDECOPI sobre protección al consumidor: qué revisar en la información, la atención "
+                    "de reclamos y la relación de tu negocio con sus clientes.",
+     "empty": "Próximamente incorporaremos análisis de decisiones del INDECOPI."},
+    {"id": "competencia-desleal", "name": "Competencia Desleal",
+     "intro": "Decisiones del INDECOPI sobre competencia desleal que ayudan a identificar "
+              "qué revisar en la publicidad y las prácticas comerciales de tu negocio.",
+     "description": "Decisiones del INDECOPI sobre competencia desleal: qué revisar en la publicidad y las prácticas "
+                    "comerciales de tu negocio.",
+     "empty": "Próximamente incorporaremos análisis de decisiones del INDECOPI."},
+]
+ATENTO_NAMES = {c["id"]: c["name"] for c in ATENTO_CATS}
+# Direcciones reservadas: una publicación no puede usar el slug de una subsección
+ATENTO_RESERVADOS = set(ATENTO_NAMES)
+CUR = ' aria-current="page"'
+
+
+def atento_url(cat=None):
+    return f"/{ATENTO['base']}/" + (f"{cat}/" if cat else "")
+
+
+def atento_menu():
+    """Opciones del desplegable «A qué estar atento» del menú principal (después de «Ver todos»)."""
+    return "\n".join(f'              <li><a href="{atento_url(c["id"])}">{esc(c["name"])}</a></li>' for c in ATENTO_CATS)
+
+
+def ld_script(ld):
+    return f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
+
+
+def breadcrumbs(pasos):
+    """Miga de pan visible (franja azul) y BreadcrumbList. pasos: [(nombre, url)]; el último es la página actual."""
+    vis = []
+    for i, (n, u) in enumerate(pasos):
+        vis.append(f'<span{CUR}>{esc(n)}</span>' if i == len(pasos) - 1 else f'<a href="{u}">{esc(n)}</a>')
+    sep = ' <span aria-hidden="true">/</span> '
+    nav = f'<nav class="crumbs at-crumbs" aria-label="Ruta de navegación">{sep.join(vis)}</nav>'
+    ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": i, "name": n, "item": SITE_URL + u} for i, (n, u) in enumerate(pasos, 1)]}
+    return nav, ld_script(ld)
+
+
+def prep_atento(items):
+    """Valida y completa las publicaciones. Solo se publican las que tienen categoría válida, dirección válida
+    no reservada y al menos una diapositiva (así no se generan páginas vacías)."""
+    listas, vistos = [], {}
+    for it in items:
+        it["pslug"] = slugify(it.get("slug")) or slugify(it["slug"])
+        it["cat"] = str(it.get("categoria") or "").strip()
+        problemas = []
+        if it["cat"] not in ATENTO_NAMES:
+            problemas.append(f'categoría «{it["cat"]}» no válida')
+        if it["pslug"] in ATENTO_RESERVADOS:
+            problemas.append(f'la dirección «{it["pslug"]}» está reservada para una subsección')
+        if not pres_slides(it):
+            problemas.append("sin diapositivas")
+        if it["pslug"] in vistos:
+            problemas.append(f'dirección repetida con {vistos[it["pslug"]]}')
+        if problemas:
+            print(f'  ! A qué estar atento: NO se publica {it["slug"]} ({"; ".join(problemas)})')
+            continue
+        vistos[it["pslug"]] = it["slug"]
+        no_jpg = [x for x in pres_slides(it) if not re.search(r"\.jpe?g$", x, re.I)]
+        if no_jpg:
+            print(f'  ! A qué estar atento: diapositivas que no son JPG en {it["slug"]}: {", ".join(no_jpg[:3])}')
+        it["url"] = atento_url(it["pslug"])
+        svc = str(it.get("servicio") or "").strip()
+        it["svc"] = svc if svc in SERVICE_NAMES else ""
+        it["updated"] = str(it.get("fecha_actualizacion") or "")[:10]
+        it["seo_title"] = titulo_seo(str(it.get("title_seo") or "").strip() or str(it.get("title") or "").strip())
+        it["seo_desc"] = (str(it.get("meta_description") or "").strip()
+                          or recortar(it.get("summary")) or ATENTO["description"])
+        listas.append(it)
+    return listas
+
+
+def atento_card(it):
+    return pres_card(it, etiquetas=[("pres-cat", ATENTO_NAMES[it["cat"]])], data={"cat": it["cat"]})
+
+
+def atento_listado(items, titulo_lista, vacio=None):
+    if not items:
+        return empty_box(vacio or ATENTO["empty"])
+    return (f'<ul class="pres-list" data-pres-list aria-label="{esc(titulo_lista)}">'
+            + "".join(atento_card(i) for i in items) + "</ul>")
+
+
+def atento_subnav(actual=None):
+    """Filtro por materia: enlaces a «Ver todos» y a las tres subsecciones (siempre visibles, también sin
+    publicaciones; funcionan sin JavaScript y llevan a la dirección propia de cada subsección)."""
+    links = f'<a href="{atento_url()}"{CUR if actual is None else ""}>Ver todos</a>'
+    links += "".join(f'<a href="{atento_url(c["id"])}"{CUR if c["id"] == actual else ""}>{esc(c["name"])}</a>'
+                     for c in ATENTO_CATS)
+    return (f'<nav class="at-subnav" aria-labelledby="at-subnav-t"><p class="pres-filtros-t" id="at-subnav-t">Materia</p>'
+            f'<div class="at-subnav-l">{links}</div></nav>')
+
+
+def atento_fuente(it):
+    """Grupo opcional «Fuente del caso»: solo se muestran los datos que se completaron."""
+    f = it.get("fuente") if isinstance(it.get("fuente"), dict) else {}
+    filas = []
+    for etiqueta, clave in (("Autoridad", "autoridad"), ("Resolución", "resolucion")):
+        if str(f.get(clave) or "").strip():
+            filas.append(f'<div><dt>{etiqueta}</dt><dd>{esc(str(f[clave]).strip())}</dd></div>')
+    fr = str(f.get("fecha_resolucion") or "")[:10]
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", fr):
+        filas.append(f'<div><dt>Fecha de la resolución</dt><dd><time datetime="{fr}">{fecha_larga(fr)}</time></dd></div>')
+    furl = str(f.get("url") or "").strip()
+    if furl.startswith(("https://", "http://")):
+        filas.append(f'<div><dt>Fuente oficial</dt><dd><a href="{esc(furl)}" target="_blank" rel="noopener">'
+                     f'Ver en el sitio de la autoridad <span aria-hidden="true">↗</span></a></dd></div>')
+    if not filas:
         return ""
-    cards = "".join(card(i) for i in all_items[:3])
-    return f'''<section style="background:var(--sage-light)">
+    return (f'<aside class="at-fuente" aria-labelledby="at-fuente-t"><h2 id="at-fuente-t">Fuente del caso</h2>'
+            f'<dl>{"".join(filas)}</dl></aside>')
+
+
+def render_atento_item(it):
+    cat = it["cat"]
+    crumbs, crumbs_ld = breadcrumbs([("Inicio", "/"), (ATENTO["label"], atento_url()),
+                                     (ATENTO_NAMES[cat], atento_url(cat)), (it.get("title") or "", it["url"])])
+    body = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
+    texto = f'<div class="prose pres-body">{body}</div>' if body.strip() else ""
+    fechas = f'Publicado el <time datetime="{it["date"]}">{fecha_larga(it["date"])}</time>' if it["date"] else ""
+    if it["updated"] and it["updated"] != it["date"]:
+        fechas += ((" · " if fechas else "")
+                   + f'Actualizado el <time datetime="{it["updated"]}">{fecha_larga(it["updated"])}</time>')
+    fechas = f'<p class="at-fechas">{fechas}</p>' if fechas else ""
+    svc = (f'<p class="q-svc">Servicio relacionado: <a href="/servicios/{it["svc"]}/">{esc(SERVICE_NAMES[it["svc"]])} '
+           f'<span aria-hidden="true">→</span></a></p>') if it["svc"] else ""
+    extra = atento_fuente(it) + svc
+    content = f'''
+<div class="page-head pres-head">
   <div class="wrap">
-    <div class="section-head reveal">
-      <h2>Lo último publicado</h2>
-      <p>Artículos sobre cómo mejorar el trabajo legal, nuevas normas y asuntos de interés para tu empresa.
-      <br><a href="/gestion-legal/" style="color:var(--navy)">Ver «¿Tu equipo odia a Legal?»</a> · <a href="/novedades/" style="color:var(--navy)">Ver novedades</a></p>
-    </div>
-    <div class="posts">{cards}</div>
+    {crumbs}
+    <a class="pres-cat-link" href="{atento_url(cat)}">{esc(ATENTO_NAMES[cat])}</a>
+    <h1>{esc(it.get("title"))}</h1>
+    <div class="pres-sum">{parrafos(it.get("summary"))}</div>
+    {fechas}
+  </div>
+</div>
+<section class="pres-view">
+  <div class="wrap">
+    {visor(it)}
+    {texto}
+    {f'<div class="at-extra">{extra}</div>' if extra else ""}
+    {aviso_legal("La información contenida en esta publicación")}
+    <p class="at-back"><a class="back" href="{atento_url(cat)}">← Ver más en {esc(ATENTO_NAMES[cat])}</a>
+    <a class="back" href="{atento_url()}">← Ver todos los contenidos de {ATENTO["label"]}</a></p>
   </div>
 </section>'''
+    portada = it.get("image") or pres_slides(it)[0]
+    ld = {"@context": "https://schema.org", "@type": "Article", "headline": it.get("title"),
+          "description": it["seo_desc"], "datePublished": it["date"] or None,
+          "dateModified": max_fecha(it["date"], it["updated"]), "articleSection": ATENTO_NAMES[cat],
+          "image": SITE_URL + portada, "mainEntityOfPage": SITE_URL + it["url"],
+          "author": {"@type": "Person", "name": DEFAULT_AUTHOR},
+          "publisher": {"@type": "Organization", "@id": ORG_ID, "name": "Viple Consultores"}}
+    ld = {k: v for k, v in ld.items() if v}
+    render(it["url"], content, it["seo_title"], it["seo_desc"], nav="atento", og_image=portada, og_type="article",
+           head_extra=crumbs_ld + "\n" + ld_script(ld), lastmod=max_fecha(it["date"], it["updated"]))
+
+
+def build_atento(items):
+    items = prep_atento(items)
+    fechas = lambda lst: [max_fecha(i["date"], i["updated"]) for i in lst]
+    # Página principal: todas las publicaciones, con filtro por materia
+    crumbs, crumbs_ld = breadcrumbs([("Inicio", "/"), (ATENTO["label"], atento_url())])
+    content = f'''
+<div class="page-head pres-head">
+  <div class="wrap">
+    {crumbs}
+    <h1>{ATENTO["label"]}</h1>
+    <p>{ATENTO["intro"]}</p>
+  </div>
+</div>
+<section class="pres">
+  <div class="wrap">
+    {atento_subnav()}
+    {atento_listado(items, ATENTO["label"])}
+  </div>
+</section>'''
+    render(atento_url(), content, ATENTO["title"], ATENTO["description"], nav="atento", head_extra=crumbs_ld,
+           noindex=not items, lastmod=max_fecha(ATENTO["lastmod"], *fechas(items)))
+    # Subsecciones: solo las publicaciones de su materia (mismas tarjetas; cada publicación tiene una sola URL)
+    for c in ATENTO_CATS:
+        propios = [i for i in items if i["cat"] == c["id"]]
+        _, crumbs_ld = breadcrumbs([("Inicio", "/"), (ATENTO["label"], atento_url()),
+                                    (c["name"], atento_url(c["id"]))])
+        crumbs = (f'<nav class="crumbs at-crumbs" aria-label="Ruta de navegación">'
+                  f'<a href="{atento_url()}">{ATENTO["label"]}</a></nav>')
+        content = f'''
+<div class="page-head pres-head">
+  <div class="wrap">
+    {crumbs}
+    <h1>{esc(c["name"])}</h1>
+    <p>{esc(c["intro"])}</p>
+  </div>
+</div>
+<section class="pres">
+  <div class="wrap">
+    {atento_subnav(c["id"])}
+    {atento_listado(propios, c["name"], c["empty"])}
+    <a class="back" href="{atento_url()}">← Ver todos los contenidos de {ATENTO["label"]}</a>
+  </div>
+</section>'''
+        render(atento_url(c["id"]), content, f'{c["name"]} | {ATENTO["label"]} | Viple Consultores',
+               c["description"], nav="atento", head_extra=crumbs_ld, noindex=not propios,
+               lastmod=max_fecha(ATENTO["lastmod"], *fechas(propios)))
+    for it in items:
+        render_atento_item(it)
+    return items
+
+
+def admin_config_atento():
+    """Reescribe las opciones «Categoría» de la colección A qué estar atento en _site/admin/config.yml
+    a partir de ATENTO_CATS (una sola fuente para la web y el panel)."""
+    f = OUT / "admin" / "config.yml"
+    txt = f.read_text(encoding="utf-8")
+    ini, fin = "# atento-categorias:inicio", "# atento-categorias:fin"
+    m = re.search(re.escape(ini) + r"\n(.*?)\n([ \t]*)" + re.escape(fin), txt, re.S)
+    if not m:
+        print("  ! admin/config.yml: faltan las marcas de las categorías de A qué estar atento")
+        return
+    sangria = m.group(2)
+    opciones = "\n".join(f'{sangria}- {{ label: "{c["name"]}", value: {c["id"]} }}' for c in ATENTO_CATS)
+    if m.group(1).strip() != opciones.strip():
+        print("  ! admin/config.yml: las categorías de A qué estar atento no coinciden con build.py; "
+              "el panel publicado usa las de build.py (actualiza también admin/config.yml)")
+    f.write_text(txt[:m.start(1)] + opciones + txt[m.end(1):], encoding="utf-8")
 
 
 # ---------- Construcción ----------
@@ -1044,7 +1314,7 @@ def main():
     novedades = load_items("novedades")
     publicadas, total_preguntas = load_preguntas()
     PUBLICADAS[:] = publicadas
-    everything = sorted(ideas + novedades, key=lambda d: d["date"], reverse=True)
+    FOOT_NOVEDADES[0] = '<li><a href="/#novedades">Novedades</a></li>' if novedades else ""
 
     for path in sorted((SRC / "pages").rglob("*.html")):
         rel = path.relative_to(SRC / "pages").as_posix()
@@ -1057,14 +1327,15 @@ def main():
         if rel == "404.html":
             url = "/404.html"
         meta, body = parse_page(path)
-        body = body.replace("{{latest}}", latest_block(everything))
+        body = body.replace("{{novedades_portada}}", novedades_portada(novedades))
         body = fill_services(body)
         meta["title"] = fill_services(meta.get("title", "Viple Consultores")).replace("&amp;", "&")
         # Fecha de última modificación: la guardada en la página, o la de las preguntas que muestra
         lastmod = meta.get("lastmod")
         head_extra = ""
         if url == "/":
-            lastmod = max_fecha(lastmod, *(q["fecha"] for q in destacadas_portada()))
+            lastmod = max_fecha(lastmod, *(q["fecha"] for q in destacadas_portada()),
+                                *(i["date"] for i in novedades[:NOVEDADES_HOME_MAX]))
         m = re.fullmatch(r"/servicios/([a-z0-9-]+)/", url)
         if m:
             slug = m.group(1)
@@ -1081,6 +1352,8 @@ def main():
     build_preguntas(publicadas)
     build_novedades(novedades)
     build_presentaciones(load_items("presentaciones"))
+    atento = build_atento(load_items(ATENTO["base"]))
+    admin_config_atento()
 
     urls = ""
     for u, lm in SITEMAP:
@@ -1091,7 +1364,8 @@ def main():
     (OUT / "robots.txt").write_text(f"User-agent: *\nDisallow: /admin/\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
     print(f"Sitio generado en _site/ - {len(SITEMAP)} paginas en el sitemap - "
-          f"{len(ideas)} articulos - {len(publicadas)} de {total_preguntas} preguntas publicadas - {len(novedades)} novedades")
+          f"{len(ideas)} articulos - {len(publicadas)} de {total_preguntas} preguntas publicadas - {len(novedades)} novedades - "
+          f"{len(atento)} en A que estar atento")
 
 
 if __name__ == "__main__":

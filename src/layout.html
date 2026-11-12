@@ -44,9 +44,15 @@
           </li>
           <li><a data-nav="preguntas" href="/preguntas/">¿Tienes preguntas?</a></li>
           <li><a data-nav="gestion-legal" href="/gestion-legal/">¿Tu equipo odia a Legal?</a></li>
+          <li class="has-sub">
+            <a data-nav="atento" href="/a-que-estar-atento/">A qué estar atento</a>
+            <button class="sub-toggle" type="button" aria-expanded="false" aria-controls="submenu-atento" aria-label="Mostrar subsecciones de A qué estar atento"></button>
+            <ul class="submenu" id="submenu-atento">
+              <li><a href="/a-que-estar-atento/">Ver todos</a></li>
+{{atento_menu}}
+            </ul>
+          </li>
           <li><a data-nav="presentaciones" href="/presentaciones/">Presentaciones especiales</a></li>
-          <li><a data-nav="novedades" href="/novedades/">Novedades</a></li>
-          <li><a data-nav="quien-soy" href="/quien-soy/">Quién soy</a></li>
           <li><a data-nav="contacto" class="btn outline" href="/contacto/">Conversemos</a></li>
         </ul>
       </nav>
@@ -72,9 +78,10 @@
           <li><a href="/servicios/">Nuestros servicios</a></li>
           <li><a href="/preguntas/">¿Tienes preguntas?</a></li>
           <li><a href="/gestion-legal/">¿Tu equipo odia a Legal?</a></li>
+          <li><a href="/a-que-estar-atento/">A qué estar atento</a></li>
           <li><a href="/presentaciones/">Presentaciones especiales</a></li>
-          <li><a href="/novedades/">Novedades</a></li>
-          <li><a href="/quien-soy/">Quién soy</a></li>
+          {{foot_novedades}}
+          <li><a href="/#quien-soy">Quién soy</a></li>
           <li><a href="/contacto/">Conversemos</a></li>
         </ul>
       </div>

@@ -4,12 +4,12 @@
 
 | Carpeta / archivo | Para qué sirve |
 |---|---|
-| `src/pages/` | El texto de cada página (inicio, servicios, quién soy, contacto). Se puede editar a mano. |
+| `src/pages/` | El texto de cada página (inicio, servicios, contacto). El bloque «Quién soy» está en `src/pages/index.html` (sección `id="quien-soy"`). Se puede editar a mano. |
 | `src/layout.html` | Encabezado, menú y pie de página comunes a todas las páginas. |
 | `assets/` | Estilos, logos, foto e imágenes subidas desde el panel. |
 | `admin/` | El panel de administración (`/admin`). |
-| `content/preguntas`, `content/notas`, `content/novedades`, `content/presentaciones` | Lo que crees desde el panel en «¿Tienes preguntas?» (/preguntas/), «¿Tu equipo odia a Legal?» (/gestion-legal/), «Novedades» y «Presentaciones especiales» (se llenan solos). |
-| `_redirects` | Redirecciones 301 de Netlify (por ejemplo /dudas/ → /preguntas/ y /notas/ → /gestion-legal/). Se copia a `_site/` en cada build. |
+| `content/preguntas`, `content/notas`, `content/novedades`, `content/presentaciones`, `content/a-que-estar-atento` | Lo que crees desde el panel en «¿Tienes preguntas?» (/preguntas/), «¿Tu equipo odia a Legal?» (/gestion-legal/), «Novedades» (bloque de la portada /#novedades y una página por novedad), «Presentaciones especiales» y «A qué estar atento» (/a-que-estar-atento/ y sus tres subsecciones). Se llenan solos. |
+| `_redirects` | Redirecciones 301 de Netlify (por ejemplo /dudas/ → /preguntas/ y /notas/ → /gestion-legal/). Se copia a `_site/` en cada build. Las que llevan a un ancla de la portada (/novedades/ → /#novedades y /quien-soy/ → /#quien-soy) están en `netlify.toml`. |
 | `content/servicios.json` | Fuente única de los servicios: nombre, nombre del menú, nombre corto como categoría de presentaciones y descripción breve. Su orden es el del menú, la portada, /servicios/, /contacto/, el acordeón de preguntas y la navegación entre servicios. Agregar un servicio requiere además su página en `src/pages/servicios/<slug>.html` y su opción en los campos «Servicio asociado» y «Categoría» de `admin/config.yml`. |
 | `build.py`, `netlify.toml`, `requirements.txt` | Instrucciones para que Netlify arme el sitio. No hace falta tocarlos. |
 | `_site/` | El sitio ya armado, generado automáticamente. **No subirlo a GitHub.** |
@@ -95,7 +95,9 @@ Cada pregunta es una entrada de la colección **¿Tienes preguntas?** (`content/
 
 Ya no existe el campo «Publicada»: una pregunta aparece en la web cuando tiene respuesta, título SEO, descripción SEO y fecha de actualización. Si tiene respuesta pero le falta algo de lo demás, la web **no** la muestra (el build lo avisa en el registro de Netlify). Mientras no pulses «Publicar», todo sigue siendo un borrador del panel.
 
-**Noindex automático**: /preguntas/, /gestion-legal/, /novedades/ y /presentaciones/ llevan `noindex` y quedan fuera del sitemap mientras no tengan nada publicado. Se retira solo en el build que publica el primer contenido.
+**Noindex automático**: /preguntas/, /gestion-legal/, /presentaciones/, /a-que-estar-atento/ y cada subsección de «A qué estar atento» llevan `noindex, follow` y quedan fuera del sitemap mientras no tengan nada publicado. Se retira solo en el build que publica el primer contenido. El bloque «Novedades» de la portada (y su enlace en el pie) solo aparece si hay al menos una novedad publicada.
+
+**A qué estar atento**: las materias (subsecciones) están en `ATENTO_CATS` de `build.py`, que alimenta las páginas, el desplegable del menú y las opciones «Categoría» del panel (el build reescribe las opciones entre las marcas `# atento-categorias:inicio/fin` de `_site/admin/config.yml`; mantén `admin/config.yml` igual). Los slugs de las subsecciones están reservados: una publicación con ese nombre no se publica. Una publicación aparece si no es borrador, tiene categoría válida y al menos una diapositiva.
 
 **Cambiar el nombre o la descripción de un servicio**: entra a **Nuestros servicios**. El cambio se aplica a la vez en el menú, la portada, /servicios/ y la página del servicio.
 

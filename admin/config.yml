@@ -359,11 +359,171 @@ collections:
         default: false
         required: false
 
+  # ---------------- A QUÉ ESTAR ATENTO ----------------
+  # (content/a-que-estar-atento; cada publicación tiene una sola página: /a-que-estar-atento/<slug>/)
+  # Misma forma de llenado que «Presentaciones especiales» (diapositivas JPG en un visor, sin descargas).
+  - name: a-que-estar-atento
+    label: A qué estar atento
+    label_singular: Publicación
+    description: "Casos y decisiones de las autoridades, mostrados como diapositivas en imagen (igual que Presentaciones especiales; no se ofrece ningún archivo para descargar). Elige la materia, sube las diapositivas JPG en orden con nombres propios de cada publicación (p. ej. caso-banco-01.jpg, caso-banco-02.jpg…) y escribe el texto alternativo de cada una. Una publicación aparece en la web cuando no es borrador y tiene al menos una diapositiva."
+    folder: content/a-que-estar-atento
+    create: true
+    delete: true
+    extension: json
+    format: json
+    identifier_field: title
+    slug: "{{fields.slug}}"
+    media_folder: /assets/uploads/a-que-estar-atento
+    public_folder: /assets/uploads/a-que-estar-atento
+    preview_path: "a-que-estar-atento/{{fields.slug}}"
+    summary: "{{title}} · {{categoria}} · {{date}}"
+    sortable_fields: [date, title]
+    view_filters:
+      - label: Borradores
+        field: draft
+        pattern: true
+    view_groups:
+      - label: Categoría
+        field: categoria
+    fields:
+      - label: Título visible (H1)
+        name: title
+        widget: string
+        hint: Título grande de la página de la publicación y de su tarjeta en el listado.
+      - label: Dirección (slug)
+        name: slug
+        widget: viple-texto
+        desde: title
+        modo: slug
+        pattern: ["^(?!(proteccion-de-datos-personales|proteccion-al-consumidor|competencia-desleal)$)[a-z0-9]+(-[a-z0-9]+)*$", "Solo minúsculas sin tildes, números y guiones. No puede ser el nombre de una subsección (proteccion-de-datos-personales, proteccion-al-consumidor, competencia-desleal)."]
+        hint: "La página será vipleconsultores.com/a-que-estar-atento/<slug>/ (una sola dirección, aunque cambies la categoría). Se propone sola a partir del título mientras la publicación es nueva; puedes acortarla. No la cambies después de publicar."
+      - label: Categoría (materia)
+        name: categoria
+        widget: select
+        required: true
+        # Las opciones salen de ATENTO_CATS en build.py (el build las reescribe en el panel publicado)
+        options:
+          # atento-categorias:inicio
+          - { label: "Protección de Datos Personales", value: proteccion-de-datos-personales }
+          - { label: "Protección al Consumidor", value: proteccion-al-consumidor }
+          - { label: "Competencia Desleal", value: competencia-desleal }
+          # atento-categorias:fin
+        hint: Obligatoria. Define la subsección en la que aparece la publicación y su filtro en el listado.
+      - label: Resumen (tarjeta y encabezado)
+        name: summary
+        widget: text
+        hint: Presenta la publicación en pocas líneas. Se ve en la tarjeta del listado y debajo del título, en la franja azul. Si no completas la metadescripción, su inicio se usa para Google.
+      - label: Diapositivas
+        name: slides
+        widget: list
+        required: false
+        collapsed: true
+        add_to_top: false
+        label_singular: diapositiva
+        summary: "{{fields.imagen}}"
+        hint: "Una imagen JPG por diapositiva, en orden (unos 1600 px de ancho y menos de 300 KB; horizontal o vertical, p. ej. 4:5). La primera es la carátula si no eliges otra. Usa nombres de archivo propios de esta publicación. Puedes reordenarlas arrastrándolas y quitar las que sobren. Sin diapositivas, la publicación no aparece en la web."
+        fields:
+          - { label: Imagen de la diapositiva (JPG), name: imagen, widget: image, choose_url: false }
+          - label: Texto alternativo
+            name: alt
+            widget: string
+            required: false
+            hint: "Qué muestra la diapositiva (para lectores de pantalla). Si lo dejas vacío, se usa «Diapositiva N de M: título»."
+      - label: Contenido de la publicación en texto (debajo de las diapositivas, ayuda a Google)
+        name: body
+        widget: markdown
+        required: false
+        hint: Opcional, pero recomendado. Google no lee el texto dentro de las imágenes. Escribe aquí los puntos principales de las diapositivas (unas 150–300 palabras); no repitas el resumen. Se ve solo en la página de la publicación, debajo del visor.
+      - label: Imagen de portada
+        name: image
+        widget: image
+        required: false
+        choose_url: false
+        hint: Opcional. Aparece en el listado (se ve completa, sin recortes). Si la dejas vacía, se usa la primera diapositiva.
+      - label: Servicio relacionado
+        name: servicio
+        widget: select
+        required: false
+        options:
+          - { label: Estructuramos tu negocio, value: estructura-empresarial }
+          - { label: Constitución de asociaciones, value: constitucion-asociaciones }
+          - { label: Protegemos tu inversión, value: protegemos-tu-inversion }
+          - { label: Contratos que funcionan en la práctica, value: contratos }
+          - { label: Protección de datos personales, value: proteccion-de-datos }
+          - { label: Prácticas comerciales y reclamos, value: reclamos-y-denuncias }
+          - { label: Diseño de herramientas legales, value: herramientas-legales }
+        hint: Opcional. Muestra «Servicio relacionado» con un enlace a la página del servicio, debajo del visor.
+      - label: Fuente del caso (opcional)
+        name: fuente
+        widget: object
+        required: false
+        collapsed: true
+        hint: Datos de la resolución analizada. Completa solo lo que tengas; se muestra únicamente lo que llenes. Usa siempre la fuente oficial.
+        fields:
+          - { label: Autoridad, name: autoridad, widget: string, required: false }
+          - { label: Número o identificador de la resolución, name: resolucion, widget: string, required: false }
+          - label: Fecha de la resolución
+            name: fecha_resolucion
+            widget: datetime
+            date_format: DD/MM/YYYY
+            time_format: false
+            format: YYYY-MM-DD
+            picker_utc: false
+            required: false
+            hint: Fecha en que la autoridad emitió la resolución (distinta de la fecha de publicación del análisis).
+          - label: URL de la fuente oficial
+            name: url
+            widget: string
+            required: false
+            pattern: ["^$|^https?://", "Debe empezar con https:// (dirección completa)"]
+            hint: Opcional. Dirección completa (https://…) del documento en el sitio oficial de la autoridad.
+      - label: Título SEO (pestaña del navegador y Google)
+        name: title_seo
+        widget: viple-texto
+        desde: title
+        modo: texto
+        recomendado: [50, 60]
+        sufijo: " | Viple Consultores"
+        required: false
+        hint: "Se propone igual al título visible mientras la publicación es nueva; edítalo libremente. Si no termina en «| Viple Consultores», se agrega solo. Si lo dejas vacío, se usa el título visible."
+      - label: Metadescripción (Google)
+        name: meta_description
+        widget: viple-texto
+        multilinea: true
+        recomendado: [140, 160]
+        required: false
+        hint: Resumen breve para Google. Si la dejas vacía, se usa el inicio del resumen.
+      - label: Fecha de publicación
+        name: date
+        widget: datetime
+        date_format: DD/MM/YYYY
+        time_format: false
+        format: YYYY-MM-DD
+        picker_utc: false
+        default: "{{now}}"
+        required: false
+        hint: Fecha en que se publica el análisis (se completa con la de hoy); las más recientes aparecen primero.
+      - label: Fecha de actualización
+        name: fecha_actualizacion
+        widget: datetime
+        date_format: DD/MM/YYYY
+        time_format: false
+        format: YYYY-MM-DD
+        picker_utc: false
+        required: false
+        hint: Opcional. Solo si cambiaste de verdad el contenido después de publicarlo. Se muestra en la página y se usa en el sitemap.
+      - label: Borrador (no publicar todavía)
+        name: draft
+        widget: boolean
+        default: false
+        required: false
+        hint: Mientras esté marcado, no aparece en la web, en los listados ni en el sitemap.
+
   # ---------------- NOVEDADES ----------------
   - name: novedades
     label: Novedades
     label_singular: Novedad
-    description: Nuevas normas, cambios regulatorios y asuntos de interés. Se muestran en «Novedades» del menú (/novedades/).
+    description: "Nuevas normas, cambios regulatorios y asuntos de interés. Las tres más recientes se muestran en el bloque «Novedades» de la portada (vipleconsultores.com/#novedades) y las demás con «Ver más novedades»; cada novedad conserva su propia página (/novedades/<dirección>/). Si no hay ninguna publicada, el bloque no aparece."
     folder: content/novedades
     create: true
     delete: true

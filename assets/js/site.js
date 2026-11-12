@@ -69,7 +69,7 @@
     var update = function () {
       var i = current();
       box.dataset.i = i;
-      if (count) count.textContent = (i + 1) + ' / ' + total;
+      if (count) count.textContent = (i + 1) + ' de ' + total;
       if (prev) prev.disabled = i <= 0;
       if (next) next.disabled = i >= total - 1;
     };
