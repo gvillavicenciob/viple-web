@@ -68,6 +68,7 @@
     var go = function (i) { track.scrollLeft = Math.max(0, Math.min(total - 1, i)) * track.clientWidth; update(); };
     var update = function () {
       var i = current();
+      box.dataset.i = i;
       if (count) count.textContent = (i + 1) + ' / ' + total;
       if (prev) prev.disabled = i <= 0;
       if (next) next.disabled = i >= total - 1;
@@ -81,31 +82,62 @@
     });
     // Sin menú contextual sobre las diapositivas (no impide una captura de pantalla, pero evita «Guardar imagen»)
     box.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+    // Ampliar: la diapositiva ocupa toda la ventana; Esc o el mismo botón la cierran
+    var zoom = box.querySelector('[data-zoom]');
+    if (zoom) {
+      var label = zoom.querySelector('span');
+      var setZoom = function (on) {
+        var i = +box.dataset.i || 0;
+        box.classList.toggle('is-zoom', on);
+        document.documentElement.classList.toggle('slides-open', on);
+        zoom.setAttribute('aria-pressed', on ? 'true' : 'false');
+        zoom.setAttribute('aria-label', on ? 'Cerrar vista ampliada' : 'Ampliar');
+        if (label) label.textContent = on ? 'Cerrar' : 'Ampliar';
+        window.requestAnimationFrame(function () { go(i); });
+        track.focus({ preventScroll: true });
+      };
+      zoom.addEventListener('click', function () { setZoom(!box.classList.contains('is-zoom')); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && box.classList.contains('is-zoom')) setZoom(false);
+      });
+      window.addEventListener('resize', function () { go(+box.dataset.i || 0); });
+    }
     update();
   });
 
-  // Presentaciones especiales: filtro por servicio (no cambia la dirección de la página)
+  // Presentaciones especiales: filtros por servicio y por sector, combinados (no cambian la dirección de la página)
   var pf = document.querySelector('[data-pres-filtros]');
   if (pf) {
     var pItems = Array.prototype.slice.call(document.querySelectorAll('[data-pres-list] .pres-item'));
-    var pBtns = pf.querySelectorAll('[data-filtro]');
-    var pSel = pf.querySelector('[data-filtro-select]');
     var pCount = pf.querySelector('[data-pf-count]');
-    var filtrar = function (cat) {
+    var pGrupos = Array.prototype.slice.call(pf.querySelectorAll('.pf-grupo'));
+    var sel = {};
+    var aplicar = function () {
       var n = 0;
       pItems.forEach(function (it) {
-        var ok = !cat || it.getAttribute('data-cat') === cat;
+        var ok = Object.keys(sel).every(function (d) { return !sel[d] || it.getAttribute('data-' + d) === sel[d]; });
         it.hidden = !ok;
         if (ok) n++;
       });
-      pBtns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-filtro') === cat ? 'true' : 'false'); });
-      if (pSel) pSel.value = cat;
-      if (pCount) pCount.textContent = n === 1 ? '1 presentación' : n + ' presentaciones';
+      pGrupos.forEach(function (g) {
+        var d = g.getAttribute('data-dim'), v = sel[d] || '';
+        g.querySelectorAll('[data-valor]').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-valor') === v ? 'true' : 'false'); });
+        var s = g.querySelector('select');
+        if (s) s.value = v;
+      });
+      if (pCount) pCount.textContent = n === 0 ? 'No hay presentaciones con esos filtros.' : (n === 1 ? '1 presentación' : n + ' presentaciones');
     };
-    pBtns.forEach(function (b) { b.addEventListener('click', function () { filtrar(b.getAttribute('data-filtro')); }); });
-    if (pSel) pSel.addEventListener('change', function () { filtrar(pSel.value); });
+    pGrupos.forEach(function (g) {
+      var d = g.getAttribute('data-dim');
+      sel[d] = '';
+      g.querySelectorAll('[data-valor]').forEach(function (b) {
+        b.addEventListener('click', function () { sel[d] = b.getAttribute('data-valor'); aplicar(); });
+      });
+      var s = g.querySelector('select');
+      if (s) s.addEventListener('change', function () { sel[d] = s.value; aplicar(); });
+    });
     pf.hidden = false;
-    filtrar('');
+    aplicar();
   }
 
   // Botón «Copiar enlace» de los artículos

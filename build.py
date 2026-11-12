@@ -133,6 +133,9 @@ ICONS = {
     "approve": '<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18"/><path d="M8.5 14.5l2.5 2.5 4.5-5"/>',
     "bulb": '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2v.1h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
     "alert": '<path d="M12 3.5 21.5 20h-19z"/><path d="M12 10v4.5"/><path d="M12 17.5h.01"/>',
+    "group": '<circle cx="12" cy="7.5" r="3"/><path d="M6.5 20c0-3.3 2.5-5.5 5.5-5.5s5.5 2.2 5.5 5.5"/><circle cx="5" cy="9.5" r="2.2"/><path d="M1.5 18.5c0-2.3 1.5-4 3.6-4.2"/><circle cx="19" cy="9.5" r="2.2"/><path d="M22.5 18.5c0-2.3-1.5-4-3.6-4.2"/>',
+    "hand-heart": '<path d="M12 11.5 8.6 8.2a2.2 2.2 0 0 1 3.1-3.1l.3.3.3-.3a2.2 2.2 0 0 1 3.1 3.1z"/><path d="M2.5 14.5h3l3.5 1h3.5a1.5 1.5 0 0 1 0 3H9"/><path d="M12.5 18.5l5.6-2.4a1.6 1.6 0 0 1 1.9 2.4L15 21H5.5l-3-1.5"/>',
+    "zoom": '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
     "chevron": '<path d="M9 5l7 7-7 7"/>',
     "arrow-left": '<path d="M19 12H5M11 6l-6 6 6 6"/>',
     "arrow-right": '<path d="M5 12h14M13 6l6 6-6 6"/>',
@@ -146,6 +149,7 @@ SVC_ICONS = {
     "reclamos-y-denuncias": "megaphone",
     "herramientas-legales": "tools",
     "protegemos-tu-inversion": "trend",
+    "constitucion-asociaciones": "group",
 }
 
 
@@ -175,6 +179,11 @@ def svc_panels(summary=False):
         <span class="svc-chev">{icon("chevron")}</span>
       </a>"""
     return f'<div class="svc-cards{" with-sum" if summary else ""}">{cards}</div>'
+
+
+def svc_links():
+    """Lista de enlaces a todos los servicios (p. ej. en /contacto/), en el orden de servicios.json."""
+    return "\n".join(f'        <li><a href="/servicios/{s["slug"]}/">→ {esc(s["name"])}</a></li>' for s in SERVICIOS)
 
 
 # Preguntas publicadas (se cargan en main() desde content/preguntas)
@@ -242,6 +251,7 @@ def fill_services(text):
     text = text.replace("{{svc_panels}}", svc_panels())
     text = text.replace("{{svc_panels_sum}}", svc_panels(summary=True))
     text = text.replace("{{preguntas_portada}}", preguntas_portada())
+    text = text.replace("{{svc_links}}", svc_links())
     for s in SERVICIOS:
         text = text.replace("{{svc:" + s["slug"] + "}}", esc(s["name"]))
         text = text.replace("{{svc_preguntas:" + s["slug"] + "}}", svc_preguntas(s["slug"]))
@@ -509,6 +519,8 @@ def render_article(cfg, item, items):
 
 SERVICE_NAMES = {s["slug"]: s["name"] for s in SERVICIOS}
 SERVICE_ORDER = {s["slug"]: i for i, s in enumerate(SERVICIOS)}
+# Etiqueta breve de cada servicio como categoría de presentaciones (mismo identificador que el servicio)
+PRES_CAT = {s["slug"]: (s.get("categoria_corta") or "").strip() or s["name"] for s in SERVICIOS}
 
 
 def texto_plano(md):
@@ -575,8 +587,9 @@ def load_preguntas():
 
 
 def titulo_seo(t):
-    t = t.strip()
-    return t if t.endswith("| Viple Consultores") else f"{t} | Viple Consultores"
+    # Acepta títulos que ya terminan en «| Viple» o «| Viple Consultores» sin duplicar la marca
+    t = re.sub(r"\s*\|\s*Viple(\s+Consultores)?\s*$", "", t.strip(), flags=re.I)
+    return f"{t} | Viple Consultores"
 
 
 def render_pregunta(q):
@@ -724,6 +737,17 @@ PRESENTACIONES = {
     "empty": "Muy pronto publicaremos nuestras primeras presentaciones.",
 }
 
+# Divisiones del catálogo de presentaciones (además de los servicios).
+# Para agregar un sector: añádelo aquí y en el campo «Sector económico» de admin/config.yml (mismo valor).
+CAT_OTROS = ("otros", "Otros")
+SECTORES = [
+    ("retail", "Retail"),
+    ("colegios", "Colegios"),
+    ("inmobiliarias", "Inmobiliarias"),
+    ("otros", "Otros"),
+]
+SECTOR_NAMES = dict(SECTORES)
+
 ICONO_PRES = ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" '
               'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
               '<rect x="3" y="4" width="18" height="12" rx="1"/><path d="M12 16v4M8 20h8"/>'
@@ -745,6 +769,39 @@ def recortar(texto, n=155):
     return t + "…"
 
 
+def img_dims(src):
+    """Ancho y alto reales de una imagen del sitio (JPG o PNG), leídos del archivo; None si no se puede."""
+    try:
+        f = ROOT / str(src).lstrip("/")
+        d = f.read_bytes()
+    except Exception:
+        return None
+    if d[:4] == bytes([0x89, 0x50, 0x4E, 0x47]):  # PNG
+        return int.from_bytes(d[16:20], "big"), int.from_bytes(d[20:24], "big")
+    if d[:2] != bytes([0xFF, 0xD8]):  # JPG
+        return None
+    i = 2
+    while i + 9 < len(d):
+        if d[i] != 0xFF:
+            i += 1
+            continue
+        m = d[i + 1]
+        if m in (0xD8, 0x01) or 0xD0 <= m <= 0xD7:
+            i += 2
+            continue
+        largo = int.from_bytes(d[i + 2:i + 4], "big")
+        if m in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+            return int.from_bytes(d[i + 7:i + 9], "big"), int.from_bytes(d[i + 5:i + 7], "big")
+        i += 2 + largo
+    return None
+
+
+def wh(src):
+    """Atributos width/height para que el navegador conozca la proporción antes de cargar la imagen."""
+    dm = img_dims(src)
+    return f' width="{dm[0]}" height="{dm[1]}"' if dm else ""
+
+
 def pres_slides(it):
     return [s for s in (it.get("slides") or []) if isinstance(s, str) and s.strip()]
 
@@ -758,9 +815,13 @@ def prep_presentaciones(items):
         it["pslug"] = slugify(it.get("slug")) or slugify(it["slug"])
         it["url"] = f"/presentaciones/{it['pslug']}/"
         cat = str(it.get("categoria") or "").strip()
-        it["cat"] = cat if cat in SERVICE_NAMES else ""
+        it["cat"] = cat if (cat in SERVICE_NAMES or cat == CAT_OTROS[0]) else ""
         if cat and not it["cat"]:
-            print(f'  ! Presentación con categoría desconocida «{cat}» (se muestra solo en «Todas»): {it["slug"]}')
+            print(f'  ! Presentación con categoría desconocida «{cat}» (se muestra solo en «Todos»): {it["slug"]}')
+        sec = str(it.get("sector") or "").strip()
+        it["sector"] = sec if sec in SECTOR_NAMES else ""
+        if sec and not it["sector"]:
+            print(f'  ! Presentación con sector desconocido «{sec}» (se muestra solo en «Todos»): {it["slug"]}')
         it["seo_title"] = titulo_seo(str(it.get("title_seo") or "").strip() or str(it.get("title") or "").strip())
         it["seo_desc"] = (str(it.get("meta_description") or "").strip()
                           or recortar(it.get("summary")) or PRESENTACIONES["intro"])
@@ -788,7 +849,7 @@ def parrafos(texto):
 def pres_card(it):
     slides = pres_slides(it)
     portada = it.get("image") or (slides[0] if slides else "")
-    img = (f'<img src="{esc(portada)}" alt="Carátula: {esc(it.get("title"))}" loading="lazy">'
+    img = (f'<img src="{esc(portada)}" alt="Carátula: {esc(it.get("title"))}"{wh(portada)} loading="lazy">'
            if portada else ICONO_PRES)
     tag, attrs, more = "div", "", ""
     if slides:
@@ -797,8 +858,13 @@ def pres_card(it):
         tag, attrs = "a", f' href="{esc(it["link"])}" target="_blank" rel="noopener"'
     if tag == "a":
         more = '<span class="pres-more">Ver presentación <span aria-hidden="true">→</span></span>'
-    cat = (f'<span class="pres-cat">{esc(SERVICE_NAMES[it["cat"]])}</span>' if it["cat"] else "")
-    return f'''<li class="pres-item" data-cat="{it["cat"]}"><{tag} class="pres-card"{attrs}>
+    etiquetas = [("pres-cat", cat_nombre(it["cat"]))] if it["cat"] else []
+    if it["sector"]:
+        etiquetas.append(("pres-cat pres-sec", f'Sector: {SECTOR_NAMES[it["sector"]]}' if it["sector"] == "otros"
+                          else SECTOR_NAMES[it["sector"]]))
+    cat = (f'<span class="pres-tags">' + "".join(f'<span class="{c}">{esc(e)}</span>' for c, e in etiquetas)
+           + '</span>') if etiquetas else ""
+    return f'''<li class="pres-item" data-cat="{it["cat"]}" data-sector="{it["sector"]}"><{tag} class="pres-card"{attrs}>
       <div class="pres-img">{img}</div>
       <div class="pres-txt">
         {cat}
@@ -809,19 +875,39 @@ def pres_card(it):
     </{tag}></li>'''
 
 
+def cat_nombre(c):
+    return CAT_OTROS[1] if c == CAT_OTROS[0] else PRES_CAT[c]
+
+
+def pf_grupo(dim, titulo, opciones):
+    """Un grupo de filtros (botones en escritorio y lista desplegable en el celular)."""
+    tid = f"pf-t-{dim}"
+    btns = f'<button type="button" data-valor="" aria-pressed="true">Todos</button>' + "".join(
+        f'<button type="button" data-valor="{v}" aria-pressed="false">{esc(n)}</button>' for v, n in opciones)
+    opts = '<option value="">Todos</option>' + "".join(f'<option value="{v}">{esc(n)}</option>' for v, n in opciones)
+    return f'''<div class="pf-grupo" data-dim="{dim}">
+        <p class="pres-filtros-t" id="{tid}">{titulo}</p>
+        <div class="pf-btns" role="group" aria-labelledby="{tid}">{btns}</div>
+        <label class="pf-sel"><span>{titulo}</span><select>{opts}</select></label>
+      </div>'''
+
+
 def pres_filtros(items):
-    """Filtros por categoría (solo en el navegador, sin direcciones nuevas). Ocultos si no hay JavaScript."""
-    usadas = [s for s in SERVICIOS if any(i["cat"] == s["slug"] for i in items)]
-    if not usadas:
+    """Filtros por servicio y por sector (solo en el navegador, sin direcciones nuevas). Ocultos sin JavaScript.
+    Cada filtro muestra solo las opciones que tienen presentaciones; «Otros» va al final."""
+    cats = [(s["slug"], PRES_CAT[s["slug"]]) for s in SERVICIOS if any(i["cat"] == s["slug"] for i in items)]
+    if any(i["cat"] == CAT_OTROS[0] for i in items):
+        cats.append(CAT_OTROS)
+    secs = [(v, n) for v, n in SECTORES if any(i["sector"] == v for i in items)]
+    grupos = ""
+    if cats:
+        grupos += pf_grupo("cat", "Servicio", cats)
+    if secs:
+        grupos += pf_grupo("sector", "Sector", secs)
+    if not grupos:
         return ""
-    btns = '<button type="button" data-filtro="" aria-pressed="true">Todas</button>' + "".join(
-        f'<button type="button" data-filtro="{s["slug"]}" aria-pressed="false">{esc(s["name"])}</button>' for s in usadas)
-    opts = '<option value="">Todas</option>' + "".join(
-        f'<option value="{s["slug"]}">{esc(s["name"])}</option>' for s in usadas)
     return f'''<div class="pres-filtros" data-pres-filtros hidden>
-      <p class="pres-filtros-t" id="pf-t">Filtrar por servicio</p>
-      <div class="pf-btns" role="group" aria-labelledby="pf-t">{btns}</div>
-      <label class="pf-sel"><span>Filtrar por servicio</span><select data-filtro-select>{opts}</select></label>
+      <div class="pf-grupos">{grupos}</div>
       <p class="pf-count" aria-live="polite" data-pf-count></p>
     </div>'''
 
@@ -833,14 +919,18 @@ def render_presentacion(it):
     for i, s in enumerate(slides, 1):
         lazy = "" if i == 1 else ' loading="lazy"'
         figs += (f'<figure class="slide"><img src="{esc(s)}" alt="Diapositiva {i} de {n}: {esc(it.get("title"))}"'
-                 f'{lazy} draggable="false"></figure>')
-    nav = ('<div class="slides-nav"><button type="button" data-prev aria-label="Diapositiva anterior">←</button>'
-           f'<span data-count aria-live="polite">1 / {n}</span>'
-           '<button type="button" data-next aria-label="Diapositiva siguiente">→</button></div>') if n > 1 else ""
+                 f'{wh(s)}{lazy} draggable="false"></figure>')
+    flechas = ('<button type="button" data-prev aria-label="Diapositiva anterior">←</button>'
+               f'<span data-count aria-live="polite">1 / {n}</span>'
+               '<button type="button" data-next aria-label="Diapositiva siguiente">→</button>') if n > 1 else ""
+    # «Ampliar»: muestra la diapositiva ocupando toda la ventana (no descarga nada)
+    nav = (f'<div class="slides-nav">{flechas}'
+           f'<button type="button" class="slides-zoom" data-zoom aria-pressed="false" aria-label="Ampliar">'
+           f'{icon("zoom")}<span>Ampliar</span></button></div>')
     body = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
     texto = f'<div class="prose pres-body">{body}</div>' if body.strip() else ""
-    cat = (f'<a class="pres-cat-link" href="/servicios/{it["cat"]}/">{esc(SERVICE_NAMES[it["cat"]])}</a>'
-           if it["cat"] else "")
+    cat = (f'<a class="pres-cat-link" href="/servicios/{it["cat"]}/">{esc(PRES_CAT[it["cat"]])}</a>'
+           if it["cat"] in SERVICE_NAMES else "")
     content = f'''
 <div class="page-head pres-head">
   <div class="wrap">

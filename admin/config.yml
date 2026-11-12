@@ -59,6 +59,7 @@ collections:
               - { label: Dirección de la página (no cambiar), name: slug, widget: hidden }
               - { label: Nombre, name: name, widget: string, hint: "Título completo: se usa en la página del servicio, la portada y /servicios/." }
               - { label: Nombre corto para el menú, name: menu, widget: string, required: false, hint: "Opcional. Si lo dejas vacío, el menú desplegable usa el nombre completo." }
+              - { label: Nombre corto como categoría de presentaciones, name: categoria_corta, widget: string, required: false, hint: "Opcional. Etiqueta y filtro en Presentaciones especiales (p. ej. «Asociaciones»). Si lo dejas vacío, se usa el nombre completo." }
               - { label: Descripción breve, name: summary, widget: text }
 
   # ---------------- ¿TIENES PREGUNTAS? ----------------
@@ -108,6 +109,7 @@ collections:
         widget: select
         options:
           - { label: Estructuramos tu negocio, value: estructura-empresarial }
+          - { label: Constitución de asociaciones, value: constitucion-asociaciones }
           - { label: Protegemos tu inversión, value: protegemos-tu-inversion }
           - { label: Contratos que funcionan en la práctica, value: contratos }
           - { label: Protección de datos personales, value: proteccion-de-datos }
@@ -290,12 +292,24 @@ collections:
         required: false
         options:
           - { label: Estructuramos tu negocio, value: estructura-empresarial }
+          - { label: Asociaciones, value: constitucion-asociaciones }
           - { label: Protegemos tu inversión, value: protegemos-tu-inversion }
           - { label: Contratos que funcionan en la práctica, value: contratos }
           - { label: Protección de datos personales, value: proteccion-de-datos }
           - { label: Prácticas comerciales y reclamos, value: reclamos-y-denuncias }
           - { label: Diseño de herramientas legales, value: herramientas-legales }
-        hint: Servicio con el que se relaciona. Sirve para los filtros del catálogo. Si la dejas vacía, la presentación aparece solo en «Todas».
+          - { label: Otros, value: otros }
+        hint: Servicio con el que se relaciona. Elige «Otros» si el tema no corresponde a ninguno de los servicios. Sirve para el filtro «Servicio» del catálogo; si la dejas vacía, la presentación aparece solo en «Todos».
+      - label: Sector económico
+        name: sector
+        widget: select
+        required: false
+        options:
+          - { label: Retail, value: retail }
+          - { label: Colegios, value: colegios }
+          - { label: Inmobiliarias, value: inmobiliarias }
+          - { label: Otros, value: otros }
+        hint: Sector al que está dirigida. Sirve para el filtro «Sector» del catálogo. Elige «Otros» si no corresponde a ninguno; si lo dejas vacío, la presentación aparece solo en «Todos».
       - label: Resumen (tarjeta y encabezado)
         name: summary
         widget: text
