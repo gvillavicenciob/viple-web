@@ -83,18 +83,17 @@ Cada pregunta es una entrada de la colección **¿Tienes preguntas?** (`content/
 | Servicio asociado | Grupo del acordeón y página de servicio donde aparece. |
 | Respuesta | Párrafos, listas y enlaces (se puede pegar desde Word). |
 | Título SEO / Descripción SEO | Pestaña del navegador y Google (~60 y ~155 caracteres). |
-| Publicada | Solo las publicadas **y completas** aparecen en la web. |
-| Destacada en la portada | La portada muestra hasta 5 destacadas **y** publicadas (destacar no publica). |
+| Destacada en la portada | La portada muestra hasta 5 destacadas que estén completas. |
 | Orden dentro del servicio / Orden en la portada | Orden de menor a mayor. |
 | Fecha de actualización | Fecha real del último cambio de la respuesta; se ve en la página y va al sitemap. |
 
 **Publicar una respuesta**
 1. Abre la pregunta (las 14 iniciales ya existen como borradores, sin respuesta).
 2. Escribe o pega la **Respuesta**, completa **Título SEO**, **Descripción SEO** y **Fecha de actualización**.
-3. Marca **Publicada** y pulsa **Guardar**: se genera una vista previa gratuita. Revísala.
+3. Pulsa **Guardar**: se genera una vista previa gratuita. Revísala con **Ver vista previa**.
 4. **Publicar → Publicar ahora**: Netlify reconstruye el sitio (un build, 15 créditos) y la pregunta aparece en su página, en el índice, en su servicio y, si está destacada, en la portada.
 
-Si una pregunta está marcada como publicada pero le falta la respuesta, un dato SEO o la fecha, la web **no** la muestra (el build lo avisa en el registro de Netlify).
+Ya no existe el campo «Publicada»: una pregunta aparece en la web cuando tiene respuesta, título SEO, descripción SEO y fecha de actualización. Si tiene respuesta pero le falta algo de lo demás, la web **no** la muestra (el build lo avisa en el registro de Netlify). Mientras no pulses «Publicar», todo sigue siendo un borrador del panel.
 
 **Noindex automático**: /preguntas/, /gestion-legal/, /novedades/ y /presentaciones/ llevan `noindex` y quedan fuera del sitemap mientras no tengan nada publicado. Se retira solo en el build que publica el primer contenido.
 

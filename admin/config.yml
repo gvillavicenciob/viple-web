@@ -70,7 +70,7 @@ collections:
   - name: preguntas
     label: ¿Tienes preguntas?
     label_singular: Pregunta
-    description: "Preguntas y respuestas de «¿Tienes preguntas?» (/preguntas/). Una pregunta solo aparece en la web si marcas «Publicada» y completas la respuesta, el título SEO, la descripción SEO y la fecha de actualización. Para ver cómo queda sin publicarla: márcala como publicada, pulsa Guardar y abre la vista previa; recién llega a la web con «Publicar ahora»."
+    description: "Preguntas y respuestas de «¿Tienes preguntas?» (/preguntas/). Una pregunta aparece en la web cuando tiene completos la respuesta, el título SEO, la descripción SEO y la fecha de actualización; mientras falte alguno, no se muestra. Para ver cómo queda sin publicarla: pulsa Guardar y abre «Ver vista previa»; recién llega a la web con «Publicar»."
     folder: content/preguntas
     create: true
     delete: true
@@ -82,12 +82,6 @@ collections:
     summary: "{{pregunta}} · {{servicio_asociado}}"
     sortable_fields: [pregunta, fecha_actualizacion, orden]
     view_filters:
-      - label: Publicadas
-        field: publicada
-        pattern: true
-      - label: Borradores (no publicadas)
-        field: publicada
-        pattern: false
       - label: Destacadas en la portada
         field: destacada
         pattern: true
@@ -129,19 +123,13 @@ collections:
         name: meta_description
         widget: text
         required: false
-        hint: Idealmente hasta unos 155 caracteres; resume la respuesta. Obligatoria para publicar.
-      - label: Publicada
-        name: publicada
-        widget: boolean
-        default: false
-        required: false
-        hint: Márcala solo cuando la respuesta y los datos SEO estén completos. Si falta algo, la web no la muestra aunque esté marcada.
+        hint: Idealmente hasta unos 155 caracteres; resume la respuesta. Obligatoria para que la pregunta aparezca en la web.
       - label: Destacada en la portada
         name: destacada
         widget: boolean
         default: false
         required: false
-        hint: La portada muestra hasta 5 preguntas que estén destacadas Y publicadas. Destacar no publica.
+        hint: La portada muestra hasta 5 preguntas destacadas que estén completas (con respuesta, datos SEO y fecha).
       - label: Orden dentro del servicio
         name: orden
         widget: number

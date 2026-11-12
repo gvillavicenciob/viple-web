@@ -536,7 +536,8 @@ def _num(v, default):
 
 
 def load_preguntas():
-    """Lee content/preguntas. Solo devuelve las publicadas y completas; los borradores no salen del repositorio."""
+    """Lee content/preguntas. Devuelve las completas (respuesta, título SEO, descripción SEO y fecha).
+    Las que aún no tienen respuesta se omiten en silencio; las que tienen respuesta pero les falta algo se avisan."""
     folder = ROOT / "content" / "preguntas"
     publicadas, total, revisar = [], 0, []
     for f in (sorted(folder.glob("*.json")) if folder.exists() else []):
@@ -546,8 +547,6 @@ def load_preguntas():
             print(f"  ! No se pudo leer la pregunta {f.name}: {e}")
             continue
         total += 1
-        if d.get("publicada") is not True:
-            continue
         q = {
             "pregunta": str(d.get("pregunta") or "").strip(),
             "slug": str(d.get("slug") or f.stem).strip(),
@@ -569,13 +568,15 @@ def load_preguntas():
             faltan.append("slug")
         if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", q["fecha"]):
             faltan.append("fecha_actualizacion")
+        if not q["respuesta"]:
+            continue  # pregunta aún sin responder: no se muestra
         if faltan:
             revisar.append(f'{f.name} (falta: {", ".join(faltan)})')
             continue
         q["_svc_i"] = SERVICE_ORDER[q["servicio_asociado"]]
         publicadas.append(q)
     if revisar:
-        print("  ! Preguntas marcadas como publicadas pero incompletas (NO se publican): " + "; ".join(revisar))
+        print("  ! Preguntas con respuesta pero incompletas (NO se publican): " + "; ".join(revisar))
     vistos = set()
     for q in list(publicadas):
         if q["slug"] in vistos:
