@@ -149,7 +149,7 @@ collections:
         date_format: DD/MM/YYYY
         time_format: false
         format: YYYY-MM-DD
-        picker_utc: true
+        picker_utc: false
         required: false
         hint: Pon la fecha en que escribiste o cambiaste de verdad la respuesta. Se muestra en la página y se usa en el sitemap. Obligatoria para publicar.
 
@@ -186,7 +186,7 @@ collections:
         date_format: DD/MM/YYYY
         time_format: false
         format: YYYY-MM-DD
-        picker_utc: true
+        picker_utc: false
         required: false
         hint: Si la dejas vacía, se usa la fecha en que creaste la entrada.
       - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }
@@ -349,7 +349,7 @@ collections:
         date_format: DD/MM/YYYY
         time_format: false
         format: YYYY-MM-DD
-        picker_utc: true
+        picker_utc: false
         default: "{{now}}"
         required: false
         hint: Fecha de publicación (se completa con la de hoy); las más recientes aparecen primero.
@@ -388,7 +388,7 @@ collections:
         date_format: DD/MM/YYYY
         time_format: false
         format: YYYY-MM-DD
-        picker_utc: true
+        picker_utc: false
         required: false
         hint: Si la dejas vacía, se usa la fecha en que creaste la entrada.
       - { label: Autor, name: author, widget: string, default: Gabriel Villavicencio Bedoya }

@@ -834,3 +834,11 @@ html.slides-open{overflow:hidden}
 .aviso-legal strong{color:var(--navy-ui);font-weight:600}
 .pres-view .aviso-legal{max-width:980px;margin-left:auto;margin-right:auto}
 @media (max-width:640px){.aviso-legal p{text-align:left}}
+
+/* Página de cada pregunta: franja azul más ancha (mismo margen a ambos lados) y texto justificado en computadora */
+.q-head .ed-narrow{max-width:1160px}
+.q-head h1{text-align:justify;text-align-last:left;text-wrap:wrap;hyphens:manual;-webkit-hyphens:manual}
+.q-article .ed-prose p,.q-article .ed-prose li{text-align:justify;text-justify:inter-word;text-wrap:pretty;hyphens:manual;-webkit-hyphens:manual}
+@media (max-width:640px){
+  .q-head h1,.q-article .ed-prose p,.q-article .ed-prose li{text-align:left}
+}

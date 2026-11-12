@@ -608,7 +608,7 @@ def render_pregunta(q):
     svc = q["servicio_asociado"]
     body_html = markdown.markdown(q["respuesta"], extensions=["extra", "sane_lists"])
     content = f"""
-<div class="page-head ed-head ed-article-head">
+<div class="page-head ed-head ed-article-head q-head">
   <div class="wrap ed-narrow">
     <a class="ed-back-top" href="/{base}/">← {PREGUNTAS["label"]}</a>
     <span class="ed-cat">{esc(SERVICE_NAMES[svc])}</span>
@@ -617,7 +617,7 @@ def render_pregunta(q):
   </div>
 </div>
 <section class="ed">
-  <article class="wrap ed-narrow">
+  <article class="wrap ed-narrow q-article">
     <div class="prose ed-prose">{body_html}</div>
     {aviso_legal("La información contenida en esta respuesta")}
     <p class="q-svc">Servicio relacionado: <a href="/servicios/{svc}/">{esc(SERVICE_NAMES[svc])} <span aria-hidden="true">→</span></a></p>
