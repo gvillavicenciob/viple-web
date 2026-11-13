@@ -953,3 +953,11 @@ html.slides-open{overflow:hidden}
   .acc-list a,.faq-q a > span,.rel-q a > span,.faq-head p,.ed-head p,
   .q-head h1,.q-article .ed-prose p,.q-article .ed-prose li{text-align:left}
 }
+
+/* «Hola, soy Gabriel»: el nombre bajo la foto empieza donde empieza el marco decorativo */
+.about-foto figcaption{padding-left:10px}
+
+/* Recuadros «Conversemos»: segunda frase del texto en peso normal */
+.cta-sub{font-weight:400}
+.svc-cta p .cta-sub{font-size:.85em}
+.q-cta p{flex:1 1 420px}

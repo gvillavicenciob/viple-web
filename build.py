@@ -55,6 +55,12 @@ IDEAS = {
     "related": "Otros artículos",
 }
 
+# Texto del recuadro «Conversemos» al final de cada respuesta, según el servicio de la pregunta
+CTA_PREGUNTA = {
+    "contratos": '¿Estás por negociar un contrato? <span class="cta-sub">Conversemos sobre qué condiciones te conviene proponer y cómo podemos acompañarte en su redacción y negociación.</span>',
+}
+CTA_PREGUNTA_DEFECTO = "¿Quieres revisar tu caso?"
+
 # «¿Tienes preguntas?»: preguntas en content/preguntas, publicadas en /preguntas/<slug>/
 PREGUNTAS = {
     "base": "preguntas",
@@ -164,6 +170,12 @@ def icon(name, cls="ico-svg"):
 SERVICIOS = json.loads((ROOT / "content" / "servicios.json").read_text(encoding="utf-8"))["servicios"]
 
 
+def preguntas_menu():
+    """Opciones del desplegable «¿Tienes preguntas?»: cada servicio con preguntas publicadas (abre su grupo en /preguntas/)."""
+    return "\n".join(f'              <li><a href="/{PREGUNTAS['base']}/#{s["slug"]}">{esc(s.get("menu") or s["name"])}</a></li>'
+                     for s in SERVICIOS if any(q["servicio_asociado"] == s["slug"] for q in PUBLICADAS))
+
+
 def svc_menu():
     return "\n".join(f'              <li><a href="/servicios/{s["slug"]}/">{esc(s.get("menu") or s["name"])}</a></li>'
                      for s in SERVICIOS)
@@ -225,10 +237,21 @@ def svc_nav(slug):
     return f'<div class="wrap"><nav class="svc-nav" aria-label="Otros servicios">{links}</nav></div>'
 
 
-def destacadas_portada():
+def destacadas_portada(n=5):
+    """Preguntas de la portada: primero las destacadas (por «Orden en la portada»); si hay menos de n,
+    se completan con otras preguntas publicadas, tomando una de cada servicio por turnos."""
     qs = [q for q in PUBLICADAS if q.get("destacada")]
     qs.sort(key=lambda q: (q["orden_portada"], q["_svc_i"], q["orden"], q["pregunta"]))
-    return qs[:5]
+    qs = qs[:n]
+    grupos = {}
+    for q in PUBLICADAS:  # ya vienen ordenadas por servicio y orden
+        if q not in qs:
+            grupos.setdefault(q["_svc_i"], []).append(q)
+    while len(qs) < n and any(grupos.values()):
+        for k in sorted(grupos):
+            if grupos[k] and len(qs) < n:
+                qs.append(grupos[k].pop(0))
+    return qs
 
 
 def preguntas_portada():
@@ -278,6 +301,7 @@ def render(url, content, title, description, nav="", logo="cuadrado",
         "{{brand}}": brand(logo),
         "{{svc_menu}}": svc_menu(),
         "{{atento_menu}}": atento_menu(),
+        "{{preguntas_menu}}": preguntas_menu(),
         "{{foot_novedades}}": FOOT_NOVEDADES[0],
         "{{content}}": content,
     }.items():
@@ -608,7 +632,7 @@ def render_pregunta(q):
     {aviso_legal("La información contenida en esta respuesta")}
     <p class="q-svc">Servicio relacionado: <a href="/servicios/{svc}/">{esc(SERVICE_NAMES[svc])} <span aria-hidden="true">→</span></a></p>
     <div class="q-cta">
-      <p>¿Quieres revisar tu caso?</p>
+      <p>{CTA_PREGUNTA.get(svc, CTA_PREGUNTA_DEFECTO)}</p>
       <a class="btn" href="/contacto/">Conversemos</a>
     </div>
     {share_links({"url": q_url(q), "title": q["pregunta"]})}
@@ -632,7 +656,7 @@ def build_preguntas(publicadas):
             if not qs:
                 continue
             lis = "".join(f'<li><a href="{q_url(q)}">{esc(q["pregunta"])}</a></li>' for q in qs)
-            grupos += f"""<details class="acc">
+            grupos += f"""<details class="acc" id="{s["slug"]}">
       <summary><span class="acc-ico">{icon(SVC_ICONS.get(s["slug"], "doc-check"))}</span><span class="acc-name">{esc(s["name"])}</span><span class="acc-n">{len(qs)}</span></summary>
       <ul class="acc-list">{lis}</ul>
     </details>"""
