@@ -780,7 +780,7 @@ h1,h2{font-weight:700;letter-spacing:-.01em;color:var(--navy-ui)}
 @media (max-width:640px){
   .page-head p,.detail .body p,.foot-txt,.svc-cta p,.pres-sum p,
   .sit-desc p,.how-item p,.svc-card .svc-sum,.dd-item p,.ed-card p,.pres-txt p,.post-card p,
-  .svc-hero p,.ed-featured p,.faq-head p,.svc-intro p{text-align:left;hyphens:manual;-webkit-hyphens:manual}
+  .svc-hero p,.ed-featured p,.faq-head p,.svc-intro p,.about-bio p{text-align:left;hyphens:manual;-webkit-hyphens:manual}
 }
 
 /* Servicios: si el número de tarjetas es impar, la última queda centrada (mismo tamaño, sin tarjetas vacías) */
@@ -834,3 +834,122 @@ html.slides-open{overflow:hidden}
 .aviso-legal strong{color:var(--navy-ui);font-weight:600}
 .pres-view .aviso-legal{max-width:980px;margin-left:auto;margin-right:auto}
 @media (max-width:640px){.aviso-legal p{text-align:left}}
+
+/* Página de cada pregunta: franja azul más ancha (mismo margen a ambos lados) y texto justificado en computadora */
+.q-head .ed-narrow{max-width:1160px}
+.q-head h1{text-align:justify;text-align-last:left;text-wrap:wrap;hyphens:manual;-webkit-hyphens:manual}
+.q-article .ed-prose p,.q-article .ed-prose li{text-align:justify;text-justify:inter-word;text-wrap:pretty;hyphens:manual;-webkit-hyphens:manual}
+@media (max-width:640px){
+  .q-head h1,.q-article .ed-prose p,.q-article .ed-prose li{text-align:left}
+}
+
+/* ===== Portada: bloques «Novedades» y «Quién soy» (11 nov) ===== */
+.home-nov,.home-about{padding:72px 0;border-top:1px solid #dfe6f0}
+.home-faq + .home-nov,.home-faq + .home-about{border-top:0}
+.home-nov .posts{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px}
+.nov-card{border:1px solid #dfe6f0;border-radius:12px;overflow:hidden}
+.nov-card:hover{border-color:var(--steel);box-shadow:0 10px 26px rgba(20,33,86,.07)}
+.nov-card .thumb{background:var(--soft)}
+.nov-card .thumb img{object-fit:contain}
+.nov-card .txt{padding:22px 24px 26px}
+.nov-card h3{font-family:var(--serif);font-weight:700;font-size:1.15rem;line-height:1.3;color:var(--navy-ui)}
+.nov-card .meta{font-size:.88rem;color:#5b6375}
+.nov-more{margin-top:24px}
+.nov-more summary{display:inline-block;cursor:pointer;color:var(--link);font-weight:500;padding:6px 0;list-style:none}
+.nov-more summary::-webkit-details-marker{display:none}
+.nov-more summary::after{content:" ↓"}
+.nov-more[open] summary{margin-bottom:20px}
+.nov-more[open] summary::after{content:" ↑"}
+.nov-more summary:hover{text-decoration:underline;text-underline-offset:3px}
+.nov-more summary:focus-visible{outline:2px solid var(--link);outline-offset:3px}
+.about-h2{font-size:clamp(2rem,3.6vw,3rem);line-height:1.08;margin-bottom:40px}
+/* «Hola, soy Gabriel» (portada, #quien-soy): presentación a la izquierda, foto a la derecha centrada
+   en el alto del texto; debajo, «Formación» y los botones */
+.about-home{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:64px;align-items:center}
+.about-saludo{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 24px;margin-bottom:24px}
+.about-home .about-h2{margin-bottom:0}
+.about-bio p{font-size:1.08rem;line-height:1.7;color:#2a3352;font-weight:400;text-align:justify;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manual}
+.about-bio p + p{margin-top:1em}
+.about-foto{margin:0}
+.about-foto .portrait::after{inset:10px -10px -10px 10px}
+.about-foto figcaption{margin-top:20px;font-size:.88rem;line-height:1.4;color:var(--sage-dark)}
+.about-foto figcaption strong{display:block;font-family:var(--serif);font-weight:700;font-size:.95rem;color:var(--navy-ui)}
+.about-formacion{margin-top:40px}
+.about-formacion h3{font-family:var(--serif);font-weight:700;font-size:1.1rem;color:var(--navy-ui);margin-bottom:14px}
+.home-about .creds{display:flex;flex-direction:column;gap:8px;margin:0}
+.home-about .creds li{font-family:var(--sans);font-size:.98rem;line-height:1.5;padding-left:22px;color:#2a3352}
+.about-pie{margin-top:32px;display:flex;flex-wrap:wrap;align-items:center;gap:14px 28px}
+.about-btns{display:flex;flex-wrap:wrap;gap:10px}
+.about-btns .btn{padding:9px 22px}
+.about-li{margin:0;font-size:.95rem}
+.about-bio .about-saludo .about-li{margin:0;font-size:.95rem;line-height:1.4;text-align:left}
+.about-li a{color:var(--link);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+.about-li a:hover{color:var(--navy-ui)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media (max-width:900px){
+  .about-home{grid-template-columns:minmax(0,1fr) 150px;gap:32px}
+}
+@media (max-width:640px){
+  .about-bio p{text-align:left;font-size:1rem}
+  /* Celular: saludo, foto, presentación */
+  .about-home{grid-template-columns:1fr;gap:0}
+  .about-bio{display:contents}
+  .about-saludo{order:1}
+  .about-foto{order:2;margin-bottom:26px}
+  .about-foto .portrait{width:140px}
+  .about-bio p{order:3}
+  .about-formacion{margin-top:36px}
+}
+/* Anclas de la portada: el encabezado fijo no tapa el título */
+#novedades,#quien-soy{scroll-margin-top:calc(var(--header-h) + 4px)}
+@media (max-width:900px){
+  .home-nov,.home-about{padding:52px 0}
+  .about-h2{margin-bottom:28px}
+}
+
+
+/* ===== Criterios de autoridades ===== */
+.at-crumbs{margin-bottom:14px}
+.at-crumbs [aria-current]{color:#dbe3ef}
+.at-subnav{margin-bottom:28px}
+.at-subnav-l{display:flex;flex-wrap:wrap;gap:10px}
+.at-subnav a{font-size:.92rem;padding:7px 16px;border:1px solid #c9d5e6;border-radius:999px;background:var(--white);color:var(--navy-ui);text-decoration:none}
+.at-subnav a:hover{border-color:var(--steel)}
+.at-subnav a[aria-current="page"]{background:var(--navy-ui);border-color:var(--navy-ui);color:var(--white);font-weight:500}
+.at-subnav a:focus-visible{outline:3px solid var(--link);outline-offset:2px}
+.at-fechas{margin-top:14px;font-size:.92rem;color:#c9d6ea}
+.at-extra{max-width:980px;margin:28px auto 0}
+.at-fuente{border:1px solid #dfe6f0;border-radius:12px;padding:20px 24px;background:var(--white)}
+.at-fuente h2{font-size:1.15rem;font-weight:700;color:var(--navy-ui);margin-bottom:12px}
+.at-fuente dl{display:grid;gap:10px}
+.at-fuente dl div{display:grid;grid-template-columns:200px minmax(0,1fr);gap:12px}
+.at-fuente dt{font-weight:500;color:var(--navy-ui)}
+.at-fuente dd{color:#3d4556;overflow-wrap:anywhere}
+.at-fuente a{color:var(--link)}
+.at-extra .q-svc{margin-top:20px}
+.at-back{display:flex;flex-wrap:wrap;gap:8px 28px;max-width:760px;margin:40px auto 0}
+.at-back .back{display:inline-block;max-width:none;margin:0}
+.pres .back{display:inline-block;margin-top:28px}
+@media (max-width:640px){
+  .at-fuente dl div{grid-template-columns:1fr;gap:2px}
+  .at-subnav-l{gap:8px}
+  .at-subnav a{font-size:.88rem;padding:6px 13px}
+}
+
+/* Desplegables del menú: «Ver todos…» subrayado y las opciones con sangría, para distinguirlos */
+.submenu li:first-child a{text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px}
+.submenu li:not(:first-child) a{padding-left:38px}
+@media (max-width:1199px){
+  .submenu li:not(:first-child) a{padding-left:16px}
+}
+
+/* Sección de preguntas: en computadora, preguntas, descripciones y respuestas siempre justificadas
+   (listado /preguntas/, preguntas destacadas de la portada, «Preguntas relacionadas» de cada servicio,
+   título y respuesta de cada pregunta); en el celular, alineadas a la izquierda como en el resto del sitio */
+.acc-list a,.faq-q a > span,.rel-q a > span,.faq-head p,.ed-head p,
+.q-head h1,.q-article .ed-prose p,.q-article .ed-prose li{
+  text-align:justify;text-align-last:left;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manual}
+@media (max-width:640px){
+  .acc-list a,.faq-q a > span,.rel-q a > span,.faq-head p,.ed-head p,
+  .q-head h1,.q-article .ed-prose p,.q-article .ed-prose li{text-align:left}
+}

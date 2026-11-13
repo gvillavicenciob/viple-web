@@ -16,3 +16,22 @@
   to = "https://vipleconsultores.com/:splat"
   status = 301
   force = true
+
+# Novedades y Quién soy pasaron a bloques de la portada (11 nov 2026). Destino con ancla (#).
+# Sin comodín: las páginas de cada novedad (/novedades/<slug>/) se conservan.
+[[redirects]]
+  from = "/novedades"
+  to = "/#novedades"
+  status = 301
+[[redirects]]
+  from = "/novedades/"
+  to = "/#novedades"
+  status = 301
+[[redirects]]
+  from = "/quien-soy"
+  to = "/#quien-soy"
+  status = 301
+[[redirects]]
+  from = "/quien-soy/"
+  to = "/#quien-soy"
+  status = 301

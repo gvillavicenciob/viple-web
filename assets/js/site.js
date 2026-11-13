@@ -8,6 +8,19 @@
     });
   }
 
+  // Anclas de la portada (/#novedades, /#quien-soy, también tras las redirecciones de /novedades/ y /quien-soy/):
+  // el navegador salta al ancla antes de que carguen fuentes e imágenes; al terminar, se vuelve a ubicar el bloque
+  if (location.hash.length > 1) {
+    var destino = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (destino) {
+      var reubicar = function () { destino.scrollIntoView({ behavior: 'instant', block: 'start' }); };
+      var listo = function () {
+        if (document.fonts && document.fonts.ready) { document.fonts.ready.then(reubicar); } else { reubicar(); }
+      };
+      if (document.readyState === 'complete') { listo(); } else { window.addEventListener('load', listo); }
+    }
+  }
+
   // Año en el pie de página
   var y = document.getElementById('y');
   if (y) y.textContent = new Date().getFullYear();
@@ -69,7 +82,7 @@
     var update = function () {
       var i = current();
       box.dataset.i = i;
-      if (count) count.textContent = (i + 1) + ' / ' + total;
+      if (count) count.textContent = (i + 1) + ' de ' + total;
       if (prev) prev.disabled = i <= 0;
       if (next) next.disabled = i >= total - 1;
     };
