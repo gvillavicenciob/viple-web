@@ -21,6 +21,19 @@
     }
   }
 
+  // /preguntas/#<servicio>: abre el grupo del acordeón indicado (desde el desplegable del menú)
+  var abrirGrupo = function () {
+    if (location.hash.length < 2) return;
+    var d = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (d && d.tagName === 'DETAILS') { d.open = true; }
+  };
+  abrirGrupo();
+  window.addEventListener('hashchange', function () {
+    abrirGrupo();
+    var d = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (d) d.scrollIntoView({ behavior: 'instant', block: 'start' });
+  });
+
   // Año en el pie de página
   var y = document.getElementById('y');
   if (y) y.textContent = new Date().getFullYear();

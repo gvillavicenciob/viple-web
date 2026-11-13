@@ -42,7 +42,14 @@
 {{svc_menu}}
             </ul>
           </li>
-          <li><a data-nav="preguntas" href="/preguntas/">¿Tienes preguntas?</a></li>
+          <li class="has-sub">
+            <a data-nav="preguntas" href="/preguntas/">¿Tienes preguntas?</a>
+            <button class="sub-toggle" type="button" aria-expanded="false" aria-controls="submenu-preguntas" aria-label="Mostrar temas de ¿Tienes preguntas?"></button>
+            <ul class="submenu" id="submenu-preguntas">
+              <li><a href="/preguntas/">Ver todas las preguntas</a></li>
+{{preguntas_menu}}
+            </ul>
+          </li>
           <li><a data-nav="gestion-legal" href="/gestion-legal/">¿Tu equipo odia a Legal?</a></li>
           <li class="has-sub">
             <a data-nav="atento" href="/criterios-de-autoridades/">Criterios de autoridades</a>
