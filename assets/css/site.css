@@ -942,3 +942,14 @@ html.slides-open{overflow:hidden}
 @media (max-width:1199px){
   .submenu li:not(:first-child) a{padding-left:16px}
 }
+
+/* Sección de preguntas: en computadora, preguntas, descripciones y respuestas siempre justificadas
+   (listado /preguntas/, preguntas destacadas de la portada, «Preguntas relacionadas» de cada servicio,
+   título y respuesta de cada pregunta); en el celular, alineadas a la izquierda como en el resto del sitio */
+.acc-list a,.faq-q a > span,.rel-q a > span,.faq-head p,.ed-head p,
+.q-head h1,.q-article .ed-prose p,.q-article .ed-prose li{
+  text-align:justify;text-align-last:left;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manual}
+@media (max-width:640px){
+  .acc-list a,.faq-q a > span,.rel-q a > span,.faq-head p,.ed-head p,
+  .q-head h1,.q-article .ed-prose p,.q-article .ed-prose li{text-align:left}
+}

@@ -140,3 +140,5 @@ python -m http.server 8000 --directory _site
 ```
 
 Abre http://localhost:8000/. Después de cada cambio vuelve a correr `python build.py` y recarga el navegador.
+
+**Alineación de textos**: en computadora, los textos de párrafo van justificados (y en «¿Tienes preguntas?» también las preguntas del listado, de la portada y de «Preguntas relacionadas», la descripción de la sección y el título y la respuesta de cada pregunta). En el celular (≤ 640 px) todo va alineado a la izquierda. Reglas al final de `assets/css/site.css`.
