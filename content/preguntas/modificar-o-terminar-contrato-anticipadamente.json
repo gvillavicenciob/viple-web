@@ -1,11 +1,11 @@
 {
+  "respuesta": "Al negociar un contrato de cierta duración, conviene prever qué ocurrirá si cambian las circunstancias que hicieron conveniente su celebración. Una vez firmado, el contrato es obligatorio y, como regla general, una parte no puede modificarlo o dejarlo sin efecto únicamente porque ya no le resulte conveniente, salvo que exista una facultad contractual o legal que lo permita.\n\nPor ello, es recomendable considerar **cláusulas de revisión o reajuste** que permitan adaptar determinadas condiciones, como el precio o los plazos, cuando se produzcan situaciones previamente definidas.\n\nTambién pueden establecerse mecanismos de renegociación, indicando qué acontecimientos permitirán solicitarla, cómo deberá desarrollarse y qué sucederá si las partes no llegan a un acuerdo. Es importante que estos mecanismos no se limiten a expresar una intención de negociar, sino que regulen sus condiciones y consecuencias.\n\nFinalmente, según el tipo de contrato, puede pactarse un **derecho de terminación anticipada**, precisando en qué supuestos podrá ejercerse, con cuánto tiempo de anticipación deberá comunicarse y qué pagos, compensaciones o penalidades corresponderán. También conviene regular qué ocurrirá con los adelantos, las prestaciones pendientes y los trabajos ya ejecutados.\n\nDebe tenerse presente que la legislación peruana reconoce determinadas facultades de terminación contractual, aun cuando no hayan sido pactadas. Por ejemplo, en los contratos de ejecución continuada que no tienen un plazo convencional o legal determinado, el artículo 1365 del Código Civil permite a cualquiera de las partes ponerles fin mediante aviso previo por vía notarial, con una anticipación no menor de treinta días. Asimismo, determinados contratos cuentan con reglas especiales sobre su terminación.\n\nLa legislación también contempla mecanismos excepcionales para afrontar cambios extraordinarios e imprevisibles, como la **excesiva onerosidad de la prestación**. Bajo determinados requisitos, esta permite solicitar judicialmente el reajuste de las prestaciones o, cuando corresponda, la resolución del contrato. No equivale a un derecho general de modificar o terminar cualquier contrato por conveniencia. Además, el Código Civil establece que es nula la renuncia a la acción por excesiva onerosidad de la prestación.\n\n**Prever estas situaciones durante la negociación permite afrontar cambios futuros con mayor flexibilidad y reducir el riesgo de quedar vinculado a condiciones que han dejado de responder a tus necesidades.**",
+  "meta_description": "Descubre qué cláusulas negociar para revisar precios, renegociar o terminar un contrato y qué derechos reconoce la legislación peruana.",
+  "fecha_actualizacion": "2026-11-13",
   "pregunta": "¿Qué debo incluir en un contrato para poder modificar sus condiciones o terminarlo anticipadamente si cambian mis circunstancias?",
+  "orden": 3,
   "slug": "modificar-o-terminar-contrato-anticipadamente",
   "servicio_asociado": "contratos",
-  "respuesta": "",
-  "title": "",
-  "meta_description": "",
-  "destacada": false,
-  "orden": 3,
-  "fecha_actualizacion": ""
+  "title": "Cómo modificar o terminar un contrato anticipadamente",
+  "destacada": false
 }
