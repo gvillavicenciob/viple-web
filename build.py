@@ -6,7 +6,7 @@ Construye el sitio de Viple Consultores en la carpeta _site/.
 - Genera «¿Tienes preguntas?» (/preguntas/, una página por pregunta publicada) desde
   content/preguntas, «¿Tu equipo odia a Legal?» (/gestion-legal/) desde content/notas,
   las novedades (bloque de la portada y una página por novedad), «Presentaciones especiales» y
-  «A qué estar atento» (/a-que-estar-atento/ y sus subsecciones), con los contenidos guardados desde el panel (/admin).
+  «Criterios de autoridades» (/criterios-de-autoridades/ y sus subsecciones), con los contenidos guardados desde el panel (/admin).
 - Las secciones sin contenido publicado llevan noindex y no entran en el sitemap.
 - El sitemap usa fechas editoriales guardadas (nunca la fecha del build).
 
@@ -821,7 +821,7 @@ def wh(src):
 
 
 def pres_slides(it):
-    """Rutas de las diapositivas, en orden. Acepta texto («/ruta.jpg») o {imagen, alt} (A qué estar atento)."""
+    """Rutas de las diapositivas, en orden. Acepta texto («/ruta.jpg») o {imagen, alt} (Criterios de autoridades)."""
     return [src for src, _ in slides_alt(it)]
 
 
@@ -877,7 +877,7 @@ def parrafos(texto):
 
 
 def pres_card(it, etiquetas=None, data=None):
-    """Tarjeta del catálogo (Presentaciones especiales y A qué estar atento).
+    """Tarjeta del catálogo (Presentaciones especiales y Criterios de autoridades).
     etiquetas: [(clase, texto)]; data: atributos data-* para los filtros. Por defecto, los de presentaciones."""
     slides = pres_slides(it)
     portada = it.get("image") or (slides[0] if slides else "")
@@ -949,7 +949,7 @@ def pres_filtros(items):
 
 
 def visor(it):
-    """Visor de diapositivas (compartido por Presentaciones especiales y A qué estar atento): cada imagen completa,
+    """Visor de diapositivas (compartido por Presentaciones especiales y Criterios de autoridades): cada imagen completa,
     en su proporción real, con flechas, posición («2 de 7»), teclado y «Ampliar». Sin descargas."""
     lista = slides_alt(it)
     n = len(lista)
@@ -1026,16 +1026,16 @@ def build_presentaciones(items):
             render_presentacion(it)
 
 
-# ---------- Sección «A qué estar atento» (content/a-que-estar-atento) ----------
+# ---------- Sección «Criterios de autoridades» (content/criterios-de-autoridades) ----------
 # Configuración compartida: de aquí salen las subsecciones, el desplegable del menú, el pie de página
 # y las opciones «Categoría» del panel (build.py las reescribe en _site/admin/config.yml).
 # Para agregar una materia: añádela aquí (id = dirección) y en admin/config.yml (entre las marcas), y vuelve a construir.
 
 ATENTO = {
-    "base": "a-que-estar-atento",
-    "label": "A qué estar atento",
+    "base": "criterios-de-autoridades",
+    "label": "Criterios de autoridades",
     "intro": "Casos y decisiones de las autoridades que ayudan a identificar qué revisar en las prácticas de tu negocio.",
-    "title": "A qué estar atento | Viple Consultores",
+    "title": "Criterios de autoridades | Viple Consultores",
     "description": ("Casos y decisiones sobre datos personales, protección al consumidor y competencia desleal: "
                     "qué revisar y qué tener en cuenta en tu negocio."),
     "empty": "Próximamente incorporaremos análisis de casos y decisiones de las autoridades.",
@@ -1072,7 +1072,7 @@ def atento_url(cat=None):
 
 
 def atento_menu():
-    """Opciones del desplegable «A qué estar atento» del menú principal (después de «Ver todos»)."""
+    """Opciones del desplegable «Criterios de autoridades» del menú principal (después de «Ver todos»)."""
     return "\n".join(f'              <li><a href="{atento_url(c["id"])}">{esc(c["name"])}</a></li>' for c in ATENTO_CATS)
 
 
@@ -1109,12 +1109,12 @@ def prep_atento(items):
         if it["pslug"] in vistos:
             problemas.append(f'dirección repetida con {vistos[it["pslug"]]}')
         if problemas:
-            print(f'  ! A qué estar atento: NO se publica {it["slug"]} ({"; ".join(problemas)})')
+            print(f'  ! Criterios de autoridades: NO se publica {it["slug"]} ({"; ".join(problemas)})')
             continue
         vistos[it["pslug"]] = it["slug"]
         no_jpg = [x for x in pres_slides(it) if not re.search(r"\.jpe?g$", x, re.I)]
         if no_jpg:
-            print(f'  ! A qué estar atento: diapositivas que no son JPG en {it["slug"]}: {", ".join(no_jpg[:3])}')
+            print(f'  ! Criterios de autoridades: diapositivas que no son JPG en {it["slug"]}: {", ".join(no_jpg[:3])}')
         it["url"] = atento_url(it["pslug"])
         svc = str(it.get("servicio") or "").strip()
         it["svc"] = svc if svc in SERVICE_NAMES else ""
@@ -1265,19 +1265,19 @@ def build_atento(items):
 
 
 def admin_config_atento():
-    """Reescribe las opciones «Categoría» de la colección A qué estar atento en _site/admin/config.yml
+    """Reescribe las opciones «Categoría» de la colección Criterios de autoridades en _site/admin/config.yml
     a partir de ATENTO_CATS (una sola fuente para la web y el panel)."""
     f = OUT / "admin" / "config.yml"
     txt = f.read_text(encoding="utf-8")
     ini, fin = "# atento-categorias:inicio", "# atento-categorias:fin"
     m = re.search(re.escape(ini) + r"\n(.*?)\n([ \t]*)" + re.escape(fin), txt, re.S)
     if not m:
-        print("  ! admin/config.yml: faltan las marcas de las categorías de A qué estar atento")
+        print("  ! admin/config.yml: faltan las marcas de las categorías de Criterios de autoridades")
         return
     sangria = m.group(2)
     opciones = "\n".join(f'{sangria}- {{ label: "{c["name"]}", value: {c["id"]} }}' for c in ATENTO_CATS)
     if m.group(1).strip() != opciones.strip():
-        print("  ! admin/config.yml: las categorías de A qué estar atento no coinciden con build.py; "
+        print("  ! admin/config.yml: las categorías de Criterios de autoridades no coinciden con build.py; "
               "el panel publicado usa las de build.py (actualiza también admin/config.yml)")
     f.write_text(txt[:m.start(1)] + opciones + txt[m.end(1):], encoding="utf-8")
 
@@ -1365,7 +1365,7 @@ def main():
 
     print(f"Sitio generado en _site/ - {len(SITEMAP)} paginas en el sitemap - "
           f"{len(ideas)} articulos - {len(publicadas)} de {total_preguntas} preguntas publicadas - {len(novedades)} novedades - "
-          f"{len(atento)} en A que estar atento")
+          f"{len(atento)} en Criterios de autoridades")
 
 
 if __name__ == "__main__":

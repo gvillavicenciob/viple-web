@@ -359,23 +359,23 @@ collections:
         default: false
         required: false
 
-  # ---------------- A QUÉ ESTAR ATENTO ----------------
-  # (content/a-que-estar-atento; cada publicación tiene una sola página: /a-que-estar-atento/<slug>/)
+  # ---------------- CRITERIOS DE AUTORIDADES ----------------
+  # (content/criterios-de-autoridades; cada publicación tiene una sola página: /criterios-de-autoridades/<slug>/)
   # Misma forma de llenado que «Presentaciones especiales» (diapositivas JPG en un visor, sin descargas).
-  - name: a-que-estar-atento
-    label: A qué estar atento
+  - name: criterios-de-autoridades
+    label: Criterios de autoridades
     label_singular: Publicación
     description: "Casos y decisiones de las autoridades, mostrados como diapositivas en imagen (igual que Presentaciones especiales; no se ofrece ningún archivo para descargar). Elige la materia, sube las diapositivas JPG en orden con nombres propios de cada publicación (p. ej. caso-banco-01.jpg, caso-banco-02.jpg…) y escribe el texto alternativo de cada una. Una publicación aparece en la web cuando no es borrador y tiene al menos una diapositiva."
-    folder: content/a-que-estar-atento
+    folder: content/criterios-de-autoridades
     create: true
     delete: true
     extension: json
     format: json
     identifier_field: title
     slug: "{{fields.slug}}"
-    media_folder: /assets/uploads/a-que-estar-atento
-    public_folder: /assets/uploads/a-que-estar-atento
-    preview_path: "a-que-estar-atento/{{fields.slug}}"
+    media_folder: /assets/uploads/criterios-de-autoridades
+    public_folder: /assets/uploads/criterios-de-autoridades
+    preview_path: "criterios-de-autoridades/{{fields.slug}}"
     summary: "{{title}} · {{categoria}} · {{date}}"
     sortable_fields: [date, title]
     view_filters:
@@ -396,7 +396,7 @@ collections:
         desde: title
         modo: slug
         pattern: ["^(?!(proteccion-de-datos-personales|proteccion-al-consumidor|competencia-desleal)$)[a-z0-9]+(-[a-z0-9]+)*$", "Solo minúsculas sin tildes, números y guiones. No puede ser el nombre de una subsección (proteccion-de-datos-personales, proteccion-al-consumidor, competencia-desleal)."]
-        hint: "La página será vipleconsultores.com/a-que-estar-atento/<slug>/ (una sola dirección, aunque cambies la categoría). Se propone sola a partir del título mientras la publicación es nueva; puedes acortarla. No la cambies después de publicar."
+        hint: "La página será vipleconsultores.com/criterios-de-autoridades/<slug>/ (una sola dirección, aunque cambies la categoría). Se propone sola a partir del título mientras la publicación es nueva; puedes acortarla. No la cambies después de publicar."
       - label: Categoría (materia)
         name: categoria
         widget: select
