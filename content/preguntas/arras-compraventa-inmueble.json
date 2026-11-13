@@ -1,11 +1,11 @@
 {
+  "respuesta": "Antes de entregar dinero como arras para comprar un inmueble, es importante establecer qué tipo de arras estás pactando. Aunque suelen utilizarse para asegurar una operación, no todas tienen las mismas consecuencias ni permiten desistirse de la compra.\n\nEl Código Civil peruano distingue dos tipos principales:\n\n**Arras confirmatorias.** Acreditan que el contrato ya se celebró y no conceden el derecho a arrepentirse libremente. Si quien entregó las arras incumple por una causa que le es imputable, la otra parte puede dejar sin efecto el contrato y conservarlas. Si incumple quien las recibió, la parte perjudicada puede dejar sin efecto el contrato y exigir su devolución por el doble.\n\nLa parte perjudicada también puede optar por exigir el cumplimiento o la resolución del contrato, con las consecuencias indemnizatorias previstas por la ley.\n\n**Arras de retractación.** Permiten a las partes desistirse válidamente de un contrato preparatorio, es decir, de un acuerdo para celebrar posteriormente un contrato definitivo. Si se retracta quien entregó las arras, las pierde; si lo hace quien las recibió, debe devolverlas dobladas. La ley permite que quien recibe las arras renuncie a su derecho de retractación.\n\nEsta diferencia es especialmente importante porque **las arras de retractación solo son válidas en contratos preparatorios, no en una compraventa definitiva**.\n\nAdemás, debes tener cuidado con el documento que firmas. Aunque se denomine «reserva» o «separación de inmueble», podría constituir una compraventa definitiva si sus condiciones así lo determinan. En el Perú, como regla general, la compraventa de un inmueble determinado puede producir la transferencia de su propiedad por el solo consentimiento, salvo disposición legal diferente o pacto en contrario.\n\nAntes de entregar las arras, también conviene acordar qué sucederá si no obtienes el financiamiento necesario, aparecen cargas sobre el inmueble o alguna de las partes incumple las condiciones previstas.\n\n**Entregar dinero para separar un inmueble sin definir claramente la naturaleza de las arras, las obligaciones de cada parte y las condiciones de devolución puede generar consecuencias muy distintas de las que esperabas.**",
+  "meta_description": "Diferencias entre arras confirmatorias y de retractación, contratos preparatorios y riesgos al entregar dinero para separar un inmueble en Perú.",
+  "fecha_actualizacion": "2026-11-13",
   "pregunta": "¿Qué debo tener en cuenta al pactar arras en una compraventa de inmueble?",
+  "orden": 6,
   "slug": "arras-compraventa-inmueble",
   "servicio_asociado": "contratos",
-  "respuesta": "",
-  "title": "",
-  "meta_description": "",
-  "destacada": false,
-  "orden": 6,
-  "fecha_actualizacion": ""
+  "title": "Arras en compraventa de inmuebles: tipos y riesgos",
+  "destacada": false
 }
