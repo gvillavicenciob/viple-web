@@ -4,7 +4,7 @@ Construye el sitio de Viple Consultores en la carpeta _site/.
 - Envuelve cada página de src/pages/ con la plantilla común src/layout.html
   (encabezado, menú y pie de página).
 - Genera «¿Tienes preguntas?» (/preguntas/, una página por pregunta publicada) desde
-  content/preguntas, «¿Tu equipo odia a Legal?» (/gestion-legal/) desde content/notas,
+  content/preguntas, «¿Legal frena tu operación?» (/gestion-legal/) desde content/notas,
   las novedades (bloque de la portada y una página por novedad), «Presentaciones especiales» y
   «Criterios de autoridades» (/criterios-de-autoridades/ y sus subsecciones), con los contenidos guardados desde el panel (/admin).
 - Las secciones sin contenido publicado llevan noindex y no entran en el sitemap.
@@ -39,11 +39,11 @@ MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
 # (actualízala solo si cambias el texto o el diseño del listado)
 LISTADOS_LASTMOD = "2026-11-10"
 
-# «¿Tu equipo odia a Legal?»: artículos en content/notas, publicados en /gestion-legal/
+# «¿Legal frena tu operación?»: artículos en content/notas, publicados en /gestion-legal/
 IDEAS = {
     "name": "notas",
     "base": "gestion-legal",
-    "label": "¿Tu equipo odia a Legal?",
+    "label": "¿Legal frena tu operación?",
     "h1": "Cómo organizar el trabajo legal para que no se convierta en un cuello de botella",
     "intro": ("Consejos prácticos para que tu equipo sepa qué contratos puede cerrar con condiciones ya aprobadas, "
               "cuándo conviene involucrar a un abogado en un proyecto y cómo aprovechar lo que ya negoció con un "
@@ -119,6 +119,7 @@ ICONS = {
     "trend": '<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 6-6"/><path d="M15 8h5v5"/>',
     "grid": '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>',
     "book": '<path d="M12 6.5C10 5 7 4.5 3 5v14c4-.5 7 0 9 1.5 2-1.5 5-2 9-1.5V5c-4-.5-7 0-9 1.5z"/><path d="M12 6.5v14"/>',
+    "user": '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7.5 8-7.5s8 3.1 8 7.5"/>',
     "users": '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17.5 14c2.4.2 4 2 4 4.5"/>',
     "refresh": '<path d="M20 11a8 8 0 0 0-14.5-4.5L3 9"/><path d="M3 4v5h5"/><path d="M4 13a8 8 0 0 0 14.5 4.5L21 15"/><path d="M21 20v-5h-5"/>',
     "layers": '<path d="M12 3l9 4.5-9 4.5-9-4.5z"/><path d="M3 12l9 4.5 9-4.5"/><path d="M3 16.5 12 21l9-4.5"/>',
@@ -249,11 +250,114 @@ def preguntas_portada():
 </section>"""
 
 
+# ---------- Versión Dos Puertas: grupos de servicios, listas de preguntas elegidas ----------
+
+# Servicios para personas que no están en content/servicios.json (páginas propias en /personas/)
+PERSONAS_EXTRA = {
+    "personas-contratos": {"url": "/personas/contratos/", "name": "Contratos para personas", "icon": "doc-pen",
+                           "summary": "Antes de firmar un alquiler, una compraventa o un préstamo, te ayudo a entender "
+                                      "qué estás aceptando y a negociar lo que necesitas."},
+    "personas-reclamos": {"url": "/personas/reclamos/", "name": "Reclamos como consumidor", "icon": "megaphone",
+                          "summary": "Si un producto o servicio no cumplió lo ofrecido, te ayudo a ordenar tu caso y a "
+                                     "presentar tu reclamo con fundamentos claros."},
+}
+GRUPOS = {
+    "empresas": ["estructura-empresarial", "contratos", "proteccion-de-datos", "reclamos-y-denuncias",
+                 "herramientas-legales"],
+    "personas": ["personas-contratos", "personas-reclamos", "protegemos-tu-inversion", "constitucion-asociaciones"],
+}
+
+
+def grupo_items(grupo):
+    por_slug = {s["slug"]: s for s in SERVICIOS}
+    items = []
+    for k in GRUPOS[grupo]:
+        if k in PERSONAS_EXTRA:
+            items.append(PERSONAS_EXTRA[k])
+        elif k in por_slug:
+            s = por_slug[k]
+            items.append({"url": f'/servicios/{k}/', "name": s["name"], "summary": s["summary"],
+                          "icon": SVC_ICONS.get(k, "doc-check")})
+    return items
+
+
+def svc_grupo(grupo):
+    cards = ""
+    for s in grupo_items(grupo):
+        cards += f"""<a class="svc-card" href="{s["url"]}">
+        <span class="svc-ico">{icon(s["icon"])}</span>
+        <span class="svc-txt"><span class="svc-name">{esc(s["name"])}</span><span class="svc-sum">{esc(s["summary"])}</span></span>
+        <span class="svc-chev">{icon("chevron")}</span>
+      </a>"""
+    return f'<div class="svc-cards with-sum">{cards}</div>'
+
+
+def grupo_nav(url):
+    """Anterior / siguiente entre las páginas propias del grupo «Para personas»."""
+    items = grupo_items("personas")
+    i = next((n for n, x in enumerate(items) if x["url"] == url), None)
+    if i is None:
+        return ""
+    links = ""
+    if i > 0:
+        a = items[i - 1]
+        links += f'<a class="prev" href="{a["url"]}"><small>← Anterior</small>{esc(a["name"])}</a>'
+    if i < len(items) - 1:
+        b = items[i + 1]
+        links += f'<a class="next" href="{b["url"]}"><small>Siguiente →</small>{esc(b["name"])}</a>'
+    return f'<div class="wrap"><nav class="svc-nav" aria-label="Otros servicios para personas">{links}</nav></div>'
+
+
+def preguntas_elegidas(slugs):
+    """Preguntas publicadas por su dirección (slug), en el orden indicado; las que no existan se omiten."""
+    por_slug = {q["slug"]: q for q in PUBLICADAS}
+    faltan = [s for s in slugs if s not in por_slug]
+    if faltan:
+        print("  ! Preguntas citadas que no están publicadas (se omiten): " + ", ".join(faltan))
+    return [por_slug[s] for s in slugs if s in por_slug]
+
+
+def faq_bloque(slugs):
+    """Bloque «¿Tienes preguntas?» (componente home-faq) con preguntas elegidas; se oculta si no hay ninguna."""
+    qs = preguntas_elegidas(slugs)
+    if not qs:
+        return ""
+    return f"""<section class="home-faq">
+  <div class="wrap faq-grid">
+    <div class="faq-head">
+      <h2>¿Tienes preguntas?</h2>
+      <p>Respuestas claras a situaciones frecuentes.</p>
+      <a class="faq-all" href="/{PREGUNTAS['base']}/">Ver todas las preguntas <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="faq-list">
+      <ul class="faq-q">{q_items(qs)}</ul>
+    </div>
+  </div>
+</section>"""
+
+
+def rel_bloque(slugs):
+    """«Preguntas relacionadas» (componente rel-q) con preguntas elegidas; se oculta si no hay ninguna."""
+    qs = preguntas_elegidas(slugs)
+    if not qs:
+        return ""
+    return f"""<div class="rel-q">
+      <h2>Preguntas relacionadas</h2>
+      <ul>{q_items(qs)}</ul>
+    </div>"""
+
+
 def fill_services(text):
     text = text.replace("{{svc_panels}}", svc_panels())
     text = text.replace("{{svc_panels_sum}}", svc_panels(summary=True))
     text = text.replace("{{preguntas_portada}}", preguntas_portada())
     text = text.replace("{{svc_links}}", svc_links())
+    text = text.replace("{{svc_grupo:empresas}}", svc_grupo("empresas"))
+    text = text.replace("{{svc_grupo:personas}}", svc_grupo("personas"))
+    text = re.sub(r"\{\{faq:([a-z0-9,-]+)\}\}", lambda m: faq_bloque(m.group(1).split(",")), text)
+    text = re.sub(r"\{\{rel_preguntas:([a-z0-9,-]*)\}\}",
+                  lambda m: rel_bloque([s for s in m.group(1).split(",") if s]), text)
+    text = re.sub(r"\{\{grupo_nav:(/[a-z0-9/-]+/)\}\}", lambda m: grupo_nav(m.group(1)), text)
     for s in SERVICIOS:
         text = text.replace("{{svc:" + s["slug"] + "}}", esc(s["name"]))
         text = text.replace("{{svc_preguntas:" + s["slug"] + "}}", svc_preguntas(s["slug"]))
@@ -282,6 +386,9 @@ def render(url, content, title, description, nav="", logo="cuadrado",
         "{{content}}": content,
     }.items():
         page = page.replace(key, val)
+    if nav == "servicios":
+        grupo_personas = [i["url"] for i in grupo_items("personas")]
+        nav = "personas" if url in grupo_personas else ("empresas" if url != "/servicios/" else "")
     if nav:
         page = page.replace(f'data-nav="{nav}"', f'data-nav="{nav}" aria-current="page"')
     if url == "/":
@@ -1301,6 +1408,22 @@ def service_ld(slug, body):
     return f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
 
 
+def hub_service_ld(url, body, description):
+    """Nodo Service de /empresas/, /personas/ y de cada página de servicio para personas (H1 visible y la meta description)."""
+    m = re.search(r"<h1[^>]*>(.*?)</h1>", body, re.S)
+    if not m:
+        return ""
+    limpio = lambda t: html.unescape(re.sub(r"<[^>]+>", "", t)).strip()
+    ld = {"@context": "https://schema.org", "@type": "Service",
+          "@id": f"{SITE_URL}{url}#service",
+          "name": limpio(m.group(1)), "description": description, "url": f"{SITE_URL}{url}",
+          "audience": {"@type": "Audience", "audienceType": "Empresas" if url.startswith("/empresas/") else "Personas"},
+          "provider": {"@type": ["Organization", "LegalService"], "@id": ORG_ID,
+                       "name": "Viple Consultores", "url": SITE_URL + "/"},
+          "areaServed": {"@type": "Country", "name": "Perú"}}
+    return f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
+
+
 def main():
     # En Windows/OneDrive alguna carpeta puede quedar bloqueada: se borra lo posible y se sobrescribe el resto
     shutil.rmtree(OUT, ignore_errors=True)
@@ -1341,6 +1464,8 @@ def main():
             slug = m.group(1)
             lastmod = max_fecha(lastmod, *(q["fecha"] for q in publicadas if q["servicio_asociado"] == slug))
             head_extra = service_ld(slug, body)
+        elif re.fullmatch(r"/(empresas|personas)/([a-z0-9-]+/)?", url):
+            head_extra = hub_service_ld(url, body, meta.get("description", ""))
         if not lastmod and url != "/404.html":
             print(f"  ! Sin fecha de última modificación (se omite lastmod): {url}")
         render(url, body, meta.get("title", "Viple Consultores"), meta.get("description", ""),

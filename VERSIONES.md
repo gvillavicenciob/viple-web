@@ -46,4 +46,29 @@ Netlify → proyecto `resplendent-sfogliatella-e4a742` → **Deploys** → abrir
 
 ## 3. Versión Dos Puertas
 
-*(Se completa al terminar el trabajo en la rama `version-dos-puertas`.)*
+Rama `version-dos-puertas` (creada desde `main` con este archivo). **Sin publicar** al 16 nov 2026.
+
+### Home Page (/), bloques en orden
+
+1. **Hero** (sin ilustración; `portada-ilustracion.jpg` se conserva en el repo): H1 «Asesoría legal clara para tu empresa y para tus decisiones personales»; foto circular de 56 px y «Trabajas directamente conmigo, Gabriel…», que enlaza a «Hola, soy Gabriel» (`#quien-soy`); dos «puertas»: **Empresas** (azul oscuro, /empresas/) y **Personas** (azul medio, /personas/).
+2. **«Cómo trabajo contigo»**: 3 pasos numerados.
+3. **«Hola, soy Gabriel»** (`#quien-soy`): párrafos 1 y 4, texto a la izquierda, LinkedIn, foto, «Formación» completa (no existe /quien-soy/, así que no hay enlace «Conoce mi trayectoria completa» ni etiquetas), sin botones.
+4. **«¿Tienes preguntas?»**: 4 preguntas elegidas (`{{faq:slug,…}}`).
+5. Novedades (solo si hay alguna publicada).
+6. **Cierre**: «¿Qué estás evaluando?» + «Conversemos» + WhatsApp.
+
+### Menú principal
+
+Inicio · **Empresas ▾** (Ver todo, 5 servicios y, dentro de «Diseño de herramientas legales», «¿Legal frena tu operación?» → /gestion-legal/) · **Personas ▾** (Ver todo, Contratos, Reclamos como consumidor, Protegemos tu inversión, Constitución de asociaciones) · ¿Tienes preguntas? · Criterios de autoridades ▾ · Presentaciones especiales · **Conversemos**. Sin «Quién soy» (está al final de la portada).
+
+### Footer
+
+Inicio, Empresas, Personas, ¿Tienes preguntas?, Criterios de autoridades, Presentaciones especiales, ¿Legal frena tu operación?, Novedades (si hay), Quién soy (/#quien-soy), Conversemos.
+
+### Páginas nuevas o cambiadas
+
+- Nuevas: /empresas/, /personas/, /personas/contratos/, /personas/reclamos/ (en el sitemap, con JSON-LD Service vinculado a `#organization`). /personas/reclamos/ oculta «Preguntas relacionadas» hasta que haya preguntas de consumo.
+- /servicios/: dos grupos, «Para empresas» y «Para personas» (lista `GRUPOS` en build.py).
+- «¿Tu equipo odia a Legal?» pasó a llamarse **«¿Legal frena tu operación?»** (misma URL /gestion-legal/; también en el panel).
+- JSON-LD de la portada: nodo Person de Gabriel unido a la organización con `founder`.
+- CSS nuevo al final de `site.css`, bloque «VERSIÓN DOS PUERTAS».

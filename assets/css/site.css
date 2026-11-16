@@ -953,3 +953,104 @@ html.slides-open{overflow:hidden}
   .acc-list a,.faq-q a > span,.rel-q a > span,.faq-head p,.ed-head p,
   .q-head h1,.q-article .ed-prose p,.q-article .ed-prose li{text-align:left}
 }
+
+/* =====================================================================
+   VERSIÓN DOS PUERTAS (16 nov 2026)
+   Portada con dos «puertas» (Empresas / Personas), páginas /empresas/ y /personas/,
+   pasos «Cómo trabajo contigo», cierre con WhatsApp y /servicios/ en dos grupos.
+   ===================================================================== */
+/* Menú: subopción dentro de «Diseño de herramientas legales» */
+.submenu li.sub-2 a{padding-left:58px;font-size:.86rem;color:var(--steel)}
+.submenu li.sub-2 a::before{content:"↳ ";}
+@media (max-width:1199px){.submenu li.sub-2 a{padding-left:34px}}
+
+/* Portada: hero con dos puertas */
+.dp-hero{padding:44px 0 56px}
+.dp-hero h1{font-size:clamp(1.85rem,3.6vw,3.1rem);line-height:1.1;max-width:900px;color:var(--navy-ui)}
+.dp-yo{display:inline-flex;align-items:center;gap:14px;margin-top:22px;text-decoration:none;color:#2a3352;font-size:1.05rem;line-height:1.4;font-weight:400}
+.dp-yo img{flex:none;width:56px;height:56px;border-radius:50%;object-fit:cover;object-position:50% 18%;box-shadow:0 0 0 2px var(--white),0 0 0 3px var(--pastel-sky-line)}
+.dp-yo strong{color:var(--navy-ui);font-weight:600}
+.dp-yo span{text-decoration:underline;text-decoration-color:#b9c8dc;text-underline-offset:4px}
+.dp-yo:hover span{text-decoration-color:var(--link);color:var(--navy-ui)}
+.dp-doors{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
+.dp-door{display:flex;flex-direction:column;gap:14px;padding:32px 34px;border-radius:14px;color:var(--white);text-decoration:none;box-shadow:0 10px 26px rgba(22,35,79,.16);transition:transform .2s,box-shadow .2s,filter .2s}
+.dp-door:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(22,35,79,.22);filter:brightness(1.06)}
+.dp-door:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.dp-door--emp{background:var(--navy-ui)}
+.dp-door--per{background:var(--steel)}
+.dp-eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:.95rem;letter-spacing:.04em;text-transform:uppercase;color:#dbe6f5}
+.dp-eyebrow-ico{width:24px;height:24px;flex:none}
+.dp-title{font-family:var(--serif);font-weight:700;font-size:clamp(1.3rem,2.2vw,1.75rem);line-height:1.2}
+.dp-lema{font-family:var(--serif);font-weight:600;font-size:1.1rem;color:var(--pastel-sky);padding-left:14px;border-left:3px solid rgba(255,255,255,.6)}
+.dp-tags{display:flex;flex-wrap:wrap;gap:8px}
+.dp-tags span{font-size:.88rem;line-height:1.3;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);font-weight:400}
+.dp-more{margin-top:auto;padding-top:6px;font-weight:500;font-size:1.02rem;text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(255,255,255,.55)}
+
+/* «Cómo trabajo contigo»: 3 pasos numerados */
+.dp-steps-sec{padding:64px 0}
+.dp-steps-sec h2,.dp-paths h2{font-size:clamp(1.7rem,3vw,2.4rem);line-height:1.12;margin-bottom:28px}
+.dp-steps{list-style:none;counter-reset:paso;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.dp-steps li{counter-increment:paso;background:#f6e9ef;border:1px solid #ead3de;border-radius:12px;padding:26px 28px}
+.dp-steps li::before{content:counter(paso);display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--navy-ui);color:var(--white);font-family:var(--serif);font-weight:700;font-size:1.1rem;margin-bottom:14px}
+.dp-steps h3{font-family:var(--serif);font-weight:700;font-size:clamp(1.15rem,1.8vw,1.4rem);line-height:1.2;color:var(--steel);margin-bottom:8px}
+.dp-steps p{font-size:1.05rem;line-height:1.55;color:#2a3352;font-weight:400}
+
+/* «Hola, soy Gabriel» en la Versión Dos Puertas: texto a la izquierda */
+.dp-about .about-bio p{text-align:left;hyphens:manual;-webkit-hyphens:manual}
+.dp-steps-sec + .home-about{border-top:1px solid #e6ebf2}
+
+/* Cierre con «Conversemos» y WhatsApp */
+.dp-cierre{padding:56px 0 72px}
+.home-faq + .dp-cierre,.home-faq + .home-nov{border-top:0}
+.svc-cta .cta-sub{display:block;margin-top:6px;font-family:var(--sans);font-weight:400;font-size:1.05rem;line-height:1.5;color:#dbe6f5}
+.dp-cta-acc{display:flex;flex-direction:column;align-items:center;gap:10px;flex:none}
+.dp-wa{color:var(--white);font-weight:500;text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(255,255,255,.55)}
+.dp-wa:hover{text-decoration-color:var(--white)}
+.svc-cta .dp-wa:focus-visible,.svc-cta .btn:focus-visible{outline:2px solid var(--white);outline-offset:3px}
+
+/* /empresas/ y /personas/ */
+.dp-hub-hero{padding:56px 0 48px}
+.dp-hub-hero .hero-text{max-width:900px}
+.dp-paths{padding:64px 0 24px}
+.dp-lead{font-size:1.15rem;line-height:1.5;color:#2a3352;font-weight:400;margin:-14px 0 28px}
+.dp-cards{list-style:none;display:grid;gap:20px}
+.dp-cards--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dp-cards--2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.dp-card{display:flex;flex-direction:column;gap:12px;background:var(--soft);border:1px solid #dfe6f0;border-radius:12px;padding:26px 28px}
+.dp-card-ico{width:50px;height:50px;padding:11px;border-radius:50%;background:var(--white);color:var(--navy-ui);box-shadow:0 2px 6px rgba(22,35,79,.08)}
+.dp-card h3{font-family:var(--serif);font-weight:700;font-size:clamp(1.15rem,1.8vw,1.4rem);line-height:1.22;color:var(--navy-ui)}
+.dp-card p{font-size:1.04rem;line-height:1.55;color:#2a3352;font-weight:400}
+.dp-links{list-style:none;margin-top:auto;padding-top:6px;display:flex;flex-direction:column;gap:6px}
+.dp-links a{color:var(--link);font-weight:500;text-decoration:underline;text-underline-offset:4px;text-decoration-color:#9fb2cc}
+.dp-links a:hover{color:var(--navy-ui);text-decoration-color:var(--navy-ui)}
+.dp-strip{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:20px;margin-top:24px;padding:22px 28px;border:2px dashed #9fb2cc;border-radius:12px;text-decoration:none;color:#2a3352;font-size:1.06rem;line-height:1.5;font-weight:400;transition:border-color .2s,background .2s}
+.dp-strip:hover{border-color:var(--steel);background:#f6f9fd}
+.dp-strip strong{color:var(--navy-ui);font-weight:600}
+.dp-strip-ico{width:40px;height:40px;color:var(--navy-ui)}
+.dp-strip-chev{width:22px;height:22px;color:var(--navy-ui)}
+.dp-recibe{grid-template-columns:1fr}
+
+/* /servicios/ en dos grupos */
+.svc-grupo-t{font-size:clamp(1.4rem,2.4vw,1.9rem);margin:8px 0 18px}
+.svc-grupo-t ~ .svc-grupo-t{margin-top:44px}
+
+@media (max-width:900px){
+  .dp-doors,.dp-cards--3,.dp-cards--2,.dp-steps{grid-template-columns:1fr;gap:14px}
+  .dp-door{padding:24px 22px;gap:12px}
+  .dp-steps-sec,.dp-paths{padding:48px 0}
+  .dp-paths{padding-bottom:16px}
+  .dp-card{padding:22px}
+  .dp-cta-acc{align-items:flex-start}
+  .dp-strip{padding:18px 20px;gap:14px}
+}
+@media (max-width:640px){
+  .dp-hero{padding:22px 0 40px}
+  .dp-hero h1{font-size:1.72rem}
+  .dp-yo{margin-top:16px;font-size:.98rem;gap:12px}
+  .dp-doors{margin-top:22px}
+  .dp-title{font-size:1.25rem}
+  .dp-strip-ico{display:none}
+  .dp-strip{grid-template-columns:minmax(0,1fr) auto}
+}
+/* Texto corto del bloque de preguntas: sin justificar (evita espacios grandes entre palabras) */
+.faq-head p{text-align:left}
