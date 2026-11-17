@@ -8,7 +8,7 @@
 | `src/layout.html` | Encabezado, menú y pie de página comunes a todas las páginas. |
 | `assets/` | Estilos, logos, foto e imágenes subidas desde el panel. |
 | `admin/` | El panel de administración (`/admin`). |
-| `content/preguntas`, `content/notas`, `content/novedades`, `content/presentaciones`, `content/criterios-de-autoridades` | Lo que crees desde el panel en «¿Tienes preguntas?» (/preguntas/), «¿Tu equipo odia a Legal?» (/gestion-legal/), «Novedades» (bloque de la portada /#novedades y una página por novedad), «Presentaciones especiales» y «Criterios de autoridades» (/criterios-de-autoridades/ y sus tres subsecciones). Se llenan solos. |
+| `content/preguntas`, `content/notas`, `content/novedades`, `content/presentaciones`, `content/criterios-de-autoridades` | Lo que crees desde el panel en «¿Tienes preguntas?» (/preguntas/), «¿Legal frena tu operación?» (/gestion-legal/), «Novedades» (bloque de la portada /#novedades y una página por novedad), «Presentaciones especiales» y «Criterios de autoridades» (/criterios-de-autoridades/ y sus tres subsecciones). Se llenan solos. |
 | `_redirects` | Redirecciones 301 de Netlify (por ejemplo /dudas/ → /preguntas/ y /notas/ → /gestion-legal/). Se copia a `_site/` en cada build. Las que llevan a un ancla de la portada (/novedades/ → /#novedades y /quien-soy/ → /#quien-soy) están en `netlify.toml`. |
 | `content/servicios.json` | Fuente única de los servicios: nombre, nombre del menú, nombre corto como categoría de presentaciones y descripción breve. Su orden es el del menú, la portada, /servicios/, /contacto/, el acordeón de preguntas y la navegación entre servicios. Agregar un servicio requiere además su página en `src/pages/servicios/<slug>.html` y su opción en los campos «Servicio asociado» y «Categoría» de `admin/config.yml`. |
 | `build.py`, `netlify.toml`, `requirements.txt` | Instrucciones para que Netlify arme el sitio. No hace falta tocarlos. |
@@ -60,7 +60,7 @@ pero el panel no puede guardar nada.
 ### 6. Úsalo
 1. Entra a https://vipleconsultores.com/admin
 2. **Iniciar sesión con GitHub**.
-3. Elige **¿Tu equipo odia a Legal?**, **¿Tienes preguntas?** o **Novedades** → **Nueva**. Llena los campos, pulsa **Guardar**, revisa la vista previa y luego **Publicar → Publicar ahora**.
+3. Elige **¿Legal frena tu operación?**, **¿Tienes preguntas?** o **Novedades** → **Nueva**. Llena los campos, pulsa **Guardar**, revisa la vista previa y luego **Publicar → Publicar ahora**.
 4. En 1–2 minutos el artículo aparece en el sitio.
    Para editar o borrar, abre el artículo en el panel y usa **Publicar** o **Borrar entrada**.
 

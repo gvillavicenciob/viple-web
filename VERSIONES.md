@@ -46,4 +46,37 @@ Netlify → proyecto `resplendent-sfogliatella-e4a742` → **Deploys** → abrir
 
 ## 3. Versión Dos Puertas
 
-*(Se completa al terminar el trabajo en la rama `version-dos-puertas`.)*
+Rama `version-dos-puertas` (creada desde `main` con este archivo). Publicada el 18 nov 2026 (merge a `main`).
+
+### Home Page (/), bloques en orden
+
+1. **Franja celeste a todo el ancho**, pegada al menú: H1 «Asesoría legal clara para tu negocio y para tus decisiones personales» y, a la derecha, la acuarela `portada-equipo.jpg` al alto de la franja y pegada al borde derecho. (`portada-ilustracion.jpg`, la acuarela de la Versión Una Puerta, se conserva en el repo.)
+2. **Dos «puertas»**: **Empresas** (azul oscuro, /empresas/, «Para operar, contratar o crecer») y **Personas** (azul medio, /personas/, «Antes de firmar, invertir o reclamar»), con etiquetas y enlace.
+3. **«Hola, soy Gabriel»** + «y trabajaré directamente contigo» (`#quien-soy`): párrafos 1 y 4 centrados en la altura de la foto; bajo la foto, nombre, cargo y LinkedIn; «Formación» completa a la altura del nombre; sin botones.
+4. **«¿Tienes preguntas?»**: 4 preguntas elegidas (`{{faq:slug,…}}`).
+5. Novedades (solo si hay alguna publicada).
+6. **Cierre**: «¿Qué estás evaluando?» + «Conversemos» (WhatsApp solo en /contacto/).
+
+### /empresas/ y /personas/
+
+- Franja azul con el H1 y la acuarela a la derecha (`empresas-equipo.jpg`, `personas-cercania.jpg`).
+- /empresas/: «¿En qué momento está tu empresa?» (3 tarjetas), franja verde punteada hacia Herramientas legales, «Cómo trabajo contigo» (3 pasos), preguntas y cierre.
+- /personas/: H1 «Decisiones personales con acompañamiento legal», «¿Cómo te puedo ayudar?» (4 tarjetas), «Cómo trabajo contigo», preguntas y cierre.
+- /personas/contratos/ y /personas/reclamos/ usan la plantilla de servicio con «Cómo trabajo contigo» (mismos 3 pasos que /personas/).
+
+### Menú principal
+
+Inicio · **Empresas ▾** (Ver todo + 5 servicios) · **Personas ▾** (Ver todo, Contratos, Reclamos como consumidor, Protegemos tu inversión, Constitución de asociaciones) · ¿Tienes preguntas? · Criterios de autoridades ▾ · Presentaciones especiales · **Conversemos**. Sin «Quién soy» (está en la portada).
+
+### Footer
+
+Inicio, Empresas, Personas, ¿Tienes preguntas?, Criterios de autoridades, Presentaciones especiales, Novedades (si hay), Quién soy (/#quien-soy), Conversemos.
+
+### Otros cambios
+
+- Nuevas páginas en el sitemap con JSON-LD Service vinculado a `#organization`; nodo Person de Gabriel (`founder`) en la portada.
+- /servicios/: dos grupos, «Para empresas» y «Para personas» (lista `GRUPOS` en build.py); «Anterior / Siguiente» de cada servicio recorre solo su grupo.
+- Todo el sitio en primera persona singular (servicios, contacto, resúmenes y cinco respuestas de «¿Tienes preguntas?»). Los nombres «Estructuramos tu negocio» y «Protegemos tu inversión» se mantienen.
+- «¿Tu equipo odia a Legal?» pasó a llamarse «¿Legal frena tu operación?» (/gestion-legal/); por ahora sin enlace en el menú ni en el pie.
+- En computadora los párrafos van justificados; en el celular, a la izquierda.
+- CSS nuevo al final de `site.css`, bloques «VERSIÓN DOS PUERTAS» y ajustes posteriores.

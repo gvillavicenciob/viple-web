@@ -953,3 +953,235 @@ html.slides-open{overflow:hidden}
   .acc-list a,.faq-q a > span,.rel-q a > span,.faq-head p,.ed-head p,
   .q-head h1,.q-article .ed-prose p,.q-article .ed-prose li{text-align:left}
 }
+
+/* =====================================================================
+   VERSIÓN DOS PUERTAS (16 nov 2026)
+   Portada con dos «puertas» (Empresas / Personas), páginas /empresas/ y /personas/,
+   pasos «Cómo trabajo contigo», cierre con WhatsApp y /servicios/ en dos grupos.
+   ===================================================================== */
+/* Menú: subopción dentro de «Diseño de herramientas legales» */
+.submenu li.sub-2 a{padding-left:58px;font-size:.86rem;color:var(--steel)}
+.submenu li.sub-2 a::before{content:"↳ ";}
+@media (max-width:1199px){.submenu li.sub-2 a{padding-left:34px}}
+
+/* Portada: hero con dos puertas */
+.dp-hero{padding:44px 0 56px}
+.dp-hero h1{font-size:clamp(1.85rem,3.6vw,3.1rem);line-height:1.1;max-width:900px;color:var(--navy-ui)}
+.dp-doors{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
+.dp-door{display:flex;flex-direction:column;gap:14px;padding:32px 34px;border-radius:14px;color:var(--white);text-decoration:none;box-shadow:0 10px 26px rgba(22,35,79,.16);transition:transform .2s,box-shadow .2s,filter .2s}
+.dp-door:hover{transform:translateY(-2px);box-shadow:0 16px 34px rgba(22,35,79,.22);filter:brightness(1.06)}
+.dp-door:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+.dp-door--emp{background:var(--navy-ui)}
+.dp-door--per{background:var(--steel)}
+.dp-eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:.95rem;letter-spacing:.04em;text-transform:uppercase;color:#dbe6f5}
+.dp-eyebrow-ico{width:24px;height:24px;flex:none}
+.dp-title{font-family:var(--serif);font-weight:700;font-size:clamp(1.3rem,2.2vw,1.75rem);line-height:1.2}
+.dp-lema{font-family:var(--serif);font-weight:600;font-size:1.1rem;color:var(--pastel-sky);padding-left:14px;border-left:3px solid rgba(255,255,255,.6)}
+.dp-tags{display:flex;flex-wrap:wrap;gap:8px}
+.dp-tags span{font-size:.88rem;line-height:1.3;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);font-weight:400}
+.dp-more{margin-top:auto;padding-top:6px;font-weight:500;font-size:1.02rem;text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(255,255,255,.55)}
+
+/* «Cómo trabajo contigo»: 3 pasos numerados */
+.dp-steps-sec{padding:64px 0}
+.dp-steps-sec h2,.dp-paths h2{font-size:clamp(1.7rem,3vw,2.4rem);line-height:1.12;margin-bottom:28px}
+.dp-steps{list-style:none;counter-reset:paso;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.dp-steps li{counter-increment:paso;background:#f6e9ef;border:1px solid #ead3de;border-radius:12px;padding:26px 28px}
+.dp-steps li::before{content:counter(paso);display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--navy-ui);color:var(--white);font-family:var(--serif);font-weight:700;font-size:1.1rem;margin-bottom:14px}
+.dp-steps h3{font-family:var(--serif);font-weight:700;font-size:clamp(1.15rem,1.8vw,1.4rem);line-height:1.2;color:var(--steel);margin-bottom:8px}
+.dp-steps p{font-size:1.05rem;line-height:1.55;color:#2a3352;font-weight:400}
+
+/* «Hola, soy Gabriel» en la Versión Dos Puertas: texto a la izquierda */
+.dp-steps-sec + .home-about{border-top:1px solid #e6ebf2}
+
+/* Cierre con «Conversemos» y WhatsApp */
+.dp-cierre{padding:56px 0 72px}
+.home-faq + .dp-cierre,.home-faq + .home-nov{border-top:0}
+.svc-cta .cta-sub{display:block;margin-top:6px;font-family:var(--sans);font-weight:400;font-size:1.05rem;line-height:1.5;color:#dbe6f5}
+.dp-cta-acc{display:flex;flex-direction:column;align-items:center;gap:10px;flex:none}
+.dp-wa{color:var(--white);font-weight:500;text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(255,255,255,.55)}
+.dp-wa:hover{text-decoration-color:var(--white)}
+.svc-cta .dp-wa:focus-visible,.svc-cta .btn:focus-visible{outline:2px solid var(--white);outline-offset:3px}
+
+/* /empresas/ y /personas/ */
+.dp-hub-hero{padding:56px 0 48px}
+.dp-hub-hero .hero-text{max-width:900px}
+.dp-paths{padding:64px 0 24px}
+.dp-lead{font-size:1.15rem;line-height:1.5;color:#2a3352;font-weight:400;margin:-14px 0 28px}
+.dp-cards{list-style:none;display:grid;gap:20px}
+.dp-cards--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.dp-cards--2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.dp-card{display:flex;flex-direction:column;gap:12px;background:var(--soft);border:1px solid #dfe6f0;border-radius:12px;padding:26px 28px}
+.dp-card-ico{width:50px;height:50px;padding:11px;border-radius:50%;background:var(--white);color:var(--navy-ui);box-shadow:0 2px 6px rgba(22,35,79,.08)}
+.dp-card h3{font-family:var(--serif);font-weight:700;font-size:clamp(1.15rem,1.8vw,1.4rem);line-height:1.22;color:var(--navy-ui)}
+.dp-card p{font-size:1.04rem;line-height:1.55;color:#2a3352;font-weight:400}
+.dp-links{list-style:none;margin-top:auto;padding-top:6px;display:flex;flex-direction:column;gap:6px}
+.dp-links a{color:var(--link);font-weight:500;text-decoration:underline;text-underline-offset:4px;text-decoration-color:#9fb2cc}
+.dp-links a:hover{color:var(--navy-ui);text-decoration-color:var(--navy-ui)}
+.dp-strip{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:20px;margin-top:24px;padding:22px 28px;border:2px dashed #9fb2cc;border-radius:12px;text-decoration:none;color:#2a3352;font-size:1.06rem;line-height:1.5;font-weight:400;transition:border-color .2s,background .2s}
+.dp-strip:hover{border-color:var(--steel);background:#f6f9fd}
+.dp-strip strong{color:var(--navy-ui);font-weight:600}
+.dp-strip-ico{width:40px;height:40px;color:var(--navy-ui)}
+.dp-strip-chev{width:22px;height:22px;color:var(--navy-ui)}
+.dp-recibe{grid-template-columns:1fr}
+
+/* /servicios/ en dos grupos */
+.svc-grupo-t{font-size:clamp(1.4rem,2.4vw,1.9rem);margin:8px 0 18px}
+.svc-grupo-t ~ .svc-grupo-t{margin-top:44px}
+
+@media (max-width:900px){
+  .dp-doors,.dp-cards--3,.dp-cards--2,.dp-steps{grid-template-columns:1fr;gap:14px}
+  .dp-door{padding:24px 22px;gap:12px}
+  .dp-steps-sec,.dp-paths{padding:48px 0}
+  .dp-paths{padding-bottom:16px}
+  .dp-card{padding:22px}
+  .dp-cta-acc{align-items:flex-start}
+  .dp-strip{padding:18px 20px;gap:14px}
+}
+@media (max-width:640px){
+  .dp-hero{padding:22px 0 40px}
+  .dp-hero h1{font-size:1.72rem}
+    .dp-doors{margin-top:22px}
+  .dp-title{font-size:1.25rem}
+  .dp-strip-ico{display:none}
+  .dp-strip{grid-template-columns:minmax(0,1fr) auto}
+}
+/* Texto corto del bloque de preguntas: sin justificar (evita espacios grandes entre palabras) */
+.faq-head p{text-align:left}
+
+/* ----- Ajustes 17 nov: portada con acuarela, franjas con imagen en /empresas/ y /personas/ ----- */
+.dp-hero-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:40px;align-items:center}
+.dp-hero-top h1{max-width:none}
+.dp-hero .hero-art{grid-area:auto}
+.dp-hero .hero-art img{width:100%;mix-blend-mode:multiply}
+.dp-hero .dp-doors{margin-top:28px}
+.dp-band .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:44px;align-items:center}
+.dp-band{padding:44px 0}
+.dp-band h1{color:var(--white)}
+.dp-band .dp-band-sub{margin-top:22px;font-family:var(--serif);font-weight:700;font-size:clamp(1.5rem,2.8vw,2.3rem);line-height:1.1;color:var(--pastel-sky-line)}
+.dp-band-art img{width:100%;border-radius:12px;box-shadow:0 10px 28px rgba(0,0,0,.25)}
+.dp-band2{background:var(--pastel-sky);border-bottom:1px solid var(--pastel-sky-line);padding:28px 0}
+.dp-band2 p{max-width:900px;font-size:clamp(1.05rem,1.6vw,1.25rem);line-height:1.55;color:var(--navy-ui);font-weight:400}
+@media (max-width:900px){
+  .dp-hero .wrap{display:flex;flex-direction:column}
+  .dp-hero-top{display:contents}
+  .dp-hero-top h1{order:1}
+  .dp-hero .dp-doors{order:2;margin-top:22px}
+  .dp-hero .hero-art{order:3;margin-top:22px}
+  .dp-band .wrap{grid-template-columns:1fr;gap:22px}
+  .dp-band{padding:32px 0}
+  .dp-band2{padding:22px 0}
+}
+
+/* ----- Ajustes 17 nov (2) ----- */
+/* Portada: menos aire arriba, acuarela sobre fondo celeste, menos espacio antes de «Hola, soy Gabriel» */
+.dp-hero{padding:24px 0 36px}
+.dp-hero .hero-art{background:var(--pastel-sky);border:1px solid var(--pastel-sky-line);border-radius:14px;padding:12px 16px}
+.dp-hero .dp-doors{margin-top:24px}
+.dp-hero + .home-about{padding-top:48px}
+.dp-saludo-sub{display:inline-block;font-size:.42em;font-weight:600;line-height:1.3;color:var(--steel);letter-spacing:0;vertical-align:middle;margin-left:6px}
+.dp-foto-li{display:block;margin-top:8px;white-space:nowrap;font-size:.8rem;line-height:1.3}
+.dp-foto-li a{color:var(--link);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+.dp-foto-li a:hover{color:var(--navy-ui)}
+/* /empresas/: franja de herramientas más grande y con el verde pastel de las situaciones */
+.dp-strip{padding:30px 34px;font-size:1.14rem;background:var(--pastel-sage);border-color:var(--pastel-sage-line);margin-top:28px}
+.dp-strip:hover{background:#d8e6e2;border-color:var(--sage-dark)}
+.dp-strip-ico{width:48px;height:48px}
+/* Menos separación entre las tarjetas y «Cómo trabajo contigo» (/empresas/, /personas/ y páginas de servicio) */
+.dp-paths + .dp-steps-sec{padding-top:24px}
+.svc-sit{padding-bottom:24px}
+.svc-how{padding-top:16px}
+.dp-steps--svc{margin-bottom:36px}
+/* Márgenes laterales simétricos: los textos ocupan todo el ancho del contenedor */
+.svc-hero p,.dp-band2 p,.svc-hero h1{max-width:none}
+/* Computadora: textos justificados (la última línea a la izquierda); celular: a la izquierda */
+@media (min-width:641px){
+  main p,main .creds li,main .svc-sum{text-align:justify;text-align-last:left;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manual}
+  main .head-center p,main .cta p,main .svc-cta p,main .dp-foto-li{text-align:left}
+}
+@media (max-width:640px){
+  main p,main li,main .svc-sum{text-align:left}
+  .dp-hero .hero-art{padding:8px 10px}
+  .dp-strip{padding:20px 22px;font-size:1.04rem}
+  .dp-saludo-sub{display:block;margin:6px 0 0;font-size:.5em}
+}
+
+/* ----- Ajustes 17 nov (3): fondo celeste para el mensaje y la imagen de la portada; imágenes en acuarela con fondo propio ----- */
+.dp-hero .dp-hero-top{background:var(--pastel-sky);border:1px solid var(--pastel-sky-line);border-radius:16px;padding:28px 28px 28px 40px}
+.dp-hero .hero-art{background:none;border:0;padding:0}
+.dp-hero .hero-art img{mix-blend-mode:normal;border-radius:12px}
+.dp-hero{padding-top:24px}
+@media (max-width:900px){
+  .dp-hero .dp-hero-top{display:flex;flex-direction:column;gap:18px;padding:20px}
+  .dp-hero .hero-art{order:2;margin-top:0}
+  .dp-hero .dp-doors{order:3}
+}
+
+/* ----- Ajustes 18 nov: hero de portada a todo el ancho pegado al menú; «Hola, soy Gabriel» alineado con la foto ----- */
+.dp-hero-band{background:var(--pastel-sky);border-bottom:1px solid var(--pastel-sky-line);padding:36px 0}
+.dp-hero-band .dp-hero-top{background:none;border:0;border-radius:0;padding:0}
+.dp-hero-band h1{font-size:clamp(1.85rem,3.6vw,3.1rem);line-height:1.1;color:var(--navy-ui)}
+.dp-hero-band .hero-art{grid-area:auto}
+.dp-hero-band .hero-art img{width:100%;border-radius:12px;box-shadow:0 8px 22px rgba(22,35,79,.12)}
+.dp-hero.dp-doors-sec{padding:28px 0 36px;background:none}
+.dp-doors-sec .dp-doors{margin-top:0}
+.dp-saludo-sub{font-size:.55em}
+/* Texto centrado en la altura de la foto; «Formación» empieza a la altura del nombre */
+@media (min-width:641px){
+  .dp-about .about-home{grid-template-columns:minmax(0,1fr) 200px;grid-template-areas:"bio foto" "form cap";column-gap:64px;row-gap:0;align-items:start}
+  .dp-about .about-foto{display:contents}
+  .dp-about .portrait{grid-area:foto}
+  .dp-about .about-foto figcaption{grid-area:cap;margin-top:20px}
+  .dp-about .about-bio{grid-area:bio;align-self:center}
+  .dp-about .about-formacion{grid-area:form;margin-top:20px}
+}
+@media (min-width:641px) and (max-width:900px){
+  .dp-about .about-home{grid-template-columns:minmax(0,1fr) 150px;column-gap:32px}
+}
+@media (max-width:900px){
+  .dp-hero-band{padding:24px 0}
+  .dp-hero-band .dp-hero-top{display:flex;flex-direction:column;gap:18px}
+  .dp-hero-band .hero-art{order:2}
+}
+@media (max-width:640px){
+  .dp-hero-band h1{font-size:1.72rem}
+  .dp-about .about-foto{display:contents}
+  .dp-about .portrait{order:2;width:140px}
+  .dp-about .about-foto figcaption{order:3;margin:18px 0 22px}
+  .dp-about .about-bio p{order:4}
+  .dp-about .about-formacion{order:5}
+  .dp-saludo-sub{font-size:.6em}
+}
+
+/* ----- Prueba 18 nov: imágenes del mismo alto que la franja y franjas más bajas (portada, /empresas/, /personas/) ----- */
+.dp-hero-band,.dp-band{padding:0}
+.dp-hero-band .dp-hero-top,.dp-band .wrap{align-items:stretch;min-height:300px}
+.dp-hero-band h1,.dp-band-txt{align-self:center;padding:28px 0}
+.dp-hero-band .hero-art,.dp-band-art{position:relative;min-height:300px}
+.dp-hero-band .hero-art img,.dp-band-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:0;box-shadow:none}
+.dp-hero-band h1{font-size:clamp(1.8rem,3.2vw,2.75rem)}
+.dp-band h1{font-size:clamp(1.8rem,3.4vw,2.9rem)}
+.dp-band .dp-band-sub{margin-top:14px}
+@media (max-width:900px){
+  .dp-hero-band .dp-hero-top,.dp-band .wrap{display:flex;flex-direction:column;gap:0;min-height:0}
+  .dp-hero-band h1,.dp-band-txt{padding:22px 0 18px}
+  .dp-hero-band .hero-art,.dp-band-art{min-height:0;height:210px;margin:0 -24px}
+}
+/* Imagen pegada al borde derecho de la pantalla (sin franja de color a su derecha) */
+.dp-hero-band,.dp-band{overflow-x:clip}
+@media (min-width:901px){
+  .dp-hero-band .hero-art,.dp-band-art{margin-right:calc(-1 * var(--gutter))}
+}
+/* Prueba 18 nov (2): imágenes de las franjas 1/4 más pequeñas (alto 300 → 225 px, mismo formato) */
+@media (min-width:901px){
+  .dp-hero-band .dp-hero-top,.dp-band .wrap{grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);min-height:225px}
+  .dp-hero-band .hero-art,.dp-band-art{min-height:225px}
+  .dp-hero-band h1,.dp-band-txt{padding:22px 0}
+}
+@media (max-width:900px){
+  .dp-hero-band .hero-art,.dp-band-art{height:158px}
+}
+/* «Cómo trabajo contigo»: las descripciones de los tres pasos empiezan a la misma altura aunque un título ocupe dos líneas */
+@media (min-width:901px){
+  .dp-steps{grid-template-rows:auto auto 1fr}
+  .dp-steps li{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0;align-content:start}
+}

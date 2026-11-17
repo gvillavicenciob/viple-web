@@ -156,9 +156,9 @@ collections:
   # ---------------- ¿TU EQUIPO ODIA A LEGAL? (notas) ----------------
   # (los archivos se guardan en content/notas y se publican en /gestion-legal/)
   - name: notas
-    label: ¿Tu equipo odia a Legal?
+    label: ¿Legal frena tu operación?
     label_singular: Artículo
-    description: Artículos sobre cómo organizar y mejorar el trabajo legal en una empresa. Se muestran en «¿Tu equipo odia a Legal?» del menú (/gestion-legal/).
+    description: Artículos sobre cómo organizar y mejorar el trabajo legal en una empresa. Se muestran en «¿Legal frena tu operación?» (/gestion-legal/; por ahora sin enlace en el menú ni en el pie).
     folder: content/notas
     create: true
     delete: true
