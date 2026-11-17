@@ -1151,3 +1151,18 @@ html.slides-open{overflow:hidden}
   .dp-about .about-formacion{order:5}
   .dp-saludo-sub{font-size:.6em}
 }
+
+/* ----- Prueba 18 nov: imágenes del mismo alto que la franja y franjas más bajas (portada, /empresas/, /personas/) ----- */
+.dp-hero-band,.dp-band{padding:0}
+.dp-hero-band .dp-hero-top,.dp-band .wrap{align-items:stretch;min-height:300px}
+.dp-hero-band h1,.dp-band-txt{align-self:center;padding:28px 0}
+.dp-hero-band .hero-art,.dp-band-art{position:relative;min-height:300px}
+.dp-hero-band .hero-art img,.dp-band-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:0;box-shadow:none}
+.dp-hero-band h1{font-size:clamp(1.8rem,3.2vw,2.75rem)}
+.dp-band h1{font-size:clamp(1.8rem,3.4vw,2.9rem)}
+.dp-band .dp-band-sub{margin-top:14px}
+@media (max-width:900px){
+  .dp-hero-band .dp-hero-top,.dp-band .wrap{display:flex;flex-direction:column;gap:0;min-height:0}
+  .dp-hero-band h1,.dp-band-txt{padding:22px 0 18px}
+  .dp-hero-band .hero-art,.dp-band-art{min-height:0;height:210px;margin:0 -24px}
+}
