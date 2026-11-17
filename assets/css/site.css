@@ -1115,3 +1115,39 @@ html.slides-open{overflow:hidden}
   .dp-hero .hero-art{order:2;margin-top:0}
   .dp-hero .dp-doors{order:3}
 }
+
+/* ----- Ajustes 18 nov: hero de portada a todo el ancho pegado al menú; «Hola, soy Gabriel» alineado con la foto ----- */
+.dp-hero-band{background:var(--pastel-sky);border-bottom:1px solid var(--pastel-sky-line);padding:36px 0}
+.dp-hero-band .dp-hero-top{background:none;border:0;border-radius:0;padding:0}
+.dp-hero-band h1{font-size:clamp(1.85rem,3.6vw,3.1rem);line-height:1.1;color:var(--navy-ui)}
+.dp-hero-band .hero-art{grid-area:auto}
+.dp-hero-band .hero-art img{width:100%;border-radius:12px;box-shadow:0 8px 22px rgba(22,35,79,.12)}
+.dp-hero.dp-doors-sec{padding:28px 0 36px;background:none}
+.dp-doors-sec .dp-doors{margin-top:0}
+.dp-saludo-sub{font-size:.55em}
+/* Texto centrado en la altura de la foto; «Formación» empieza a la altura del nombre */
+@media (min-width:641px){
+  .dp-about .about-home{grid-template-columns:minmax(0,1fr) 200px;grid-template-areas:"bio foto" "form cap";column-gap:64px;row-gap:0;align-items:start}
+  .dp-about .about-foto{display:contents}
+  .dp-about .portrait{grid-area:foto}
+  .dp-about .about-foto figcaption{grid-area:cap;margin-top:20px}
+  .dp-about .about-bio{grid-area:bio;align-self:center}
+  .dp-about .about-formacion{grid-area:form;margin-top:20px}
+}
+@media (min-width:641px) and (max-width:900px){
+  .dp-about .about-home{grid-template-columns:minmax(0,1fr) 150px;column-gap:32px}
+}
+@media (max-width:900px){
+  .dp-hero-band{padding:24px 0}
+  .dp-hero-band .dp-hero-top{display:flex;flex-direction:column;gap:18px}
+  .dp-hero-band .hero-art{order:2}
+}
+@media (max-width:640px){
+  .dp-hero-band h1{font-size:1.72rem}
+  .dp-about .about-foto{display:contents}
+  .dp-about .portrait{order:2;width:140px}
+  .dp-about .about-foto figcaption{order:3;margin:18px 0 22px}
+  .dp-about .about-bio p{order:4}
+  .dp-about .about-formacion{order:5}
+  .dp-saludo-sub{font-size:.6em}
+}

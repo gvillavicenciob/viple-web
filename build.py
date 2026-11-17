@@ -213,18 +213,8 @@ def svc_preguntas(slug, sin=()):
 
 
 def svc_nav(slug):
-    i = next((n for n, x in enumerate(SERVICIOS) if x["slug"] == slug), None)
-    if i is None:
-        return ""
-    links = ""
-    if i > 0:
-        a = SERVICIOS[i - 1]
-        links += f'<a class="prev" href="/servicios/{a["slug"]}/"><small>← Anterior</small>{esc(a["name"])}</a>'
-    if i < len(SERVICIOS) - 1:
-        b = SERVICIOS[i + 1]
-        links += f'<a class="next" href="/servicios/{b["slug"]}/"><small>Siguiente →</small>{esc(b["name"])}</a>'
-    return f'<div class="wrap"><nav class="svc-nav" aria-label="Otros servicios">{links}</nav></div>'
-
+    """Anterior / siguiente dentro del grupo del servicio (Para empresas o Para personas), en su orden."""
+    return grupo_nav(f"/servicios/{slug}/")
 
 def destacadas_portada():
     qs = [q for q in PUBLICADAS if q.get("destacada")]
@@ -293,20 +283,21 @@ def svc_grupo(grupo):
 
 
 def grupo_nav(url):
-    """Anterior / siguiente entre las páginas propias del grupo «Para personas»."""
-    items = grupo_items("personas")
-    i = next((n for n, x in enumerate(items) if x["url"] == url), None)
-    if i is None:
-        return ""
-    links = ""
-    if i > 0:
-        a = items[i - 1]
-        links += f'<a class="prev" href="{a["url"]}"><small>← Anterior</small>{esc(a["name"])}</a>'
-    if i < len(items) - 1:
-        b = items[i + 1]
-        links += f'<a class="next" href="{b["url"]}"><small>Siguiente →</small>{esc(b["name"])}</a>'
-    return f'<div class="wrap"><nav class="svc-nav" aria-label="Otros servicios para personas">{links}</nav></div>'
-
+    """Anterior / siguiente entre los servicios del mismo grupo («Para empresas» o «Para personas»)."""
+    for grupo, etiqueta in (("empresas", "para empresas"), ("personas", "para personas")):
+        items = grupo_items(grupo)
+        i = next((n for n, x in enumerate(items) if x["url"] == url), None)
+        if i is None:
+            continue
+        links = ""
+        if i > 0:
+            a = items[i - 1]
+            links += f'<a class="prev" href="{a["url"]}"><small>← Anterior</small>{esc(a["name"])}</a>'
+        if i < len(items) - 1:
+            b = items[i + 1]
+            links += f'<a class="next" href="{b["url"]}"><small>Siguiente →</small>{esc(b["name"])}</a>'
+        return f'<div class="wrap"><nav class="svc-nav" aria-label="Otros servicios {etiqueta}">{links}</nav></div>'
+    return ""
 
 def preguntas_elegidas(slugs):
     """Preguntas publicadas por su dirección (slug), en el orden indicado; las que no existan se omiten."""
