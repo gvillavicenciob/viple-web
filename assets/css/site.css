@@ -1104,3 +1104,14 @@ html.slides-open{overflow:hidden}
   .dp-strip{padding:20px 22px;font-size:1.04rem}
   .dp-saludo-sub{display:block;margin:6px 0 0;font-size:.5em}
 }
+
+/* ----- Ajustes 17 nov (3): fondo celeste para el mensaje y la imagen de la portada; imágenes en acuarela con fondo propio ----- */
+.dp-hero .dp-hero-top{background:var(--pastel-sky);border:1px solid var(--pastel-sky-line);border-radius:16px;padding:28px 28px 28px 40px}
+.dp-hero .hero-art{background:none;border:0;padding:0}
+.dp-hero .hero-art img{mix-blend-mode:normal;border-radius:12px}
+.dp-hero{padding-top:24px}
+@media (max-width:900px){
+  .dp-hero .dp-hero-top{display:flex;flex-direction:column;gap:18px;padding:20px}
+  .dp-hero .hero-art{order:2;margin-top:0}
+  .dp-hero .dp-doors{order:3}
+}
