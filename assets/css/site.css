@@ -1166,3 +1166,8 @@ html.slides-open{overflow:hidden}
   .dp-hero-band h1,.dp-band-txt{padding:22px 0 18px}
   .dp-hero-band .hero-art,.dp-band-art{min-height:0;height:210px;margin:0 -24px}
 }
+/* Imagen pegada al borde derecho de la pantalla (sin franja de color a su derecha) */
+.dp-hero-band,.dp-band{overflow-x:clip}
+@media (min-width:901px){
+  .dp-hero-band .hero-art,.dp-band-art{margin-right:calc(-1 * var(--gutter))}
+}
