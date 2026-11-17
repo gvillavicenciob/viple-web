@@ -48,7 +48,7 @@ IDEAS = {
     "intro": ("Consejos prácticos para que tu equipo sepa qué contratos puede cerrar con condiciones ya aprobadas, "
               "cuándo conviene involucrar a un abogado en un proyecto y cómo aprovechar lo que ya negoció con un "
               "cliente para llegar mejor preparado al siguiente acuerdo"),
-    "empty": "Muy pronto publicaremos los primeros artículos.",
+    "empty": "Muy pronto publicaré los primeros artículos.",
     "nav": "gestion-legal",
     "featured_label": "Artículo destacado",
     "more": "Leer artículo →",
@@ -60,7 +60,7 @@ PREGUNTAS = {
     "base": "preguntas",
     "label": "¿Tienes preguntas?",
     "intro": "Encuentra respuestas a preguntas legales sobre situaciones de tu vida diaria o de tu negocio.",
-    "empty": "Muy pronto publicaremos las respuestas a las preguntas más frecuentes.",
+    "empty": "Muy pronto publicaré las respuestas a las preguntas más frecuentes.",
 }
 
 # «Novedades»: bloque de la portada (/#novedades) y una página por novedad (/novedades/<slug>/)
@@ -240,7 +240,7 @@ def preguntas_portada():
   <div class="wrap faq-grid">
     <div class="faq-head">
       <h2>¿Tienes preguntas?</h2>
-      <p>Preguntas frecuentes sobre cada uno de nuestros servicios.</p>
+      <p>Preguntas frecuentes sobre cada uno de mis servicios.</p>
     </div>
     <div class="faq-list">
       <ul class="faq-q">{q_items(qs)}</ul>
@@ -858,8 +858,8 @@ def build_novedades(items):
 
 PRESENTACIONES = {
     "h1": "Presentaciones especiales",
-    "intro": "Presentaciones que hemos preparado sobre temas legales de interés para personas y empresas.",
-    "empty": "Muy pronto publicaremos nuestras primeras presentaciones.",
+    "intro": "Presentaciones que he preparado sobre temas legales de interés para personas y empresas.",
+    "empty": "Muy pronto publicaré mis primeras presentaciones.",
 }
 
 # Divisiones del catálogo de presentaciones (además de los servicios).
@@ -1145,7 +1145,7 @@ ATENTO = {
     "title": "Criterios de autoridades | Viple Consultores",
     "description": ("Casos y decisiones sobre datos personales, protección al consumidor y competencia desleal: "
                     "qué revisar y qué tener en cuenta en tu negocio."),
-    "empty": "Próximamente incorporaremos análisis de casos y decisiones de las autoridades.",
+    "empty": "Próximamente incorporaré análisis de casos y decisiones de las autoridades.",
     "lastmod": "2026-11-11",
 }
 ATENTO_CATS = [
@@ -1154,19 +1154,19 @@ ATENTO_CATS = [
               "qué revisar en el tratamiento de datos de tu negocio.",
      "description": "Decisiones de la ANPD sobre protección de datos personales: qué revisar en el tratamiento de datos "
                     "de clientes, trabajadores y proveedores de tu negocio.",
-     "empty": "Próximamente incorporaremos análisis de decisiones de la ANPD."},
+     "empty": "Próximamente incorporaré análisis de decisiones de la ANPD."},
     {"id": "proteccion-al-consumidor", "name": "Protección al Consumidor",
      "intro": "Decisiones del INDECOPI sobre protección al consumidor que ayudan a identificar "
               "qué revisar en la relación de tu negocio con sus clientes.",
      "description": "Decisiones del INDECOPI sobre protección al consumidor: qué revisar en la información, la atención "
                     "de reclamos y la relación de tu negocio con sus clientes.",
-     "empty": "Próximamente incorporaremos análisis de decisiones del INDECOPI."},
+     "empty": "Próximamente incorporaré análisis de decisiones del INDECOPI."},
     {"id": "competencia-desleal", "name": "Competencia Desleal",
      "intro": "Decisiones del INDECOPI sobre competencia desleal que ayudan a identificar "
               "qué revisar en la publicidad y las prácticas comerciales de tu negocio.",
      "description": "Decisiones del INDECOPI sobre competencia desleal: qué revisar en la publicidad y las prácticas "
                     "comerciales de tu negocio.",
-     "empty": "Próximamente incorporaremos análisis de decisiones del INDECOPI."},
+     "empty": "Próximamente incorporaré análisis de decisiones del INDECOPI."},
 ]
 ATENTO_NAMES = {c["id"]: c["name"] for c in ATENTO_CATS}
 # Direcciones reservadas: una publicación no puede usar el slug de una subsección
