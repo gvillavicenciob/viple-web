@@ -1180,3 +1180,8 @@ html.slides-open{overflow:hidden}
 @media (max-width:900px){
   .dp-hero-band .hero-art,.dp-band-art{height:158px}
 }
+/* «Cómo trabajo contigo»: las descripciones de los tres pasos empiezan a la misma altura aunque un título ocupe dos líneas */
+@media (min-width:901px){
+  .dp-steps{grid-template-rows:auto auto 1fr}
+  .dp-steps li{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0;align-content:start}
+}
