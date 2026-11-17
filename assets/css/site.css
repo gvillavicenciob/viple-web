@@ -1171,3 +1171,12 @@ html.slides-open{overflow:hidden}
 @media (min-width:901px){
   .dp-hero-band .hero-art,.dp-band-art{margin-right:calc(-1 * var(--gutter))}
 }
+/* Prueba 18 nov (2): imágenes de las franjas 1/4 más pequeñas (alto 300 → 225 px, mismo formato) */
+@media (min-width:901px){
+  .dp-hero-band .dp-hero-top,.dp-band .wrap{grid-template-columns:minmax(0,1.75fr) minmax(0,1fr);min-height:225px}
+  .dp-hero-band .hero-art,.dp-band-art{min-height:225px}
+  .dp-hero-band h1,.dp-band-txt{padding:22px 0}
+}
+@media (max-width:900px){
+  .dp-hero-band .hero-art,.dp-band-art{height:158px}
+}
