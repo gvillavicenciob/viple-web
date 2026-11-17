@@ -202,8 +202,8 @@ def q_items(qs):
                    for q in qs)
 
 
-def svc_preguntas(slug):
-    qs = [q for q in PUBLICADAS if q["servicio_asociado"] == slug]
+def svc_preguntas(slug, sin=()):
+    qs = [q for q in PUBLICADAS if q["servicio_asociado"] == slug and q["slug"] not in sin]
     if not qs:
         return ""
     return f"""<div class="rel-q">
@@ -357,6 +357,8 @@ def fill_services(text):
     text = re.sub(r"\{\{faq:([a-z0-9,-]+)\}\}", lambda m: faq_bloque(m.group(1).split(",")), text)
     text = re.sub(r"\{\{rel_preguntas:([a-z0-9,-]*)\}\}",
                   lambda m: rel_bloque([s for s in m.group(1).split(",") if s]), text)
+    text = re.sub(r"\{\{svc_preguntas_sin:([a-z0-9-]+):([a-z0-9,-]+)\}\}",
+                  lambda m: svc_preguntas(m.group(1), m.group(2).split(",")), text)
     text = re.sub(r"\{\{grupo_nav:(/[a-z0-9/-]+/)\}\}", lambda m: grupo_nav(m.group(1)), text)
     for s in SERVICIOS:
         text = text.replace("{{svc:" + s["slug"] + "}}", esc(s["name"]))

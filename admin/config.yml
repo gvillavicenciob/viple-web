@@ -158,7 +158,7 @@ collections:
   - name: notas
     label: ¿Legal frena tu operación?
     label_singular: Artículo
-    description: Artículos sobre cómo organizar y mejorar el trabajo legal en una empresa. Se muestran en «¿Legal frena tu operación?» del menú, dentro de Empresas → Diseño de herramientas legales (/gestion-legal/).
+    description: Artículos sobre cómo organizar y mejorar el trabajo legal en una empresa. Se muestran en «¿Legal frena tu operación?» (/gestion-legal/, enlazada desde el pie de página).
     folder: content/notas
     create: true
     delete: true

@@ -991,7 +991,6 @@ html.slides-open{overflow:hidden}
 .dp-steps p{font-size:1.05rem;line-height:1.55;color:#2a3352;font-weight:400}
 
 /* «Hola, soy Gabriel» en la Versión Dos Puertas: texto a la izquierda */
-.dp-about .about-bio p{text-align:left;hyphens:manual;-webkit-hyphens:manual}
 .dp-steps-sec + .home-about{border-top:1px solid #e6ebf2}
 
 /* Cierre con «Conversemos» y WhatsApp */
@@ -1071,4 +1070,37 @@ html.slides-open{overflow:hidden}
   .dp-band .wrap{grid-template-columns:1fr;gap:22px}
   .dp-band{padding:32px 0}
   .dp-band2{padding:22px 0}
+}
+
+/* ----- Ajustes 17 nov (2) ----- */
+/* Portada: menos aire arriba, acuarela sobre fondo celeste, menos espacio antes de «Hola, soy Gabriel» */
+.dp-hero{padding:24px 0 36px}
+.dp-hero .hero-art{background:var(--pastel-sky);border:1px solid var(--pastel-sky-line);border-radius:14px;padding:12px 16px}
+.dp-hero .dp-doors{margin-top:24px}
+.dp-hero + .home-about{padding-top:48px}
+.dp-saludo-sub{display:inline-block;font-size:.42em;font-weight:600;line-height:1.3;color:var(--steel);letter-spacing:0;vertical-align:middle;margin-left:6px}
+.dp-foto-li{display:block;margin-top:8px;white-space:nowrap;font-size:.8rem;line-height:1.3}
+.dp-foto-li a{color:var(--link);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+.dp-foto-li a:hover{color:var(--navy-ui)}
+/* /empresas/: franja de herramientas más grande y con el verde pastel de las situaciones */
+.dp-strip{padding:30px 34px;font-size:1.14rem;background:var(--pastel-sage);border-color:var(--pastel-sage-line);margin-top:28px}
+.dp-strip:hover{background:#d8e6e2;border-color:var(--sage-dark)}
+.dp-strip-ico{width:48px;height:48px}
+/* Menos separación entre las tarjetas y «Cómo trabajo contigo» (/empresas/, /personas/ y páginas de servicio) */
+.dp-paths + .dp-steps-sec{padding-top:24px}
+.svc-sit{padding-bottom:24px}
+.svc-how{padding-top:16px}
+.dp-steps--svc{margin-bottom:36px}
+/* Márgenes laterales simétricos: los textos ocupan todo el ancho del contenedor */
+.svc-hero p,.dp-band2 p,.svc-hero h1{max-width:none}
+/* Computadora: textos justificados (la última línea a la izquierda); celular: a la izquierda */
+@media (min-width:641px){
+  main p,main .creds li,main .svc-sum{text-align:justify;text-align-last:left;text-justify:inter-word;hyphens:manual;-webkit-hyphens:manual}
+  main .head-center p,main .cta p,main .svc-cta p,main .dp-foto-li{text-align:left}
+}
+@media (max-width:640px){
+  main p,main li,main .svc-sum{text-align:left}
+  .dp-hero .hero-art{padding:8px 10px}
+  .dp-strip{padding:20px 22px;font-size:1.04rem}
+  .dp-saludo-sub{display:block;margin:6px 0 0;font-size:.5em}
 }
