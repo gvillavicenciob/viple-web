@@ -46,7 +46,7 @@ Netlify → proyecto `resplendent-sfogliatella-e4a742` → **Deploys** → abrir
 
 ## 3. Versión Dos Puertas
 
-Rama `version-dos-puertas` (creada desde `main` con este archivo). Publicada el 18 nov 2026 (merge a `main`).
+Rama `version-dos-puertas` (creada desde `main` con este archivo). Publicada el 18 nov 2026: merge `351a56e` en `main`, deploy de Netlify `6afce96dbea49a0bcf5af1ca`. Para volver a la Versión Una Puerta en Git: `git revert -m 1 351a56e`.
 
 ### Home Page (/), bloques en orden
 
