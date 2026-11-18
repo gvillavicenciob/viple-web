@@ -1187,3 +1187,19 @@ html.slides-open{overflow:hidden}
 }
 /* «Hola, soy Gabriel»: el nombre bajo la foto empieza donde empieza el marco decorativo */
 .dp-about .about-foto figcaption{padding-left:10px;margin-right:-10px}
+
+/* ----- 18 nov: las imágenes de las franjas conservan su proporción (1440×754) en cualquier ancho de pantalla ----- */
+@media (min-width:901px){
+  .dp-hero-band,.dp-band{position:relative}
+  .dp-hero-band .dp-hero-top,.dp-band .wrap{display:flex;align-items:center;min-height:225px}
+  .dp-hero-band h1,.dp-band-txt{max-width:calc(100vw - 470px - var(--gutter));padding:22px 0}
+  .dp-hero-band .hero-art,.dp-band-art{position:absolute;top:0;bottom:0;right:0;width:auto;height:auto;min-height:0;aspect-ratio:1440/754;margin:0}
+}
+@media (max-width:900px){
+  .dp-hero-band .hero-art,.dp-band-art{height:auto;aspect-ratio:1440/754}
+}
+@media (min-width:901px){
+  .dp-hero-band,.dp-band{--band-h:clamp(225px,14vw,300px)}
+  .dp-hero-band .dp-hero-top,.dp-band .wrap{min-height:var(--band-h)}
+  .dp-hero-band h1,.dp-band-txt{max-width:calc(100vw - var(--band-h) * 1.91 - 40px - var(--gutter))}
+}
