@@ -1185,3 +1185,5 @@ html.slides-open{overflow:hidden}
   .dp-steps{grid-template-rows:auto auto 1fr}
   .dp-steps li{display:grid;grid-row:span 3;grid-template-rows:subgrid;row-gap:0;align-content:start}
 }
+/* «Hola, soy Gabriel»: el nombre bajo la foto empieza donde empieza el marco decorativo */
+.dp-about .about-foto figcaption{padding-left:10px;margin-right:-10px}

@@ -165,6 +165,16 @@ def icon(name, cls="ico-svg"):
 SERVICIOS = json.loads((ROOT / "content" / "servicios.json").read_text(encoding="utf-8"))["servicios"]
 
 
+def preguntas_menu():
+    """Opciones del desplegable «¿Tienes preguntas?»: cada servicio con preguntas publicadas, en el orden
+    de los grupos «Para empresas» y «Para personas»; cada una abre su grupo en /preguntas/."""
+    por_slug = {s["slug"]: s for s in SERVICIOS}
+    orden = [k for g in ("empresas", "personas") for k in GRUPOS[g] if k in por_slug]
+    orden += [s["slug"] for s in SERVICIOS if s["slug"] not in orden]
+    return "\n".join(f'              <li><a href="/{PREGUNTAS["base"]}/#{k}">{esc(por_slug[k].get("menu") or por_slug[k]["name"])}</a></li>'
+                     for k in orden if any(q["servicio_asociado"] == k for q in PUBLICADAS))
+
+
 def svc_menu():
     return "\n".join(f'              <li><a href="/servicios/{s["slug"]}/">{esc(s.get("menu") or s["name"])}</a></li>'
                      for s in SERVICIOS)
@@ -308,9 +318,30 @@ def preguntas_elegidas(slugs):
     return [por_slug[s] for s in slugs if s in por_slug]
 
 
-def faq_bloque(slugs):
-    """Bloque «¿Tienes preguntas?» (componente home-faq) con preguntas elegidas; se oculta si no hay ninguna."""
+def completar_preguntas(qs, n):
+    """Completa la lista hasta n: primero las destacadas y luego otras publicadas, una de cada servicio por turnos."""
+    qs = list(qs)
+    for q in sorted((q for q in PUBLICADAS if q.get("destacada")),
+                    key=lambda q: (q["orden_portada"], q["_svc_i"], q["orden"], q["pregunta"])):
+        if len(qs) < n and q not in qs:
+            qs.append(q)
+    grupos = {}
+    for q in PUBLICADAS:
+        if q not in qs:
+            grupos.setdefault(q["_svc_i"], []).append(q)
+    while len(qs) < n and any(grupos.values()):
+        for k in sorted(grupos):
+            if grupos[k] and len(qs) < n:
+                qs.append(grupos[k].pop(0))
+    return qs
+
+
+def faq_bloque(slugs, n=0):
+    """Bloque «¿Tienes preguntas?» (componente home-faq) con preguntas elegidas (y, si n > 0, completado
+    hasta n preguntas); se oculta si no hay ninguna."""
     qs = preguntas_elegidas(slugs)
+    if n:
+        qs = completar_preguntas(qs, n)
     if not qs:
         return ""
     return f"""<section class="home-faq">
@@ -346,6 +377,7 @@ def fill_services(text):
     text = text.replace("{{svc_grupo:empresas}}", svc_grupo("empresas"))
     text = text.replace("{{svc_grupo:personas}}", svc_grupo("personas"))
     text = re.sub(r"\{\{faq:([a-z0-9,-]+)\}\}", lambda m: faq_bloque(m.group(1).split(",")), text)
+    text = re.sub(r"\{\{faq5:([a-z0-9,-]+)\}\}", lambda m: faq_bloque(m.group(1).split(","), 5), text)
     text = re.sub(r"\{\{rel_preguntas:([a-z0-9,-]*)\}\}",
                   lambda m: rel_bloque([s for s in m.group(1).split(",") if s]), text)
     text = re.sub(r"\{\{svc_preguntas_sin:([a-z0-9-]+):([a-z0-9,-]+)\}\}",
@@ -375,6 +407,7 @@ def render(url, content, title, description, nav="", logo="cuadrado",
         "{{brand}}": brand(logo),
         "{{svc_menu}}": svc_menu(),
         "{{atento_menu}}": atento_menu(),
+        "{{preguntas_menu}}": preguntas_menu(),
         "{{foot_novedades}}": FOOT_NOVEDADES[0],
         "{{content}}": content,
     }.items():
@@ -732,7 +765,7 @@ def build_preguntas(publicadas):
             if not qs:
                 continue
             lis = "".join(f'<li><a href="{q_url(q)}">{esc(q["pregunta"])}</a></li>' for q in qs)
-            grupos += f"""<details class="acc">
+            grupos += f"""<details class="acc" id="{s["slug"]}">
       <summary><span class="acc-ico">{icon(SVC_ICONS.get(s["slug"], "doc-check"))}</span><span class="acc-name">{esc(s["name"])}</span><span class="acc-n">{len(qs)}</span></summary>
       <ul class="acc-list">{lis}</ul>
     </details>"""

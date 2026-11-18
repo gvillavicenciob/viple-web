@@ -142,3 +142,5 @@ python -m http.server 8000 --directory _site
 Abre http://localhost:8000/. Después de cada cambio vuelve a correr `python build.py` y recarga el navegador.
 
 **Alineación de textos**: en computadora, los textos de párrafo van justificados (y en «¿Tienes preguntas?» también las preguntas del listado, de la portada y de «Preguntas relacionadas», la descripción de la sección y el título y la respuesta de cada pregunta). En el celular (≤ 640 px) todo va alineado a la izquierda. Reglas al final de `assets/css/site.css`.
+
+**Preguntas en la portada**: primero las 4 elegidas en `src/pages/index.html` (`{{faq5:…}}`) y, hasta completar 5, las destacadas y luego otras publicadas (una de cada servicio por turnos). **Desplegable «¿Tienes preguntas?»**: un enlace por servicio con preguntas publicadas, en el orden de Empresas y Personas; abre su grupo en /preguntas/.

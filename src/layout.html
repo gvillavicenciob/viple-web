@@ -57,7 +57,14 @@
               <li><a href="/servicios/constitucion-asociaciones/">Constitución de asociaciones</a></li>
             </ul>
           </li>
-          <li><a data-nav="preguntas" href="/preguntas/">¿Tienes preguntas?</a></li>
+          <li class="has-sub">
+            <a data-nav="preguntas" href="/preguntas/">¿Tienes preguntas?</a>
+            <button class="sub-toggle" type="button" aria-expanded="false" aria-controls="submenu-preguntas" aria-label="Mostrar temas de ¿Tienes preguntas?"></button>
+            <ul class="submenu" id="submenu-preguntas">
+              <li><a href="/preguntas/">Ver todas las preguntas</a></li>
+{{preguntas_menu}}
+            </ul>
+          </li>
           <li class="has-sub">
             <a data-nav="atento" href="/criterios-de-autoridades/">Criterios de autoridades</a>
             <button class="sub-toggle" type="button" aria-expanded="false" aria-controls="submenu-atento" aria-label="Mostrar subsecciones de Criterios de autoridades"></button>
