@@ -20,5 +20,26 @@
   "categoria": "proteccion-de-datos",
   "title_seo": "Protección de datos personales en inmobiliarias | Viple",
   "title": "Protección de datos personales en inmobiliarias: riesgos, multas y obligaciones",
-  "sector": "inmobiliarias"
+  "sector": "inmobiliarias",
+  "claves": {
+    "situacion": "Un prospecto que no recuerda haber autorizado publicidad recibe mensajes de un proyecto, o una persona es grabada por las cámaras de una caseta de ventas sin ningún aviso. Basta que una persona cuestione el uso de sus datos para activar un problema legal y reputacional.",
+    "criterio": "La Autoridad Nacional de Protección de Datos Personales (ANPD) ha multado a inmobiliarias, administradoras de edificios y agencias de marketing inmobiliario, con las multas más altas por videovigilancia y por consentimiento para marketing. En los casos que recoge esta presentación, las multas van de S/ 3,465 a S/ 181,500.",
+    "fuente": "Resoluciones de la ANPD (DGTAIPD) sobre las empresas citadas en la presentación",
+    "fuente_url": "",
+    "revisar": "Revisa si tienes evidencia del consentimiento de cada lead por canal (landing pages, ferias, formularios, WhatsApp, redes y Meta Lead Ads) y si tus agencias, call centers y administradores de redes tienen reglas escritas sobre cómo manejar los datos que recolectan para ti."
+  },
+  "textos_alternativos": [
+    "Portada: Protección de Datos Personales en empresas inmobiliarias. Por qué es relevante en este sector, dónde aparece el riesgo y cuánto puede costar no estar preparado.",
+    "Las cinco obligaciones básicas al tratar datos personales: recoger los datos de forma válida, conservarlos bajo control, usarlos y compartirlos bajo reglas, protegerlos y atender los derechos del titular.",
+    "Gráfico de multas de la ANPD en el sector inmobiliario, de S/ 181,500 (JP Edif. Reynaldo Vivanco, por videovigilancia) a S/ 3,465 (Inversiones Inmob. MAK). El detalle está en la tabla debajo de las diapositivas.",
+    "Puntos de contacto donde una inmobiliaria recopila datos: captación de interesados, campañas, formularios web, WhatsApp y redes, casetas de venta, ferias, separaciones, proformas y minutas, postventa, trabajadores, proveedores y videovigilancia.",
+    "Quién puede activar el riesgo: un prospecto que no recuerda haber autorizado publicidad, un comprador que pide eliminar sus datos, un titular que recibe comunicaciones de otro proyecto, un trabajador que reclama, una persona grabada sin aviso o un cliente cuyos datos se compartieron con un tercero.",
+    "INDECOPI (Resolución 1812-2026/SPC-INDECOPI) puede analizar cláusulas sobre datos personales como cláusulas abusivas, usando las normas de protección de datos como parámetro: una misma cláusula de consentimiento puede generar riesgo ante la ANPD y ante INDECOPI.",
+    "Dónde se pierde el control, de mayor a menor probabilidad de denuncia: leads y prospectos; videovigilancia; compradores y propietarios; trabajadores y postulantes.",
+    "Lista de verificación de cinco preguntas para saber si la empresa podría acreditar su cumplimiento ante la ANPD: evidencia del consentimiento de cada lead, reglas para agencias y call centers, control de accesos a bancos de datos, procedimiento ARCO y uso de videovigilancia.",
+    "Tres alternativas de decisión y su riesgo: no hacer nada estructural (alto), solo política y avisos básicos (medio o alto) y diagnóstico con adecuación por etapas (bajo).",
+    "Propuesta de Viple: diagnóstico operativo de protección de datos en dos semanas, con mapa de datos, consentimiento y deber de informar, exposición por terceros, y seguridad y responsables internos.",
+    "Siguiente paso: una conversación de 60 minutos con Gabriel Villavicencio Bedoya, abogado a cargo, y datos de contacto de Viple Consultores."
+  ],
+  "body": "## Multas de la ANPD en el sector inmobiliario citadas en la presentación\n\nMontos en soles equivalentes a la UIT 2026 (S/ 5,500), según la presentación. Materias según la leyenda del gráfico.\n\n| Empresa | Multa | Materias |\n|---|---|---|\n| JP Edif. Reynaldo Vivanco | S/ 181,500 | Videovigilancia |\n| GEINSE (administración de edificios) | S/ 136,125 | Videovigilancia |\n| Al Punto Marketing | S/ 128,535 | Consentimiento y marketing; registro de bancos de datos y flujo |\n| Real Edificaciones | S/ 90,310 | Consentimiento y marketing; deber de informar y derechos ARCO; medidas de seguridad |\n| Paz Centenario | S/ 28,875 | Deber de informar y derechos ARCO |\n| V&V Grupo Inmobiliario | S/ 27,500 | Deber de informar y derechos ARCO |\n| FLO House | S/ 21,450 | Consentimiento y marketing |\n| Urbanova | S/ 18,865 | Deber de informar y derechos ARCO; registro de bancos de datos y flujo |\n| Marcan | S/ 16,500 | Deber de informar y derechos ARCO |\n| JYSA Inmobiliaria | S/ 13,145 | Consentimiento y marketing; registro de bancos de datos y flujo |\n| JP Edif. C.C. La Merced | S/ 5,500 | Registro de bancos de datos y flujo |\n| Inversiones Inmob. MAK | S/ 3,465 | Deber de informar y derechos ARCO; registro de bancos de datos y flujo |\n\nFuente indicada en la presentación: resoluciones ANPD/DGTAIPD.\n"
 }

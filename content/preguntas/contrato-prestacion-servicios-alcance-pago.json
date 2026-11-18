@@ -6,6 +6,7 @@
   "orden": 8,
   "slug": "contrato-prestacion-servicios-alcance-pagos",
   "servicio_asociado": "contratos",
+  "destino": "contratos",
   "title": "Contrato de prestación de servicios: alcance y pagos",
   "destacada": false
 }

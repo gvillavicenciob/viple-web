@@ -42,6 +42,7 @@ PERSONA = {
     "@id": PERSONA_ID,
     "name": "Gabriel Villavicencio Bedoya",
     "jobTitle": "Fundador de Viple Consultores",
+    "description": "Abogado en Perú",  # firma visible en cada respuesta de «¿Tienes preguntas?»
     "url": SITE_URL + "/#quien-soy",
     "image": SITE_URL + "/assets/img/gabriel.jpg",
     "worksFor": {"@id": ORG_ID},

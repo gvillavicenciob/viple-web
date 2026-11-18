@@ -6,6 +6,7 @@
   "orden": 3,
   "slug": "modificar-o-terminar-contrato-anticipadamente",
   "servicio_asociado": "contratos",
+  "destino": "contratos-ambos",
   "title": "Cómo modificar o terminar un contrato anticipadamente",
   "destacada": false
 }

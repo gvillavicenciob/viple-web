@@ -217,8 +217,43 @@ def q_items(qs):
                    for q in qs)
 
 
+# Destino de cada pregunta: a qué página de servicio lleva («Servicio relacionado») y en cuáles se recomienda.
+# Se decide por el contenido de la pregunta (campo «destino» del panel); si está vacío, se usa el servicio asociado.
+DESTINOS_ESPECIALES = {
+    "personas-contratos": [("Contratos para personas", "/personas/contratos/")],
+    "personas-reclamos": [("Reclamos como consumidor", "/personas/reclamos/")],
+    "contratos-ambos": [("Contratos para personas", "/personas/contratos/"),
+                        ("Contratos para empresas", "/servicios/contratos/")],
+}
+
+
+def q_destinos(q):
+    d = q.get("destino") or q["servicio_asociado"]
+    if d in DESTINOS_ESPECIALES:
+        return DESTINOS_ESPECIALES[d]
+    if d not in SERVICE_NAMES:
+        d = q["servicio_asociado"]
+    return [(SERVICE_NAMES[d], f"/servicios/{d}/")]
+
+
+def preguntas_para(url):
+    """Preguntas publicadas cuyo destino incluye esta página de servicio."""
+    qs = [q for q in PUBLICADAS if url in [u for _, u in q_destinos(q)]]
+    return sorted(qs, key=lambda q: len(q_destinos(q)) > 1)  # primero las propias de esa página, luego las compartidas
+
+
+def rel_destino(url):
+    qs = preguntas_para(url)
+    if not qs:
+        return ""
+    return f"""<div class="rel-q">
+      <h2>Preguntas relacionadas</h2>
+      <ul>{q_items(qs)}</ul>
+    </div>"""
+
+
 def svc_preguntas(slug, sin=()):
-    qs = [q for q in PUBLICADAS if q["servicio_asociado"] == slug and q["slug"] not in sin]
+    qs = [q for q in preguntas_para(f"/servicios/{slug}/") if q["slug"] not in sin]
     if not qs:
         return ""
     return f"""<div class="rel-q">
@@ -387,6 +422,7 @@ def fill_services(text):
                   lambda m: rel_bloque([s for s in m.group(1).split(",") if s]), text)
     text = re.sub(r"\{\{svc_preguntas_sin:([a-z0-9-]+):([a-z0-9,-]+)\}\}",
                   lambda m: svc_preguntas(m.group(1), m.group(2).split(",")), text)
+    text = re.sub(r"\{\{preguntas_de:(/[a-z0-9/-]+/)\}\}", lambda m: rel_destino(m.group(1)), text)
     text = re.sub(r"\{\{grupo_nav:(/[a-z0-9/-]+/)\}\}", lambda m: grupo_nav(m.group(1)), text)
     for s in SERVICIOS:
         text = text.replace("{{svc:" + s["slug"] + "}}", esc(s["name"]))
@@ -402,6 +438,7 @@ MENU_NOMBRES = {}  # dirección → nombre que muestra el menú principal (para 
 for _h, _n in re.findall(r'<a [^>]*href="(/[^"#]*)"[^>]*>([^<]+)</a>', LAYOUT.split('<nav class="site-nav"')[1].split("</nav>")[0]):
     if not _n.strip().startswith("Ver ") and _h not in MENU_NOMBRES:
         MENU_NOMBRES[_h] = html.unescape(_n.strip())
+MENU_NOMBRES.setdefault("/criterios-de-autoridades/", "Criterios de autoridades")
 PAGE_INFO = {}  # dirección → (título, descripción), para /llms.txt
 
 
@@ -485,7 +522,8 @@ def render(url, content, title, description, nav="", logo="cuadrado",
         "{{head_extra}}": head_extra,
         "{{brand}}": brand(logo),
         "{{svc_menu}}": svc_menu(),
-        "{{atento_menu}}": atento_menu(),
+        "{{atento_nav}}": atento_nav(),
+        "{{atento_pie}}": atento_pie(),
         "{{preguntas_menu}}": preguntas_menu(),
         "{{foot_novedades}}": FOOT_NOVEDADES[0],
         "{{content}}": content,
@@ -746,6 +784,7 @@ def load_preguntas():
             "pregunta": str(d.get("pregunta") or "").strip(),
             "slug": str(d.get("slug") or f.stem).strip(),
             "servicio_asociado": str(d.get("servicio_asociado") or "").strip(),
+            "destino": str(d.get("destino") or "").strip(),
             "respuesta": str(d.get("respuesta") or "").strip(),
             "title": str(d.get("title") or "").strip(),
             "meta_description": str(d.get("meta_description") or "").strip(),
@@ -798,24 +837,38 @@ def aviso_legal(que):
             f'particular.</p></aside>')
 
 
+def respuesta_sin_h1(q):
+    lineas = q["respuesta"].strip().splitlines()
+    norm = lambda s: re.sub(r"\W+", "", s.lower())
+    if lineas and re.match(r"^#\s+", lineas[0]) and norm(lineas[0][1:]) == norm(q["pregunta"]):
+        lineas = lineas[1:]
+        print(f'  ! Pregunta {q["slug"]}: la respuesta repetía la pregunta como título; se omite (el H1 es la pregunta)')
+    texto = "\n".join(lineas)
+    return re.sub(r"^#(\s)", r"##\1", texto, flags=re.M)
+
+
 def render_pregunta(q):
     base = PREGUNTAS["base"]
     svc = q["servicio_asociado"]
-    body_html = markdown.markdown(q["respuesta"], extensions=["extra", "sane_lists"])
+    body_html = markdown.markdown(respuesta_sin_h1(q), extensions=["extra", "sane_lists"])
+    destinos = q_destinos(q)
+    enlaces = " <span aria-hidden=\"true\">·</span> ".join(
+        f'<a href="{u}">{esc(n)} <span aria-hidden="true">→</span></a>' for n, u in destinos)
+    rel_label = "Servicio relacionado" if len(destinos) == 1 else "Servicios relacionados"
     content = f"""
 <div class="page-head ed-head ed-article-head q-head">
   <div class="wrap ed-narrow">
     <a class="ed-back-top" href="/{base}/">← {PREGUNTAS["label"]}</a>
     <span class="ed-cat">{esc(SERVICE_NAMES[svc])}</span>
     <h1>{esc(q["pregunta"])}</h1>
-    <p class="ed-byline">Actualizado el <time datetime="{q["fecha"]}">{fecha_larga(q["fecha"])}</time></p>
+    <p class="ed-byline"><a class="q-autor" href="/#quien-soy">Gabriel Villavicencio Bedoya · Abogado en Perú</a> <span aria-hidden="true">·</span> Actualizado el <time datetime="{q["fecha"]}">{fecha_larga(q["fecha"])}</time></p>
   </div>
 </div>
 <section class="ed">
   <article class="wrap ed-narrow q-article">
     <div class="prose ed-prose">{body_html}</div>
     {aviso_legal("La información contenida en esta respuesta")}
-    <p class="q-svc">Servicio relacionado: <a href="/servicios/{svc}/">{esc(SERVICE_NAMES[svc])} <span aria-hidden="true">→</span></a></p>
+    <p class="q-svc">{rel_label}: {enlaces}</p>
     <div class="q-cta">
       <p>¿Quieres revisar tu caso?</p>
       <a class="btn" href="/contacto/">Conversemos</a>
@@ -1045,9 +1098,10 @@ def pres_slides(it):
 def slides_alt(it):
     """Lista de (ruta, texto alternativo) de las diapositivas; el texto alternativo puede estar vacío."""
     out = []
+    alts = [str(a or "").strip() for a in (it.get("textos_alternativos") or [])]  # mismo orden que las diapositivas
     for s in (it.get("slides") or []):
         if isinstance(s, str) and s.strip():
-            out.append((s.strip(), ""))
+            out.append((s.strip(), alts[len(out)] if len(out) < len(alts) else ""))
         elif isinstance(s, dict) and str(s.get("imagen") or "").strip():
             out.append((str(s["imagen"]).strip(), str(s.get("alt") or "").strip()))
     return out
@@ -1189,6 +1243,29 @@ def visor(it):
     </div>'''
 
 
+def claves_html(it):
+    """Bloque «Lo esencial» (opcional): situación del sector, criterio aplicable con su fuente y qué revisar."""
+    c = it.get("claves") if isinstance(it.get("claves"), dict) else {}
+    sit, crit, rev = (str(c.get(k) or "").strip() for k in ("situacion", "criterio", "revisar"))
+    if not (sit or crit or rev):
+        return ""
+    fuente, url = str(c.get("fuente") or "").strip(), str(c.get("fuente_url") or "").strip()
+    if fuente and url.startswith(("https://", "http://")):
+        fuente = f'<a href="{esc(url)}" target="_blank" rel="noopener">{esc(fuente)} <span aria-hidden="true">↗</span></a>'
+    else:
+        fuente = esc(fuente)
+    partes = ""
+    if sit:
+        partes += f'<div class="pc-item"><h3>Situación del sector</h3><p>{esc(sit)}</p></div>'
+    if crit:
+        partes += (f'<div class="pc-item"><h3>Criterio aplicable</h3><p>{esc(crit)}</p>'
+                   + (f'<p class="pc-fuente">Fuente: {fuente}</p>' if fuente else "") + '</div>')
+    if rev:
+        partes += f'<div class="pc-item"><h3>Qué revisar <span class="pc-tag">Recomendación de Viple</span></h3><p>{esc(rev)}</p></div>'
+    return (f'<section class="pres-claves" aria-labelledby="pc-t"><h2 id="pc-t">Lo esencial de esta presentación</h2>'
+            f'<div class="pc-grid">{partes}</div></section>')
+
+
 def render_presentacion(it):
     slides = pres_slides(it)
     body = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
@@ -1205,6 +1282,7 @@ def render_presentacion(it):
 </div>
 <section class="pres-view">
   <div class="wrap">
+    {claves_html(it)}
     {visor(it)}
     {texto}
     {aviso_legal("La información contenida en esta presentación")}
@@ -1297,9 +1375,31 @@ def atento_url(cat=None):
     return f"/{ATENTO['base']}/" + (f"{cat}/" if cat else "")
 
 
+ATENTO_PUB = []  # publicaciones válidas de Criterios de autoridades (se cargan antes de generar las páginas)
+
+
 def atento_menu():
-    """Opciones del desplegable «Criterios de autoridades» del menú principal (después de «Ver todos»)."""
-    return "\n".join(f'              <li><a href="{atento_url(c["id"])}">{esc(c["name"])}</a></li>' for c in ATENTO_CATS)
+    """Opciones del desplegable «Criterios de autoridades»: solo materias con al menos una publicación."""
+    return "\n".join(f'              <li><a href="{atento_url(c["id"])}">{esc(c["name"])}</a></li>'
+                     for c in ATENTO_CATS if any(i["cat"] == c["id"] for i in ATENTO_PUB))
+
+
+def atento_nav():
+    """Elemento «Criterios de autoridades» del menú principal: oculto mientras no haya publicaciones."""
+    if not ATENTO_PUB:
+        return ""
+    return f"""          <li class="has-sub">
+            <a data-nav="atento" href="{atento_url()}">{ATENTO["label"]}</a>
+            <button class="sub-toggle" type="button" aria-expanded="false" aria-controls="submenu-atento" aria-label="Mostrar subsecciones de {ATENTO["label"]}"></button>
+            <ul class="submenu" id="submenu-atento">
+              <li><a href="{atento_url()}">Ver todos</a></li>
+{atento_menu()}
+            </ul>
+          </li>"""
+
+
+def atento_pie():
+    return f'          <li><a href="{atento_url()}">{ATENTO["label"]}</a></li>\n' if ATENTO_PUB else ""
 
 
 def ld_script(ld):
@@ -1444,7 +1544,7 @@ def render_atento_item(it):
 
 
 def build_atento(items):
-    items = prep_atento(items)
+    """items: publicaciones ya validadas con prep_atento (en main, antes de generar las páginas)."""
     fechas = lambda lst: [max_fecha(i["date"], i["updated"]) for i in lst]
     # Página principal: todas las publicaciones, con filtro por materia
     crumbs, crumbs_ld = breadcrumbs([("Inicio", "/"), (ATENTO["label"], atento_url())])
@@ -1615,6 +1715,7 @@ def main():
     novedades = load_items("novedades")
     publicadas, total_preguntas = load_preguntas()
     PUBLICADAS[:] = publicadas
+    ATENTO_PUB[:] = prep_atento(load_items(ATENTO["base"]))
     FOOT_NOVEDADES[0] = '<li><a href="/#novedades">Novedades</a></li>' if novedades else ""
 
     for path in sorted((SRC / "pages").rglob("*.html")):
@@ -1651,7 +1752,7 @@ def main():
     build_preguntas(publicadas)
     build_novedades(novedades)
     build_presentaciones(load_items("presentaciones"))
-    atento = build_atento(load_items(ATENTO["base"]))
+    atento = build_atento(ATENTO_PUB)
     admin_config_atento()
     llms_txt(publicadas, atento)
 
