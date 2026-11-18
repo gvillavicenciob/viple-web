@@ -13,6 +13,7 @@
 <meta property="og:description" content="{{description}}">
 <meta property="og:url" content="https://vipleconsultores.com{{url}}">
 <meta property="og:image" content="https://vipleconsultores.com{{og_image}}">
+{{og_extra}}
 <link rel="icon" href="/assets/img/logo-cuadrado.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,15 +58,15 @@
               <li><a href="/servicios/constitucion-asociaciones/">Constitución de asociaciones</a></li>
             </ul>
           </li>
-          <li><a data-nav="preguntas" href="/preguntas/">¿Tienes preguntas?</a></li>
           <li class="has-sub">
-            <a data-nav="atento" href="/criterios-de-autoridades/">Criterios de autoridades</a>
-            <button class="sub-toggle" type="button" aria-expanded="false" aria-controls="submenu-atento" aria-label="Mostrar subsecciones de Criterios de autoridades"></button>
-            <ul class="submenu" id="submenu-atento">
-              <li><a href="/criterios-de-autoridades/">Ver todos</a></li>
-{{atento_menu}}
+            <a data-nav="preguntas" href="/preguntas/">¿Tienes preguntas?</a>
+            <button class="sub-toggle" type="button" aria-expanded="false" aria-controls="submenu-preguntas" aria-label="Mostrar temas de ¿Tienes preguntas?"></button>
+            <ul class="submenu" id="submenu-preguntas">
+              <li><a href="/preguntas/">Ver todas las preguntas</a></li>
+{{preguntas_menu}}
             </ul>
           </li>
+{{atento_nav}}
           <li><a data-nav="presentaciones" href="/presentaciones/">Presentaciones especiales</a></li>
           <li><a data-nav="contacto" class="btn outline" href="/contacto/">Conversemos</a></li>
         </ul>
@@ -92,8 +93,7 @@
           <li><a href="/empresas/">Empresas</a></li>
           <li><a href="/personas/">Personas</a></li>
           <li><a href="/preguntas/">¿Tienes preguntas?</a></li>
-          <li><a href="/criterios-de-autoridades/">Criterios de autoridades</a></li>
-          <li><a href="/presentaciones/">Presentaciones especiales</a></li>
+{{atento_pie}}          <li><a href="/presentaciones/">Presentaciones especiales</a></li>
           {{foot_novedades}}
           <li><a href="/#quien-soy">Quién soy</a></li>
           <li><a href="/contacto/">Conversemos</a></li>

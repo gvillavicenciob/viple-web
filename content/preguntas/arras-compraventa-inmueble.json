@@ -6,6 +6,7 @@
   "orden": 6,
   "slug": "arras-compraventa-inmueble",
   "servicio_asociado": "contratos",
+  "destino": "personas-contratos",
   "title": "Arras en compraventa de inmuebles: tipos y riesgos",
   "destacada": false
 }

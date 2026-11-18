@@ -109,11 +109,27 @@ collections:
           - { label: Protección de datos personales, value: proteccion-de-datos }
           - { label: Prácticas comerciales y reclamos, value: reclamos-y-denuncias }
           - { label: Diseño de herramientas legales, value: herramientas-legales }
+      - label: Página de servicio a la que lleva
+        name: destino
+        widget: select
+        required: false
+        options:
+          - { label: "Contratos para personas (/personas/contratos/)", value: personas-contratos }
+          - { label: "Contratos para personas y para empresas (dos enlaces)", value: contratos-ambos }
+          - { label: "Contratos para empresas (/servicios/contratos/)", value: contratos }
+          - { label: "Reclamos como consumidor (/personas/reclamos/)", value: personas-reclamos }
+          - { label: Estructuramos tu negocio, value: estructura-empresarial }
+          - { label: Constitución de asociaciones, value: constitucion-asociaciones }
+          - { label: Protegemos tu inversión, value: protegemos-tu-inversion }
+          - { label: Protección de datos personales, value: proteccion-de-datos }
+          - { label: Prácticas comerciales y reclamos, value: reclamos-y-denuncias }
+          - { label: Diseño de herramientas legales, value: herramientas-legales }
+        hint: "Según el contenido de la pregunta: decide el enlace «Servicio relacionado» y en qué página de servicio aparece como «Pregunta relacionada». Si lo dejas vacío, se usa el servicio asociado. El servicio asociado solo agrupa la pregunta en /preguntas/ y en el menú."
       - label: Respuesta
         name: respuesta
         widget: markdown
         required: false
-        hint: Párrafos, listas y enlaces. Puedes pegar desde Word y revisar el formato con la barra. Obligatoria para publicar.
+        hint: "Párrafos, listas y enlaces. Empieza directamente con el texto: la pregunta ya es el título de la página (no la repitas como «Título 1»; usa «Título 2» para los subtítulos). Puedes pegar desde Word y revisar el formato con la barra. Obligatoria para publicar."
       - label: Título SEO (pestaña del navegador y Google)
         name: title
         widget: string
@@ -311,6 +327,25 @@ collections:
         label_singular: diapositiva
         hint: "Una imagen por diapositiva, en orden (JPG de unos 1600 px de ancho y menos de 300 KB). Usa nombres de archivo propios de esta presentación (p. ej. inmobiliarias-01.jpg). Puedes reordenarlas arrastrándolas."
         field: { label: Imagen de la diapositiva, name: image, widget: image, choose_url: false }
+      - label: Textos alternativos de las diapositivas (opcional, mismo orden)
+        name: textos_alternativos
+        widget: list
+        required: false
+        label_singular: texto alternativo
+        field: { label: Qué muestra o concluye la diapositiva, name: alt, widget: string }
+        hint: "Uno por diapositiva, en el mismo orden. Describe el tema o la conclusión de la lámina (lo lee quien usa lector de pantalla). Si falta, se usa «Título – diapositiva N»."
+      - label: Lo esencial (bloque de texto antes de las diapositivas, opcional)
+        name: claves
+        widget: object
+        required: false
+        collapsed: true
+        hint: "Permite leer el aporte principal sin recorrer todas las diapositivas. Distingue lo que dijo la autoridad (criterio + fuente) de la recomendación de Viple (qué revisar)."
+        fields:
+          - { label: Situación del sector, name: situacion, widget: text, required: false, hint: "Una situación concreta que un director, gerente o responsable reconozca." }
+          - { label: Criterio aplicable, name: criterio, widget: text, required: false, hint: "La conclusión relevante. Si se atribuye a una autoridad, indica la fuente." }
+          - { label: Fuente del criterio (texto), name: fuente, widget: string, required: false }
+          - { label: Fuente del criterio (enlace oficial), name: fuente_url, widget: string, required: false }
+          - { label: Qué revisar (recomendación de Viple), name: revisar, widget: text, required: false }
       - label: Contenido de la presentación en texto (debajo de las diapositivas, ayuda a Google)
         name: body
         widget: markdown

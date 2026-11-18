@@ -8,7 +8,9 @@ Construye el sitio de Viple Consultores en la carpeta _site/.
   las novedades (bloque de la portada y una página por novedad), «Presentaciones especiales» y
   «Criterios de autoridades» (/criterios-de-autoridades/ y sus subsecciones), con los contenidos guardados desde el panel (/admin).
 - Las secciones sin contenido publicado llevan noindex y no entran en el sitemap.
-- El sitemap usa fechas editoriales guardadas (nunca la fecha del build).
+- El sitemap usa fechas editoriales guardadas o la del último commit de cada archivo (nunca la fecha del build).
+- Cada página lleva un solo JSON-LD con @graph: nodos globales (datos_schema.py) + nodo de la página.
+- Genera /llms.txt desde las mismas colecciones.
 
 Netlify ejecuta este archivo automáticamente en cada publicación.
 Para probarlo en tu computadora:  python build.py
@@ -19,11 +21,14 @@ import json
 import math
 import re
 import shutil
+import subprocess
 import unicodedata
 from pathlib import Path
 from urllib.parse import quote
 
 import markdown
+
+import datos_schema as DS
 
 ROOT = Path(__file__).resolve().parent
 SRC = ROOT / "src"
@@ -165,6 +170,16 @@ def icon(name, cls="ico-svg"):
 SERVICIOS = json.loads((ROOT / "content" / "servicios.json").read_text(encoding="utf-8"))["servicios"]
 
 
+def preguntas_menu():
+    """Opciones del desplegable «¿Tienes preguntas?»: cada servicio con preguntas publicadas, en el orden
+    de los grupos «Para empresas» y «Para personas»; cada una abre su grupo en /preguntas/."""
+    por_slug = {s["slug"]: s for s in SERVICIOS}
+    orden = [k for g in ("empresas", "personas") for k in GRUPOS[g] if k in por_slug]
+    orden += [s["slug"] for s in SERVICIOS if s["slug"] not in orden]
+    return "\n".join(f'              <li><a href="/{PREGUNTAS["base"]}/#{k}">{esc(por_slug[k].get("menu") or por_slug[k]["name"])}</a></li>'
+                     for k in orden if any(q["servicio_asociado"] == k for q in PUBLICADAS))
+
+
 def svc_menu():
     return "\n".join(f'              <li><a href="/servicios/{s["slug"]}/">{esc(s.get("menu") or s["name"])}</a></li>'
                      for s in SERVICIOS)
@@ -202,8 +217,43 @@ def q_items(qs):
                    for q in qs)
 
 
+# Destino de cada pregunta: a qué página de servicio lleva («Servicio relacionado») y en cuáles se recomienda.
+# Se decide por el contenido de la pregunta (campo «destino» del panel); si está vacío, se usa el servicio asociado.
+DESTINOS_ESPECIALES = {
+    "personas-contratos": [("Contratos para personas", "/personas/contratos/")],
+    "personas-reclamos": [("Reclamos como consumidor", "/personas/reclamos/")],
+    "contratos-ambos": [("Contratos para personas", "/personas/contratos/"),
+                        ("Contratos para empresas", "/servicios/contratos/")],
+}
+
+
+def q_destinos(q):
+    d = q.get("destino") or q["servicio_asociado"]
+    if d in DESTINOS_ESPECIALES:
+        return DESTINOS_ESPECIALES[d]
+    if d not in SERVICE_NAMES:
+        d = q["servicio_asociado"]
+    return [(SERVICE_NAMES[d], f"/servicios/{d}/")]
+
+
+def preguntas_para(url):
+    """Preguntas publicadas cuyo destino incluye esta página de servicio."""
+    qs = [q for q in PUBLICADAS if url in [u for _, u in q_destinos(q)]]
+    return sorted(qs, key=lambda q: len(q_destinos(q)) > 1)  # primero las propias de esa página, luego las compartidas
+
+
+def rel_destino(url):
+    qs = preguntas_para(url)
+    if not qs:
+        return ""
+    return f"""<div class="rel-q">
+      <h2>Preguntas relacionadas</h2>
+      <ul>{q_items(qs)}</ul>
+    </div>"""
+
+
 def svc_preguntas(slug, sin=()):
-    qs = [q for q in PUBLICADAS if q["servicio_asociado"] == slug and q["slug"] not in sin]
+    qs = [q for q in preguntas_para(f"/servicios/{slug}/") if q["slug"] not in sin]
     if not qs:
         return ""
     return f"""<div class="rel-q">
@@ -308,9 +358,30 @@ def preguntas_elegidas(slugs):
     return [por_slug[s] for s in slugs if s in por_slug]
 
 
-def faq_bloque(slugs):
-    """Bloque «¿Tienes preguntas?» (componente home-faq) con preguntas elegidas; se oculta si no hay ninguna."""
+def completar_preguntas(qs, n):
+    """Completa la lista hasta n: primero las destacadas y luego otras publicadas, una de cada servicio por turnos."""
+    qs = list(qs)
+    for q in sorted((q for q in PUBLICADAS if q.get("destacada")),
+                    key=lambda q: (q["orden_portada"], q["_svc_i"], q["orden"], q["pregunta"])):
+        if len(qs) < n and q not in qs:
+            qs.append(q)
+    grupos = {}
+    for q in PUBLICADAS:
+        if q not in qs:
+            grupos.setdefault(q["_svc_i"], []).append(q)
+    while len(qs) < n and any(grupos.values()):
+        for k in sorted(grupos):
+            if grupos[k] and len(qs) < n:
+                qs.append(grupos[k].pop(0))
+    return qs
+
+
+def faq_bloque(slugs, n=0):
+    """Bloque «¿Tienes preguntas?» (componente home-faq) con preguntas elegidas (y, si n > 0, completado
+    hasta n preguntas); se oculta si no hay ninguna."""
     qs = preguntas_elegidas(slugs)
+    if n:
+        qs = completar_preguntas(qs, n)
     if not qs:
         return ""
     return f"""<section class="home-faq">
@@ -346,10 +417,12 @@ def fill_services(text):
     text = text.replace("{{svc_grupo:empresas}}", svc_grupo("empresas"))
     text = text.replace("{{svc_grupo:personas}}", svc_grupo("personas"))
     text = re.sub(r"\{\{faq:([a-z0-9,-]+)\}\}", lambda m: faq_bloque(m.group(1).split(",")), text)
+    text = re.sub(r"\{\{faq5:([a-z0-9,-]+)\}\}", lambda m: faq_bloque(m.group(1).split(","), 5), text)
     text = re.sub(r"\{\{rel_preguntas:([a-z0-9,-]*)\}\}",
                   lambda m: rel_bloque([s for s in m.group(1).split(",") if s]), text)
     text = re.sub(r"\{\{svc_preguntas_sin:([a-z0-9-]+):([a-z0-9,-]+)\}\}",
                   lambda m: svc_preguntas(m.group(1), m.group(2).split(",")), text)
+    text = re.sub(r"\{\{preguntas_de:(/[a-z0-9/-]+/)\}\}", lambda m: rel_destino(m.group(1)), text)
     text = re.sub(r"\{\{grupo_nav:(/[a-z0-9/-]+/)\}\}", lambda m: grupo_nav(m.group(1)), text)
     for s in SERVICIOS:
         text = text.replace("{{svc:" + s["slug"] + "}}", esc(s["name"]))
@@ -359,11 +432,85 @@ def fill_services(text):
     return text
 
 
+# ---------- Datos estructurados (schema.org): un solo @graph por página ----------
+
+MENU_NOMBRES = {}  # dirección → nombre que muestra el menú principal (para las migas del BreadcrumbList)
+for _h, _n in re.findall(r'<a [^>]*href="(/[^"#]*)"[^>]*>([^<]+)</a>', LAYOUT.split('<nav class="site-nav"')[1].split("</nav>")[0]):
+    if not _n.strip().startswith("Ver ") and _h not in MENU_NOMBRES:
+        MENU_NOMBRES[_h] = html.unescape(_n.strip())
+MENU_NOMBRES.setdefault("/criterios-de-autoridades/", "Criterios de autoridades")
+PAGE_INFO = {}  # dirección → (título, descripción), para /llms.txt
+
+
+def migas(url, nombre=None):
+    """Pasos del BreadcrumbList: Inicio > Sección > Página, con los nombres del menú."""
+    if url == "/":
+        return None
+    pasos = [("Inicio", "/")]
+    for g in ("empresas", "personas"):
+        if url in [i["url"] for i in grupo_items(g)]:
+            pasos.append((MENU_NOMBRES.get(f"/{g}/", g.capitalize()), f"/{g}/"))
+            break
+    pasos.append((MENU_NOMBRES.get(url) or nombre or url, url))
+    return pasos
+
+
+def ref(id_):
+    return {"@id": id_}
+
+
+def autor_ld(author):
+    return ref(DS.PERSONA_ID) if (author or DEFAULT_AUTHOR) == DEFAULT_AUTHOR else {"@type": "Person", "name": author}
+
+
+def lista_ld(items):
+    """ItemList con (url, nombre) en el orden visible."""
+    return {"@type": "ItemList", "itemListElement": [
+        {"@type": "ListItem", "position": i, "url": SITE_URL + u, "name": n} for i, (u, n) in enumerate(items, 1)]}
+
+
+def grafo(url, title, description, ld):
+    """Un solo bloque JSON-LD: nodos globales + nodo de la página (+ BreadcrumbList y nodos propios)."""
+    U = SITE_URL + url
+    page = {"@type": ld.get("tipo", "WebPage"), "@id": U + "#webpage", "url": U, "name": title,
+            "description": description, "inLanguage": DS.IDIOMA, "isPartOf": ref(DS.WEBSITE_ID),
+            "publisher": ref(DS.ORG_ID)}
+    if not description:
+        del page["description"]
+    nodos = [*DS.NODOS_GLOBALES, page]
+    pasos = ld["crumbs"] if "crumbs" in ld else migas(url, ld.get("nombre"))
+    if pasos:
+        page["breadcrumb"] = ref(U + "#breadcrumb")
+        nodos.append({"@type": "BreadcrumbList", "@id": U + "#breadcrumb", "itemListElement": [
+            {"@type": "ListItem", "position": i, "name": n, "item": SITE_URL + u}
+            for i, (n, u) in enumerate(pasos, 1)]})
+    page.update(ld.get("props") or {})
+    nodos += ld.get("nodos") or []
+    data = {"@context": "https://schema.org", "@graph": nodos}
+    return f'<script type="application/ld+json">{json.dumps(data, ensure_ascii=False)}</script>'
+
+
 def render(url, content, title, description, nav="", logo="cuadrado",
-           og_image="/assets/img/logo-cuadrado.png", og_type="website", head_extra="",
-           noindex=False, lastmod=None):
+           og_image=None, og_type="website", head_extra="",
+           noindex=False, lastmod=None, ld=None, article_times=None):
+    og_image = og_image or DS.IMAGEN_SOCIAL["src"]
+    PAGE_INFO[url] = (title, description)
+    head_extra = grafo(url, title, description, ld or {}) + ("\n" + head_extra if head_extra else "")
     if noindex:
         head_extra = '<meta name="robots" content="noindex, follow">\n' + head_extra
+    og_extra = []
+    dm = img_dims(og_image)
+    if dm:
+        og_extra += [f'<meta property="og:image:width" content="{dm[0]}">',
+                     f'<meta property="og:image:height" content="{dm[1]}">']
+    og_extra += [f'<meta property="og:image:alt" content="{esc(DS.IMAGEN_SOCIAL["alt"])}">',
+                 '<meta name="twitter:card" content="summary_large_image">']
+    if article_times:
+        pub, mod = article_times
+        if pub:
+            og_extra.append(f'<meta property="article:published_time" content="{pub}">')
+        if mod:
+            og_extra.append(f'<meta property="article:modified_time" content="{mod}">')
     page = LAYOUT
     for key, val in {
         "{{title}}": esc(title),
@@ -371,10 +518,13 @@ def render(url, content, title, description, nav="", logo="cuadrado",
         "{{url}}": url,
         "{{og_image}}": og_image,
         "{{og_type}}": og_type,
+        "{{og_extra}}": "\n".join(og_extra),
         "{{head_extra}}": head_extra,
         "{{brand}}": brand(logo),
         "{{svc_menu}}": svc_menu(),
-        "{{atento_menu}}": atento_menu(),
+        "{{atento_nav}}": atento_nav(),
+        "{{atento_pie}}": atento_pie(),
+        "{{preguntas_menu}}": preguntas_menu(),
         "{{foot_novedades}}": FOOT_NOVEDADES[0],
         "{{content}}": content,
     }.items():
@@ -510,7 +660,9 @@ def build_editorial(cfg, items):
   </div>
 </section>'''
     render(f"/{name}/", content, f'{cfg["label"]} | Viple Consultores', cfg["intro"] + ".", nav=cfg["nav"],
-           noindex=not items, lastmod=max_fecha(LISTADOS_LASTMOD, *(i["date"] for i in items)))
+           noindex=not items, lastmod=max_fecha(LISTADOS_LASTMOD, *(i["date"] for i in items)),
+           ld={"tipo": "CollectionPage", "crumbs": [("Inicio", "/"), (cfg["label"], f"/{name}/")],
+               "props": {"mainEntity": lista_ld([(i["url"], i.get("title")) for i in items])} if items else {}})
 
     for item in items:
         render_article(cfg, item, items)
@@ -579,26 +731,21 @@ def render_article(cfg, item, items):
   </article>
 </section>
 {rel_html}'''
-    image = item.get("image") or "/assets/img/logo-cuadrado.png"
-    ld = {
-        "@context": "https://schema.org",
-        "@type": "Article",
-        "headline": item.get("title"),
-        "description": item.get("summary"),
-        "datePublished": item["date"],
-        "author": {"@type": "Person", "name": author},
-        "publisher": {"@type": "Organization", "name": "Viple Consultores",
-                      "logo": {"@type": "ImageObject", "url": SITE_URL + "/assets/img/logo-cuadrado.png"}},
-        "image": SITE_URL + image,
-        "articleSection": cat,
-        "mainEntityOfPage": SITE_URL + item["url"],
-    }
-    head_extra = (f'<meta property="article:published_time" content="{item["date"]}">\n'
-                  f'<meta property="article:section" content="{esc(cat)}">\n'
-                  f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>')
+    image = item.get("image") or DS.IMAGEN_SOCIAL["src"]
+    U = SITE_URL + item["url"]
+    art = {"@type": "Article", "@id": U + "#article", "headline": item.get("title"),
+           "description": item.get("summary") or cfg["intro"], "datePublished": item["date"],
+           "dateModified": item["date"], "author": autor_ld(author), "publisher": ref(DS.ORG_ID),
+           "image": SITE_URL + image, "articleSection": cat or None, "inLanguage": DS.IDIOMA,
+           "mainEntityOfPage": ref(U + "#webpage")}
+    art = {k: v for k, v in art.items() if v}
+    head_extra = f'<meta property="article:section" content="{esc(cat)}">' if cat else ""
     render(item["url"], content, f'{item.get("title")} | Viple Consultores',
            item.get("summary") or cfg["intro"], nav=cfg["nav"], og_image=image,
-           og_type="article", head_extra=head_extra, lastmod=max_fecha(item["date"]))
+           og_type="article", head_extra=head_extra, lastmod=max_fecha(item["date"]),
+           ld={"crumbs": [("Inicio", "/"), (cfg["label"], f"/{name}/"), (item.get("title"), item["url"])],
+               "props": {"mainEntity": ref(U + "#article")}, "nodos": [art]},
+           article_times=(item["date"], item["date"]))
 
 
 # ---------- Sección «¿Tienes preguntas?» (content/preguntas) ----------
@@ -637,6 +784,7 @@ def load_preguntas():
             "pregunta": str(d.get("pregunta") or "").strip(),
             "slug": str(d.get("slug") or f.stem).strip(),
             "servicio_asociado": str(d.get("servicio_asociado") or "").strip(),
+            "destino": str(d.get("destino") or "").strip(),
             "respuesta": str(d.get("respuesta") or "").strip(),
             "title": str(d.get("title") or "").strip(),
             "meta_description": str(d.get("meta_description") or "").strip(),
@@ -689,24 +837,38 @@ def aviso_legal(que):
             f'particular.</p></aside>')
 
 
+def respuesta_sin_h1(q):
+    lineas = q["respuesta"].strip().splitlines()
+    norm = lambda s: re.sub(r"\W+", "", s.lower())
+    if lineas and re.match(r"^#\s+", lineas[0]) and norm(lineas[0][1:]) == norm(q["pregunta"]):
+        lineas = lineas[1:]
+        print(f'  ! Pregunta {q["slug"]}: la respuesta repetía la pregunta como título; se omite (el H1 es la pregunta)')
+    texto = "\n".join(lineas)
+    return re.sub(r"^#(\s)", r"##\1", texto, flags=re.M)
+
+
 def render_pregunta(q):
     base = PREGUNTAS["base"]
     svc = q["servicio_asociado"]
-    body_html = markdown.markdown(q["respuesta"], extensions=["extra", "sane_lists"])
+    body_html = markdown.markdown(respuesta_sin_h1(q), extensions=["extra", "sane_lists"])
+    destinos = q_destinos(q)
+    enlaces = " <span aria-hidden=\"true\">·</span> ".join(
+        f'<a href="{u}">{esc(n)} <span aria-hidden="true">→</span></a>' for n, u in destinos)
+    rel_label = "Servicio relacionado" if len(destinos) == 1 else "Servicios relacionados"
     content = f"""
 <div class="page-head ed-head ed-article-head q-head">
   <div class="wrap ed-narrow">
     <a class="ed-back-top" href="/{base}/">← {PREGUNTAS["label"]}</a>
     <span class="ed-cat">{esc(SERVICE_NAMES[svc])}</span>
     <h1>{esc(q["pregunta"])}</h1>
-    <p class="ed-byline">Actualizado el <time datetime="{q["fecha"]}">{fecha_larga(q["fecha"])}</time></p>
+    <p class="ed-byline"><a class="q-autor" href="/#quien-soy">Gabriel Villavicencio Bedoya · Abogado en Perú</a> <span aria-hidden="true">·</span> Actualizado el <time datetime="{q["fecha"]}">{fecha_larga(q["fecha"])}</time></p>
   </div>
 </div>
 <section class="ed">
   <article class="wrap ed-narrow q-article">
     <div class="prose ed-prose">{body_html}</div>
     {aviso_legal("La información contenida en esta respuesta")}
-    <p class="q-svc">Servicio relacionado: <a href="/servicios/{svc}/">{esc(SERVICE_NAMES[svc])} <span aria-hidden="true">→</span></a></p>
+    <p class="q-svc">{rel_label}: {enlaces}</p>
     <div class="q-cta">
       <p>¿Quieres revisar tu caso?</p>
       <a class="btn" href="/contacto/">Conversemos</a>
@@ -715,12 +877,15 @@ def render_pregunta(q):
     <a class="back" href="/{base}/">← Volver a {PREGUNTAS["label"]}</a>
   </article>
 </section>"""
-    ld = {"@context": "https://schema.org", "@type": "FAQPage", "url": SITE_URL + q_url(q),
-          "mainEntity": [{"@type": "Question", "name": q["pregunta"],
-                          "acceptedAnswer": {"@type": "Answer", "text": texto_plano(q["respuesta"])}}]}
+    # El panel guarda una sola fecha («Actualizado el …», visible): se usa como publicación y modificación
+    ld = {"tipo": "FAQPage",
+          "crumbs": [("Inicio", "/"), (MENU_NOMBRES.get(f"/{base}/", PREGUNTAS["label"]), f"/{base}/"),
+                     (q["pregunta"], q_url(q))],
+          "props": {"mainEntity": [{"@type": "Question", "name": q["pregunta"],
+                                    "acceptedAnswer": {"@type": "Answer", "text": texto_plano(q["respuesta"])}}],
+                    "author": ref(DS.PERSONA_ID), "datePublished": q["fecha"], "dateModified": q["fecha"]}}
     render(q_url(q), content, titulo_seo(q["title"]), q["meta_description"], nav="preguntas", og_type="article",
-           head_extra=f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>',
-           lastmod=q["fecha"])
+           lastmod=q["fecha"], ld=ld, article_times=(q["fecha"], q["fecha"]))
 
 
 def build_preguntas(publicadas):
@@ -732,22 +897,19 @@ def build_preguntas(publicadas):
             if not qs:
                 continue
             lis = "".join(f'<li><a href="{q_url(q)}">{esc(q["pregunta"])}</a></li>' for q in qs)
-            grupos += f"""<details class="acc">
+            grupos += f"""<details class="acc" id="{s["slug"]}">
       <summary><span class="acc-ico">{icon(SVC_ICONS.get(s["slug"], "doc-check"))}</span><span class="acc-name">{esc(s["name"])}</span><span class="acc-n">{len(qs)}</span></summary>
       <ul class="acc-list">{lis}</ul>
     </details>"""
         listing = f'<div class="acc-group">{grupos}</div>'
-        ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": PREGUNTAS["label"],
-              "url": f"{SITE_URL}/{base}/",
-              "mainEntity": {"@type": "ItemList", "itemListElement": [
-                  {"@type": "ListItem", "position": i, "url": SITE_URL + q_url(q), "name": q["pregunta"]}
-                  for i, q in enumerate(publicadas, 1)]}}
-        head_extra = f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
+        # Mismo orden visible: por servicio (orden de servicios.json) y luego por orden de la pregunta
+        visibles = [q for s in SERVICIOS for q in publicadas if q["servicio_asociado"] == s["slug"]]
+        ld = {"tipo": "CollectionPage", "props": {"mainEntity": lista_ld([(q_url(q), q["pregunta"]) for q in visibles])}}
     else:
         listing = (f'<div class="empty"><img src="/assets/img/logo-cuadrado.png" alt="">'
                    f'<p>{esc(PREGUNTAS["empty"])}</p>'
                    f'<p>Si tienes una consulta, <a href="/contacto/">conversemos</a>.</p></div>')
-        head_extra = ""
+        ld = {"tipo": "CollectionPage"}
     content = f"""
 <div class="page-head ed-head">
   <div class="wrap">
@@ -761,7 +923,7 @@ def build_preguntas(publicadas):
   </div>
 </section>"""
     render(f"/{base}/", content, f'{PREGUNTAS["label"]} | Viple Consultores', PREGUNTAS["intro"], nav="preguntas",
-           head_extra=head_extra, noindex=not publicadas,
+           ld=ld, noindex=not publicadas,
            lastmod=max_fecha(LISTADOS_LASTMOD, *(q["fecha"] for q in publicadas)))
     for q in publicadas:
         render_pregunta(q)
@@ -842,9 +1004,17 @@ def build_novedades(items):
     <a class="back" href="/#novedades">← Ver todas las novedades</a>
   </article>
 </section>'''
+        U = SITE_URL + item["url"]
+        art = {"@type": "Article", "@id": U + "#article", "headline": item.get("title"),
+               "description": item.get("summary") or cfg["intro"], "datePublished": item["date"],
+               "dateModified": item["date"], "author": autor_ld(author), "publisher": ref(DS.ORG_ID),
+               "inLanguage": DS.IDIOMA, "mainEntityOfPage": ref(U + "#webpage")}
         render(item["url"], content, f'{item.get("title")} | Viple Consultores',
                item.get("summary") or cfg["intro"], nav=cfg["nav"],
-               og_image=item.get("image") or "/assets/img/logo-cuadrado.png", lastmod=max_fecha(item["date"]))
+               og_image=item.get("image") or DS.IMAGEN_SOCIAL["src"], lastmod=max_fecha(item["date"]),
+               og_type="article", article_times=(item["date"], item["date"]),
+               ld={"crumbs": [("Inicio", "/"), (cfg["eyebrow"], "/#novedades"), (item.get("title"), item["url"])],
+                   "props": {"mainEntity": ref(U + "#article")}, "nodos": [art]})
 
 
 # ---------- Sección «Presentaciones especiales» (content/presentaciones) ----------
@@ -928,9 +1098,10 @@ def pres_slides(it):
 def slides_alt(it):
     """Lista de (ruta, texto alternativo) de las diapositivas; el texto alternativo puede estar vacío."""
     out = []
+    alts = [str(a or "").strip() for a in (it.get("textos_alternativos") or [])]  # mismo orden que las diapositivas
     for s in (it.get("slides") or []):
         if isinstance(s, str) and s.strip():
-            out.append((s.strip(), ""))
+            out.append((s.strip(), alts[len(out)] if len(out) < len(alts) else ""))
         elif isinstance(s, dict) and str(s.get("imagen") or "").strip():
             out.append((str(s["imagen"]).strip(), str(s.get("alt") or "").strip()))
     return out
@@ -1072,6 +1243,29 @@ def visor(it):
     </div>'''
 
 
+def claves_html(it):
+    """Bloque «Lo esencial» (opcional): situación del sector, criterio aplicable con su fuente y qué revisar."""
+    c = it.get("claves") if isinstance(it.get("claves"), dict) else {}
+    sit, crit, rev = (str(c.get(k) or "").strip() for k in ("situacion", "criterio", "revisar"))
+    if not (sit or crit or rev):
+        return ""
+    fuente, url = str(c.get("fuente") or "").strip(), str(c.get("fuente_url") or "").strip()
+    if fuente and url.startswith(("https://", "http://")):
+        fuente = f'<a href="{esc(url)}" target="_blank" rel="noopener">{esc(fuente)} <span aria-hidden="true">↗</span></a>'
+    else:
+        fuente = esc(fuente)
+    partes = ""
+    if sit:
+        partes += f'<div class="pc-item"><h3>Situación del sector</h3><p>{esc(sit)}</p></div>'
+    if crit:
+        partes += (f'<div class="pc-item"><h3>Criterio aplicable</h3><p>{esc(crit)}</p>'
+                   + (f'<p class="pc-fuente">Fuente: {fuente}</p>' if fuente else "") + '</div>')
+    if rev:
+        partes += f'<div class="pc-item"><h3>Qué revisar <span class="pc-tag">Recomendación de Viple</span></h3><p>{esc(rev)}</p></div>'
+    return (f'<section class="pres-claves" aria-labelledby="pc-t"><h2 id="pc-t">Lo esencial de esta presentación</h2>'
+            f'<div class="pc-grid">{partes}</div></section>')
+
+
 def render_presentacion(it):
     slides = pres_slides(it)
     body = markdown.markdown(it.get("body") or "", extensions=["extra", "sane_lists"])
@@ -1088,15 +1282,24 @@ def render_presentacion(it):
 </div>
 <section class="pres-view">
   <div class="wrap">
+    {claves_html(it)}
     {visor(it)}
     {texto}
     {aviso_legal("La información contenida en esta presentación")}
     <a class="back" href="/presentaciones/">← Ver todas las presentaciones</a>
   </div>
 </section>'''
+    U = SITE_URL + it["url"]
+    # La página no muestra fecha ni autor: el nodo solo describe lo visible (título, resumen e imagen)
+    doc = {"@type": "PresentationDigitalDocument", "@id": U + "#presentation", "name": it.get("title"),
+           "description": it["seo_desc"], "url": U, "inLanguage": DS.IDIOMA, "publisher": ref(DS.ORG_ID),
+           "image": SITE_URL + (it.get("image") or slides[0])}
     render(it["url"], content, it["seo_title"], it["seo_desc"],
            nav="presentaciones", og_image=it.get("image") or slides[0], og_type="article",
-           lastmod=max_fecha(it["date"]))
+           lastmod=max_fecha(it["date"]),
+           ld={"crumbs": [("Inicio", "/"), (MENU_NOMBRES.get("/presentaciones/", "Presentaciones especiales"),
+                                            "/presentaciones/"), (it.get("title"), it["url"])],
+               "props": {"mainEntity": ref(U + "#presentation")}, "nodos": [doc]})
 
 
 def build_presentaciones(items):
@@ -1120,7 +1323,8 @@ def build_presentaciones(items):
   </div>
 </section>'''
     render("/presentaciones/", content, f'{cfg["h1"]} | Viple Consultores', cfg["intro"], nav="presentaciones",
-           noindex=not items, lastmod=max_fecha(LISTADOS_LASTMOD, *(i["date"] for i in items)))
+           noindex=not items, lastmod=max_fecha(LISTADOS_LASTMOD, *(i["date"] for i in items)),
+           ld={"tipo": "CollectionPage"})
     for it in items:
         if pres_slides(it):
             render_presentacion(it)
@@ -1171,9 +1375,31 @@ def atento_url(cat=None):
     return f"/{ATENTO['base']}/" + (f"{cat}/" if cat else "")
 
 
+ATENTO_PUB = []  # publicaciones válidas de Criterios de autoridades (se cargan antes de generar las páginas)
+
+
 def atento_menu():
-    """Opciones del desplegable «Criterios de autoridades» del menú principal (después de «Ver todos»)."""
-    return "\n".join(f'              <li><a href="{atento_url(c["id"])}">{esc(c["name"])}</a></li>' for c in ATENTO_CATS)
+    """Opciones del desplegable «Criterios de autoridades»: solo materias con al menos una publicación."""
+    return "\n".join(f'              <li><a href="{atento_url(c["id"])}">{esc(c["name"])}</a></li>'
+                     for c in ATENTO_CATS if any(i["cat"] == c["id"] for i in ATENTO_PUB))
+
+
+def atento_nav():
+    """Elemento «Criterios de autoridades» del menú principal: oculto mientras no haya publicaciones."""
+    if not ATENTO_PUB:
+        return ""
+    return f"""          <li class="has-sub">
+            <a data-nav="atento" href="{atento_url()}">{ATENTO["label"]}</a>
+            <button class="sub-toggle" type="button" aria-expanded="false" aria-controls="submenu-atento" aria-label="Mostrar subsecciones de {ATENTO["label"]}"></button>
+            <ul class="submenu" id="submenu-atento">
+              <li><a href="{atento_url()}">Ver todos</a></li>
+{atento_menu()}
+            </ul>
+          </li>"""
+
+
+def atento_pie():
+    return f'          <li><a href="{atento_url()}">{ATENTO["label"]}</a></li>\n' if ATENTO_PUB else ""
 
 
 def ld_script(ld):
@@ -1187,9 +1413,7 @@ def breadcrumbs(pasos):
         vis.append(f'<span{CUR}>{esc(n)}</span>' if i == len(pasos) - 1 else f'<a href="{u}">{esc(n)}</a>')
     sep = ' <span aria-hidden="true">/</span> '
     nav = f'<nav class="crumbs at-crumbs" aria-label="Ruta de navegación">{sep.join(vis)}</nav>'
-    ld = {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
-        {"@type": "ListItem", "position": i, "name": n, "item": SITE_URL + u} for i, (n, u) in enumerate(pasos, 1)]}
-    return nav, ld_script(ld)
+    return nav, pasos
 
 
 def prep_atento(items):
@@ -1302,19 +1526,25 @@ def render_atento_item(it):
   </div>
 </section>'''
     portada = it.get("image") or pres_slides(it)[0]
-    ld = {"@context": "https://schema.org", "@type": "Article", "headline": it.get("title"),
-          "description": it["seo_desc"], "datePublished": it["date"] or None,
-          "dateModified": max_fecha(it["date"], it["updated"]), "articleSection": ATENTO_NAMES[cat],
-          "image": SITE_URL + portada, "mainEntityOfPage": SITE_URL + it["url"],
-          "author": {"@type": "Person", "name": DEFAULT_AUTHOR},
-          "publisher": {"@type": "Organization", "@id": ORG_ID, "name": "Viple Consultores"}}
-    ld = {k: v for k, v in ld.items() if v}
+    U = SITE_URL + it["url"]
+    modificado = max_fecha(it["date"], it["updated"])
+    art = {"@type": "Article", "@id": U + "#article", "headline": it.get("title"),
+           "description": it["seo_desc"], "datePublished": it["date"] or None,
+           "dateModified": modificado, "articleSection": ATENTO_NAMES[cat], "inLanguage": DS.IDIOMA,
+           "image": SITE_URL + portada, "mainEntityOfPage": ref(U + "#webpage"),
+           "author": ref(DS.PERSONA_ID), "publisher": ref(DS.ORG_ID)}
+    f = it.get("fuente") if isinstance(it.get("fuente"), dict) else {}
+    resolucion = str(f.get("resolucion") or "").strip()
+    if resolucion:  # solo si la resolución se muestra en «Fuente del caso»
+        art["about"] = {"@type": "Legislation", "name": resolucion}
+    art = {k: v for k, v in art.items() if v}
     render(it["url"], content, it["seo_title"], it["seo_desc"], nav="atento", og_image=portada, og_type="article",
-           head_extra=crumbs_ld + "\n" + ld_script(ld), lastmod=max_fecha(it["date"], it["updated"]))
+           lastmod=modificado, ld={"crumbs": crumbs_ld, "props": {"mainEntity": ref(U + "#article")}, "nodos": [art]},
+           article_times=(it["date"] or None, modificado))
 
 
 def build_atento(items):
-    items = prep_atento(items)
+    """items: publicaciones ya validadas con prep_atento (en main, antes de generar las páginas)."""
     fechas = lambda lst: [max_fecha(i["date"], i["updated"]) for i in lst]
     # Página principal: todas las publicaciones, con filtro por materia
     crumbs, crumbs_ld = breadcrumbs([("Inicio", "/"), (ATENTO["label"], atento_url())])
@@ -1332,7 +1562,9 @@ def build_atento(items):
     {atento_listado(items, ATENTO["label"])}
   </div>
 </section>'''
-    render(atento_url(), content, ATENTO["title"], ATENTO["description"], nav="atento", head_extra=crumbs_ld,
+    lista = lambda lst: {"mainEntity": lista_ld([(i["url"], i.get("title")) for i in lst])} if lst else {}
+    render(atento_url(), content, ATENTO["title"], ATENTO["description"], nav="atento",
+           ld={"tipo": "CollectionPage", "crumbs": crumbs_ld, "props": lista(items)},
            noindex=not items, lastmod=max_fecha(ATENTO["lastmod"], *fechas(items)))
     # Subsecciones: solo las publicaciones de su materia (mismas tarjetas; cada publicación tiene una sola URL)
     for c in ATENTO_CATS:
@@ -1357,7 +1589,8 @@ def build_atento(items):
   </div>
 </section>'''
         render(atento_url(c["id"]), content, f'{c["name"]} | {ATENTO["label"]} | Viple Consultores',
-               c["description"], nav="atento", head_extra=crumbs_ld, noindex=not propios,
+               c["description"], nav="atento", noindex=not propios,
+               ld={"tipo": "CollectionPage", "crumbs": crumbs_ld, "props": lista(propios)},
                lastmod=max_fecha(ATENTO["lastmod"], *fechas(propios)))
     for it in items:
         render_atento_item(it)
@@ -1384,37 +1617,89 @@ def admin_config_atento():
 
 # ---------- Construcción ----------
 
-def service_ld(slug, body):
-    """Nodo Service de cada página de servicio, con el título y la descripción visibles del hero."""
-    m = re.search(r'<section class="svc-hero[^"]*">.*?<h1>(.*?)</h1>\s*<p>(.*?)</p>', body, re.S)
-    if not m:
-        return ""
-    limpio = lambda t: html.unescape(re.sub(r"<[^>]+>", "", t)).strip()
-    ld = {"@context": "https://schema.org", "@type": "Service",
-          "@id": f"{SITE_URL}/servicios/{slug}/#service",
-          "name": limpio(m.group(1)), "description": limpio(m.group(2)),
-          "url": f"{SITE_URL}/servicios/{slug}/",
-          "serviceType": SERVICE_NAMES.get(slug, ""),
-          "provider": {"@type": ["Organization", "LegalService"], "@id": ORG_ID,
-                       "name": "Viple Consultores", "url": SITE_URL + "/"},
-          "areaServed": {"@type": "Country", "name": "Perú"}}
-    return f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
-
-
-def hub_service_ld(url, body, description):
-    """Nodo Service de /empresas/, /personas/ y de cada página de servicio para personas (H1 visible y la meta description)."""
+def h1_texto(body):
     m = re.search(r"<h1[^>]*>(.*?)</h1>", body, re.S)
-    if not m:
-        return ""
-    limpio = lambda t: html.unescape(re.sub(r"<[^>]+>", "", t)).strip()
-    ld = {"@context": "https://schema.org", "@type": "Service",
-          "@id": f"{SITE_URL}{url}#service",
-          "name": limpio(m.group(1)), "description": description, "url": f"{SITE_URL}{url}",
-          "audience": {"@type": "Audience", "audienceType": "Empresas" if url.startswith("/empresas/") else "Personas"},
-          "provider": {"@type": ["Organization", "LegalService"], "@id": ORG_ID,
-                       "name": "Viple Consultores", "url": SITE_URL + "/"},
-          "areaServed": {"@type": "Country", "name": "Perú"}}
-    return f'<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>'
+    return " ".join(html.unescape(re.sub(r"<[^>]+>", " ", m.group(1))).split()) if m else ""
+
+
+def servicio_info(url):
+    """(grupo, nombre del servicio) de una página de servicio; None si la dirección no es de un servicio."""
+    for g in ("empresas", "personas"):
+        for i in grupo_items(g):
+            if i["url"] == url:
+                return g, i["name"]
+    return None
+
+
+def pagina_fija_ld(url, body, description):
+    """Nodo de página de las páginas de src/pages según su tipo."""
+    if url == "/":
+        return {"props": {"about": ref(DS.ORG_ID)}}
+    if url == "/404.html":
+        return {"crumbs": None}
+    if url == "/contacto/":
+        return {"tipo": "ContactPage", "props": {"mainEntity": ref(DS.ORG_ID)}}
+    if url in ("/empresas/", "/personas/", "/servicios/"):
+        vistos = []
+        for h in re.findall(r'href="(/(?:servicios|personas)/[a-z0-9-]+/)"', body):
+            if servicio_info(h) and h not in vistos:
+                vistos.append(h)
+        ld = {"tipo": "CollectionPage", "nombre": "Servicios"}
+        if vistos:
+            ld["props"] = {"mainEntity": lista_ld([(h, servicio_info(h)[1]) for h in vistos])}
+        return ld
+    info = servicio_info(url)
+    if info:
+        grupo, nombre = info
+        U = SITE_URL + url
+        audiencia = ({"@type": "BusinessAudience", "audienceType": "Pequeñas y medianas empresas"} if grupo == "empresas"
+                     else {"@type": "PeopleAudience", "audienceType": "Personas"})
+        svc = {"@type": "Service", "@id": U + "#service", "name": h1_texto(body),
+               "description": description, "url": U, "serviceType": nombre, "provider": ref(DS.ORG_ID),
+               "areaServed": {"@type": "Country", "name": "Perú"}, "audience": audiencia}
+        return {"props": {"mainEntity": ref(U + "#service")}, "nodos": [svc]}
+    return {}
+
+
+_GIT = {}
+
+
+def fecha_git(path):
+    """Fecha (AAAA-MM-DD) del último commit que modificó el archivo; None si no hay historial completo."""
+    if "ok" not in _GIT:
+        try:
+            r = subprocess.run(["git", "rev-parse", "--is-shallow-repository"], cwd=ROOT,
+                               capture_output=True, text=True, timeout=20)
+            _GIT["ok"] = r.returncode == 0 and r.stdout.strip() == "false"
+        except Exception:
+            _GIT["ok"] = False
+    if not _GIT["ok"]:
+        return None
+    try:
+        r = subprocess.run(["git", "log", "-1", "--format=%cs", "--", str(path)], cwd=ROOT,
+                           capture_output=True, text=True, timeout=20)
+        d = r.stdout.strip()
+        return d if re.fullmatch(r"\d{4}-\d{2}-\d{2}", d) else None
+    except Exception:
+        return None
+
+
+def llms_txt(publicadas, atento):
+    """/llms.txt: resumen del sitio para asistentes de IA, generado desde las mismas colecciones."""
+    def linea(url, nombre):
+        desc = (PAGE_INFO.get(url) or ("", ""))[1]
+        return f"- [{nombre}]({SITE_URL}{url})" + (f": {desc}" if desc else "")
+    out = ["# Viple Consultores", "", f"> {DS.LLMS_RESUMEN}", ""]
+    out += ["## Servicios para empresas", ""] + [linea(i["url"], i["name"]) for i in grupo_items("empresas")] + [""]
+    out += ["## Servicios para personas", ""] + [linea(i["url"], i["name"]) for i in grupo_items("personas")] + [""]
+    out += ["## Preguntas frecuentes", ""]
+    out += [f"- [{q['pregunta']}]({SITE_URL}{q_url(q)}): {q['meta_description']}"
+            for s in SERVICIOS for q in publicadas if q["servicio_asociado"] == s["slug"]] or ["- Aún no hay preguntas publicadas."]
+    out += ["", "## Criterios de autoridades", ""]
+    out += [linea(i["url"], i.get("title")) for i in atento] or ["- Aún no hay contenidos publicados."]
+    out += ["", "## Contacto", "", linea("/contacto/", "Conversemos"),
+            f"- Correo: {DS.ORGANIZACION['email']}", f"- Teléfono y WhatsApp: {DS.ORGANIZACION['telephone']}", ""]
+    (OUT / "llms.txt").write_text("\n".join(out), encoding="utf-8")
 
 
 def main():
@@ -1430,6 +1715,7 @@ def main():
     novedades = load_items("novedades")
     publicadas, total_preguntas = load_preguntas()
     PUBLICADAS[:] = publicadas
+    ATENTO_PUB[:] = prep_atento(load_items(ATENTO["base"]))
     FOOT_NOVEDADES[0] = '<li><a href="/#novedades">Novedades</a></li>' if novedades else ""
 
     for path in sorted((SRC / "pages").rglob("*.html")):
@@ -1447,8 +1733,7 @@ def main():
         body = fill_services(body)
         meta["title"] = fill_services(meta.get("title", "Viple Consultores")).replace("&amp;", "&")
         # Fecha de última modificación: la guardada en la página, o la de las preguntas que muestra
-        lastmod = meta.get("lastmod")
-        head_extra = ""
+        lastmod = max_fecha(meta.get("lastmod"), fecha_git(path))
         if url == "/":
             lastmod = max_fecha(lastmod, *(q["fecha"] for q in destacadas_portada()),
                                 *(i["date"] for i in novedades[:NOVEDADES_HOME_MAX]))
@@ -1456,22 +1741,20 @@ def main():
         if m:
             slug = m.group(1)
             lastmod = max_fecha(lastmod, *(q["fecha"] for q in publicadas if q["servicio_asociado"] == slug))
-            head_extra = service_ld(slug, body)
-        elif re.fullmatch(r"/(empresas|personas)/([a-z0-9-]+/)?", url):
-            head_extra = hub_service_ld(url, body, meta.get("description", ""))
         if not lastmod and url != "/404.html":
             print(f"  ! Sin fecha de última modificación (se omite lastmod): {url}")
         render(url, body, meta.get("title", "Viple Consultores"), meta.get("description", ""),
                nav=meta.get("nav", ""), logo=meta.get("logo", "cuadrado"),
-               og_image=meta.get("og_image", "/assets/img/logo-cuadrado.png"),
-               head_extra=head_extra, lastmod=lastmod)
+               og_image=meta.get("og_image"), lastmod=lastmod,
+               ld=pagina_fija_ld(url, body, meta.get("description", "")))
 
     build_editorial(IDEAS, ideas)
     build_preguntas(publicadas)
     build_novedades(novedades)
     build_presentaciones(load_items("presentaciones"))
-    atento = build_atento(load_items(ATENTO["base"]))
+    atento = build_atento(ATENTO_PUB)
     admin_config_atento()
+    llms_txt(publicadas, atento)
 
     urls = ""
     for u, lm in SITEMAP:

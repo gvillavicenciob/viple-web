@@ -6,6 +6,7 @@
   "orden": 7,
   "slug": "opcion-compromiso-compraventa-bien-futuro",
   "servicio_asociado": "contratos",
+  "destino": "personas-contratos",
   "title": "Opción, compromiso y compraventa de bien futuro | Perú",
   "destacada": false
 }

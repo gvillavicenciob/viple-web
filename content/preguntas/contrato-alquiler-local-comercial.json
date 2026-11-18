@@ -6,6 +6,7 @@
   "orden": 5,
   "slug": "contrato-alquiler-local-comercial",
   "servicio_asociado": "contratos",
+  "destino": "contratos",
   "title": "Contrato de alquiler de local comercial: qué negociar",
   "destacada": false
 }
